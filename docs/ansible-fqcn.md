@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Automation Framework and FQCN Compliance Standards"
+description: "Enforcing Fully Qualified Collection Names (FQCN), privilege escalation philosophies, and Quadlet file deployment tasks."
+resource: "file:///docs/ansible-fqcn.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🤖 Automation Framework and FQCN Compliance Standards
 
 To support deployment via automated frameworks such as Google Jules, Ansible playbooks must enforce Fully Qualified Collection Names (FQCN) and manage rootless systemd execution contexts.

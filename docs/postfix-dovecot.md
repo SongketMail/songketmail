@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Postfix & Dovecot Integration Patterns"
+description: "Inbound email routing, Local Mail Transport Protocol (LMTP) delivery patterns, and PostgreSQL virtual mailbox queries."
+resource: "file:///docs/postfix-dovecot.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # ✉️ Postfix & Dovecot Integration Patterns
 
 Inbound email received from external servers on port 25 passes through Postfix for recipient validation and Rspamd policy filtering. Once validated, Postfix delivers messages to Dovecot using Local Mail Transport Protocol (LMTP) on internal port 24. LMTP provides transaction verification, confirming that messages are committed to storage before acknowledging receipt to the sending MTA.

@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "SongketMail — Podman Email Server Deployment Fabric"
+description: "An enterprise-grade, highly secure, and horizontally scalable email server baseline orchestrated using Ansible and Podman 5+."
+resource: "file:///README.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # SongketMail — Podman Email Server Deployment Fabric
 
 An enterprise-grade, highly secure, and horizontally scalable email server baseline orchestrated using **Ansible** and **Podman 5+**. This project acts as the architectural blueprint and operational baseline for deploying persistent, secure, and performant rootless email services.

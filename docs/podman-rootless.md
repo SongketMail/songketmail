@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Rootless Podman 5+ & Quadlet Orchestration"
+description: "Advanced rootless capabilities using systemd Quadlets, keep-id namespace mapping, and enabling systemd lingering."
+resource: "file:///docs/podman-rootless.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🐳 Rootless Podman 5+ & Quadlet Orchestration
 
 Legacy container deployments heavily rely on rootful Docker daemons or system-wide configurations, presenting major security risks. **Podman 5+** introduces advanced rootless capabilities using **systemd Quadlets**, converting declarative `.container`, `.volume`, `.pod`, and `.network` files directly into native, unprivileged systemd unit files. This removes the overhead of complex daemon architectures and ensures containers behave exactly like local system services.

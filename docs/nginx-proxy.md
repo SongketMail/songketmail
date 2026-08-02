@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Nginx Proxy and Mail Protocol Handling"
+description: "Terminating SSL/TLS certificates and reverse proxying HTTP webmail and TCP mail protocols with client IP preservation."
+resource: "file:///docs/nginx-proxy.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🌐 Nginx Proxy and Mail Protocol Handling
 
 Nginx is globally recognized for its HTTP reverse proxying capabilities, but it also contains a native **mail proxy module**. This allows a single unprivileged Nginx container to terminate SSL/TLS certificates and securely proxy **HTTP/HTTPS webmail** as well as classic TCP mail protocols (**IMAP, IMAPS, SMTP, SMTPS**). This minimizes attack surfaces and centralizes certificate rotation (e.g., Let's Encrypt).
@@ -93,7 +101,7 @@ mail {
 
 ---
 
-## 💡 How Nginx Mail Authentication & Client IP Preservation Works
+## 🛡️ How Nginx Mail Authentication & Client IP Preservation Works
 
 For incoming mail protocol connections, Nginx uses the **ngx_mail_auth_http_module** to validate user credentials against an HTTP authentication service before proxying the session.
 

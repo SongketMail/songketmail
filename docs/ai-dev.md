@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "AI-Assisted Development: Gemini + Jules"
+description: "Collaborative workflows, AI agent profiles, semantic discovery strategies, and frontmatter validation."
+resource: "file:///docs/ai-dev.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🤖 AI-Assisted Development: Gemini + Jules
 
 In the modern era of static front-end engineering, you are no longer coding in isolation. CMSForNerd/SongketMail was architected using a high-speed synergy between **Google Gemini** (The Architect) and **Google Jules** (The Developer Twin).

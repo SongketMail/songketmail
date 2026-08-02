@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "SongketMail Architectural Blueprint"
+description: "Cohesive architectural overview, network flows, containerized service fabric matrix, and database schemas."
+resource: "file:///docs/architectural-blueprint.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🏗️ SongketMail Architectural Blueprint
 
 This document synthesizes our previous deep research topics into a cohesive, production-ready deployment fabric named **SongketMail**. Every design decision is governed by the **Persistence Trinity** strategy, ensuring robust security, horizontal scalability, and storage sovereignty.

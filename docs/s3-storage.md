@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "S3-Compatible Object Storage Options"
+description: "Comparing MinIO, SeaweedFS, Garage, and Ceph, and integrating Dovecot MDA with S3 object storage."
+resource: "file:///docs/s3-storage.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🪣 S3-Compatible Object Storage Options
 
 Email files historically reside in local maildirs on high-performance SAN or NAS structures. As email body and attachment sizes grow, local hardware limits scalability. Storing mail bodies and attachments in an **S3-compatible object storage cluster** allows IMAP and SMTP servers to remain largely stateless, shifting heavy storage lifting to distributed, highly-redundant storage fabrics.
