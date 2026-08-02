@@ -176,7 +176,7 @@
                     <span>HTTPS Webmail Reverse Proxy</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    The block below represents the traditional <code>http {}</code> reverse proxy configuring SSL termination and security headers for SnappyMail.
+                    The block below represents the traditional <code>http {}</code> reverse proxy configuring SSL termination and security headers for Roundcube, routing unencrypted internal TCP streams to backend containers inside <code>songketmail-net</code>.
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
 http {
@@ -198,7 +198,7 @@ http {
         add_header X-Content-Type-Options nosniff;
 
         location / {
-            proxy_pass http://skm_fabric_webmail:80;
+            proxy_pass http://songketmail-web:8080;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -212,26 +212,38 @@ http {
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>✉️</span>
-                    <span>The Native Nginx mail {} Block</span>
+                    <span>The Native Nginx mail {} Block with PROXY Protocol</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
                     Nginx uses a separate <code>mail {}</code> configuration block to proxy IMAP, POP3, and SMTP traffic. Because Nginx doesn't read password databases directly, it uses an internal **HTTP Authentication Service** to validate the credentials before routing TCP connections.
                 </p>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    Proxying connections directly typically replaces the client's public IP address with Nginx's internal container IP, which disrupts log analysis and fail2ban security mechanisms. SongketMail addresses this by configuring <code>proxy_protocol on;</code> within Nginx mail server blocks and enabling PROXY protocol parsing on Dovecot and Postfix listeners. This forwards a PROXY header containing the original client IP and port information to backend services before protocol handshakes initiate.
+                </p>
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
 mail {
     # Auth Service endpoint that resolves destination IP/Port
-    auth_http http://skm_fabric_webmail:80/mail-auth.php;
+    auth_http http://songketmail-web:8080/mail-auth.php;
 
     # SSL Termination for Secure Protocols
     ssl_certificate /etc/letsencrypt/live/songketmail/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/songketmail/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
 
+    # Enable client IP forwarding via PROXY protocol
+    proxy_protocol on;
+
     # SMTP SMTPS IMAP IMAPS Servers
     server {
         listen 25;
         protocol smtp;
         smtp_auth none; # Let backend authenticate SMTP relays
+    }
+
+    server {
+        listen 587;
+        protocol smtp;
+        smtp_auth login plain;
     }
 
     server {
@@ -255,12 +267,20 @@ mail {
 
             <!-- HTTP Auth Protocol Explanation -->
             <div class="bg-violet-50 dark:bg-slate-900/60 p-5 rounded-xl border border-violet-100 dark:border-slate-755 space-y-3 text-xs leading-relaxed">
-                <h4 class="font-bold text-violet-750 dark:text-violet-350">💡 How Nginx Mail Authentication Works</h4>
+                <h4 class="font-bold text-violet-750 dark:text-violet-350">💡 How Nginx Mail Authentication & Client IP Preservation Works</h4>
                 <p class="text-slate-600 dark:text-slate-400">
-                    When a mail client connects to Nginx on port 993 (IMAPS), Nginx intercepts the credentials and sends a background HTTP POST query to the configured <code>auth_http</code> service.
+                    For incoming mail protocol connections, Nginx uses the <strong>ngx_mail_auth_http_module</strong> to validate user credentials against an HTTP authentication service before proxying the session.
                 </p>
                 <p class="text-slate-600 dark:text-slate-400">
-                    If the database authentication succeeds, the PHP auth script replies to Nginx with:
+                    Upon receiving a client connection, Nginx issues an HTTP GET request to the authentication endpoint, passing headers such as:
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
+Auth-User: user@songketmail.internal
+Auth-Pass: plain_or_hashed_password
+Auth-Protocol: imap
+Client-IP: 203.0.113.50</pre>
+                <p class="text-slate-600 dark:text-slate-400 mt-2">
+                    When the authentication service validates the user against the database, it returns an HTTP 200 OK containing the destination details:
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
 HTTP/1.1 200 OK
@@ -268,7 +288,12 @@ Auth-Status: OK
 Auth-Server: 10.89.1.15  # Internal IP of Dovecot container
 Auth-Port: 143           # Internal IMAP Port</pre>
                 <p class="text-slate-600 dark:text-slate-400 mt-2">
-                    Nginx then transparently bridges the IMAPS TCP stream directly to the Dovecot container, ensuring seamless performance.
+                    Nginx then transparently bridges the IMAPS TCP stream directly to the Dovecot container. Since <code>proxy_protocol on;</code> is enabled, Nginx prepends the PROXY header:
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
+PROXY TCP4 203.0.113.50 10.89.1.1 43212 993</pre>
+                <p class="text-slate-600 dark:text-slate-400 mt-2">
+                    This preserves the client's public IP address (<code>203.0.113.50</code>) inside Postfix and Dovecot's logs, enabling fail2ban and audit routines natively.
                 </p>
             </div>
 

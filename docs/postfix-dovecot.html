@@ -165,9 +165,10 @@
                     The Modern Mail Delivery Agent: LMTP Over Isolated Networks
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Standard mail setups historically use direct local storage system writes (LDA) or share filesystems between SMTP receivers and IMAP servers.
-                    In a containerized ecosystem, we isolate **Postfix** (SMTP/Receiver) and **Dovecot** (IMAP/Store) into their own network zones, coupling them exclusively through **LMTP (Local Mail Transfer Protocol)**.
-                    LMTP operates over an isolated, cluster-prefixed container network, preventing other containers or outside actors from intercepting internal mail routing.
+                    Inbound email received from external servers on port 25 passes through Postfix for recipient validation and Rspamd policy filtering. Once validated, Postfix delivers messages to Dovecot using Local Mail Transport Protocol (LMTP) on internal port 24. LMTP provides transaction verification, confirming that messages are committed to storage before acknowledging receipt to the sending MTA.
+                </p>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    By decoupling Postfix and Dovecot, LMTP operates over an isolated, cluster-prefixed container network (<code>songketmail-net</code>), preventing other containers or outside actors from intercepting internal mail routing.
                 </p>
             </div>
 
@@ -178,14 +179,14 @@
                     <span>PostgreSQL Virtual User Virtualization</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By storing users, domains, and aliases in a relational PostgreSQL database, administrators can scale mailboxes horizontally without altering local host user groups.
+                    Postfix validates domains, mailboxes, and aliases by querying PostgreSQL using native SQL lookup tables (<code>virtual_mailbox_domains</code>, <code>virtual_mailbox_maps</code>, and <code>virtual_alias_maps</code> mapped to <code>virtual_aliases</code> table). This allows administrators to scale mailboxes horizontally without altering local host user groups.
                 </p>
 
                 <!-- Configuration Map: Postfix pgsql-virtual-mailbox-maps.cf -->
                 <div class="space-y-4">
                     <div class="text-xs font-bold text-slate-500 uppercase">1. Postfix PGSQL Configuration: pgsql-virtual-mailbox-maps.cf</div>
                     <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-hosts = pgsql-database.skm_fabric_net
+hosts = songketmail-db.songketmail-net
 user = mail_admin
 password = super_secure_db_pass
 dbname = mailserver
@@ -202,7 +203,7 @@ virtual_mailbox_maps = pgsql:/etc/postfix/pgsql-virtual-mailbox-maps.cf
 virtual_alias_maps = pgsql:/etc/postfix/pgsql-virtual-alias-maps.cf
 
 # Delegate Delivery to Dovecot LMTP Container
-virtual_transport = lmtp:inet:dovecot.skm_fabric_net:24</pre>
+virtual_transport = lmtp:inet:songketmail-dovecot.songketmail-net:24</pre>
                 </div>
             </div>
 
@@ -219,10 +220,10 @@ virtual_transport = lmtp:inet:dovecot.skm_fabric_net:24</pre>
                         <div class="text-xs font-bold text-slate-500 uppercase mb-1">dovecot-sql.conf.ext</div>
                         <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto">
 driver = pgsql
-connect = host=pgsql-database.skm_fabric_net dbname=mailserver user=mail_admin password=super_secure_db_pass
+connect = host=songketmail-db.songketmail-net dbname=mailserver user=mail_admin password=super_secure_db_pass
 default_pass_scheme = ARGON2ID
 password_query = SELECT password FROM users WHERE email='%u' AND active=true
-user_query = SELECT '/var/mail/'||maildir AS home, 2001 AS uid, 2001 AS gid FROM users WHERE email='%u'</pre>
+user_query = SELECT '/var/vmail/indexes/'||maildir AS home, 2001 AS uid, 2001 AS gid FROM users WHERE email='%u'</pre>
                     </div>
 
                     <!-- Dovecot master.conf LMTP -->
@@ -253,7 +254,7 @@ protocol lmtp {
                     <span>Fabric Isolation Advantage</span>
                 </h4>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    Because Postfix and Dovecot talk over the isolated <code>skm_fabric_net</code>, LMTP and DB socket traffic never gets exposed to host ports (such as host ports 80, 443, etc.). The database server (PostgreSQL) is placed deep within the network fabric and only responds to verified interior container IPs, maintaining complete defense-in-depth security.
+                    Because Postfix and Dovecot talk over the isolated <code>songketmail-net</code>, LMTP and DB socket traffic never gets exposed to host ports (such as host ports 80, 443, etc.). The database server (PostgreSQL) is placed deep within the network fabric and only responds to verified interior container IPs, maintaining complete defense-in-depth security.
                 </p>
             </div>
 

@@ -188,7 +188,7 @@
                     <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
                         <strong class="text-green-500 font-bold">2. Rootless Deployments</strong>
                         <p class="mt-1 text-slate-600 dark:text-slate-400">
-                            Executed with <code>become: yes</code> + <code>become_user: songketmail</code>. Deploys Quadlet templates directly to user directory, reloads unprivileged daemon, and starts services.
+                            Executed with <code>become: yes</code> + <code>become_user: songket</code>. Deploys Quadlet templates directly to user directory, reloads unprivileged daemon, and starts services.
                         </p>
                     </div>
                 </div>
@@ -198,10 +198,10 @@
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white">Quadlet File Placement</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Systemd Quadlets are evaluated from directories based on the execution context. For our rootless <code>songketmail</code> deployment, the designated destination is:
+                    Systemd Quadlets are evaluated from directories based on the execution context. For our rootless <code>songket</code> deployment, the designated destination is:
                 </p>
                 <div class="bg-violet-50 dark:bg-slate-900/60 p-3.5 rounded-lg border border-violet-100 dark:border-slate-755 text-xs font-mono">
-/home/songketmail/.config/containers/systemd/</div>
+/home/songket/.config/containers/systemd/</div>
                 <p class="text-slate-600 dark:text-slate-400 text-xs">
                     This directory is scanned automatically by the rootless systemd manager. Placing files here allows unprivileged units to be declared and generated without needing administrative intervention.
                 </p>
@@ -220,27 +220,27 @@
 # Deploys standard and custom Quadlets into the rootless systemd path
 - name: Create Quadlet configuration directory
   ansible.builtin.file:
-    path: "/home/songketmail/.config/containers/systemd"
+    path: "/home/songket/.config/containers/systemd"
     state: directory
-    owner: songketmail
-    group: songketmail
+    owner: songket
+    group: songket
     mode: '0755'
   become: yes
-  become_user: songketmail
+  become_user: songket
 
 - name: Deploy SongketMail Quadlet container templates
   ansible.builtin.template:
     src: "templates/{{ item }}.j2"
-    dest: "/home/songketmail/.config/containers/systemd/{{ item }}"
-    owner: songketmail
-    group: songketmail
+    dest: "/home/songket/.config/containers/systemd/{{ item }}"
+    owner: songket
+    group: songket
     mode: '0644'
   loop:
     - skm_network.network
     - skm_pod.pod
     - emailserver.container
   become: yes
-  become_user: songketmail
+  become_user: songket
   register: quadlets_deployed
 
 - name: Reload user-level systemd daemon and restart services
@@ -251,10 +251,10 @@
     state: restarted
     enabled: yes
   become: yes
-  become_user: songketmail
+  become_user: songket
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+    XDG_RUNTIME_DIR: "/run/user/{{ songket_uid | default(2001) }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songket_uid | default(2001) }}/bus"
   when: quadlets_deployed.changed</pre>
             </div>
 
@@ -268,7 +268,7 @@
                     </li>
                     <li class="flex items-start">
                         <span class="text-amber-500 mr-2">⚠️</span>
-                        <span><strong>Error: Permission denied /opt/songketmail/</strong> - Ensure the storage mount path permissions are configured recursively for the UID/GID 2001:2001 host user before initiating the unprivileged Podman deployment.</span>
+                        <span><strong>Error: Permission denied /var/srv/songketmail/</strong> - Ensure the storage mount path permissions are configured recursively for the UID/GID 2001:2001 host user before initiating the unprivileged Podman deployment.</span>
                     </li>
                 </ul>
             </div>
