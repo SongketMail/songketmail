@@ -1,0 +1,56 @@
+---
+# Rootless Podman Quadlet Deployment Tasks
+
+- name: Create rootless systemd Quadlet directory for user
+  ansible.builtin.file:
+    path: "{{ songketmail_home }}/.config/containers/systemd"
+    state: directory
+    mode: '0700'
+
+- name: Deploy Cluster Network Quadlet definition
+  ansible.builtin.template:
+    src: skm_network.network
+    dest: "{{ songketmail_home }}/.config/containers/systemd/{{ cluster_prefix }}_net.network"
+    mode: '0644'
+
+- name: Deploy Cluster Pod Quadlet definition
+  ansible.builtin.template:
+    src: skm_pod.pod
+    dest: "{{ songketmail_home }}/.config/containers/systemd/{{ cluster_prefix }}_pod.pod"
+    mode: '0644'
+
+- name: Deploy Container Quadlet definitions for each SongketMail service
+  ansible.builtin.template:
+    src: "{{ item }}.container"
+    dest: "{{ songketmail_home }}/.config/containers/systemd/{{ cluster_prefix }}_{{ item }}.container"
+    mode: '0644'
+  loop: "{{ songketmail_services }}"
+
+- name: Force systemd daemon-reload for rootless user session
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    scope: user
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+
+- name: Ensure Pod systemd service is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ cluster_prefix }}_pod-pod"
+    state: started
+    enabled: yes
+    scope: user
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+
+- name: Ensure Container systemd services are enabled and running
+  ansible.builtin.systemd:
+    name: "{{ cluster_prefix }}_{{ item }}"
+    state: started
+    enabled: yes
+    scope: user
+  loop: "{{ songketmail_services }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"

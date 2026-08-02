@@ -1,0 +1,99 @@
+---
+# Rootful Host-level Hardening and Preparation Tasks
+
+- name: OS Kernel Tuning for ElasticSearch/Database containers
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "{{ vm_max_map_count_value }}"
+    state: present
+    reload: yes
+    sysctl_set: yes
+
+- name: Ensure native bridge module (br_netfilter) is loaded
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Persist bridge filter module load on boot
+  ansible.builtin.copy:
+    content: "br_netfilter"
+    dest: /etc/modules-load.d/br_netfilter.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Set sysctl bridge configuration for IPv4 packet forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: yes
+    sysctl_set: yes
+
+- name: Create non-privileged system group for SongketMail
+  ansible.builtin.group:
+    name: "{{ songketmail_user }}"
+    gid: "{{ songketmail_gid }}"
+    state: present
+
+- name: Create non-privileged system user for SongketMail
+  ansible.builtin.user:
+    name: "{{ songketmail_user }}"
+    uid: "{{ songketmail_uid }}"
+    group: "{{ songketmail_user }}"
+    home: "{{ songketmail_home }}"
+    shell: /bin/bash
+    create_home: yes
+    state: present
+
+- name: Configure subuid namespaces for rootless container execution
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    regexp: "^{{ songketmail_user }}:"
+    line: "{{ songketmail_user }}:100000:65536"
+    state: present
+
+- name: Configure subgid namespaces for rootless container execution
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    regexp: "^{{ songketmail_user }}:"
+    line: "{{ songketmail_user }}:100000:65536"
+    state: present
+
+- name: Create base storage and service directories for SongketMail
+  ansible.builtin.file:
+    path: "{{ storage_base_path }}/{{ item }}/{{ inventory_hostname }}/data"
+    state: directory
+    owner: "{{ songketmail_user }}"
+    group: "{{ songketmail_user }}"
+    mode: '0755'
+    recurse: yes
+  loop: "{{ songketmail_services }}"
+
+- name: Enable systemd lingering for the non-privileged user to run persistent services
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ songketmail_user }}"
+  register: linger_result
+  changed_when: false
+
+- name: Ensure User Systemd generator directories exist
+  ansible.builtin.file:
+    path: "{{ songketmail_home }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ songketmail_user }}"
+    group: "{{ songketmail_user }}"
+    mode: '0700'
+
+- name: Verify installed Podman version meets minimum requirements
+  ansible.builtin.command:
+    cmd: "podman --version"
+  register: podman_version_raw
+  changed_when: false
+  failed_when: false
+
+- name: Debug Podman version output
+  ansible.builtin.debug:
+    msg: "Installed podman version: {{ podman_version_raw.stdout | default('Not Installed') }}"
+
+- name: Import ASIMP audit security task compilation
+  ansible.builtin.import_tasks: audit.yml

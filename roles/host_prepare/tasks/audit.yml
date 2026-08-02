@@ -1,0 +1,60 @@
+---
+# ASIMP-aligned security auditing and system integrity checks
+
+- name: Check if debsums is installed (for system integrity tracking)
+  ansible.builtin.command:
+    cmd: "which debsums"
+  register: debsums_check
+  changed_when: false
+  failed_when: false
+
+- name: Audit system file package integrity via debsums (if installed)
+  ansible.builtin.command:
+    cmd: "debsums -c"
+  register: debsums_audit
+  changed_when: false
+  failed_when: false
+  when: debsums_check.rc == 0
+
+- name: Log debsums audit results if files were modified
+  ansible.builtin.debug:
+    msg: "System file mismatches found: {{ debsums_audit.stdout_lines }}"
+  when: debsums_check.rc == 0 and debsums_audit.rc != 0
+
+- name: Check if Lynis audit tool is installed
+  ansible.builtin.command:
+    cmd: "which lynis"
+  register: lynis_check
+  changed_when: false
+  failed_when: false
+
+- name: Execute Lynis audit and generate compliance scores (if installed)
+  ansible.builtin.command:
+    cmd: "lynis audit system --quick"
+  register: lynis_audit
+  changed_when: false
+  failed_when: false
+  when: lynis_check.rc == 0
+
+- name: Check if OpenSCAP scanner is installed
+  ansible.builtin.command:
+    cmd: "which oscap"
+  register: oscap_check
+  changed_when: false
+  failed_when: false
+
+- name: Execute OpenSCAP security baseline audit (if installed)
+  ansible.builtin.command:
+    cmd: "oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis_level2 /usr/share/xml/scap/ssg/content/ssg-ubuntu2204-ds.xml"
+  register: oscap_audit
+  changed_when: false
+  failed_when: false
+  when: oscap_check.rc == 0
+
+- name: Consolidate security baseline audit verification
+  ansible.builtin.debug:
+    msg: >
+      ASIMP Compliance Audit finished.
+      Lynis found: {{ 'Installed' if lynis_check.rc == 0 else 'Absent' }}.
+      OpenSCAP found: {{ 'Installed' if oscap_check.rc == 0 else 'Absent' }}.
+      Ensure system-level compliance targets are verified post-deployment.

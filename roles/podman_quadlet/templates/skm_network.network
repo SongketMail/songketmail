@@ -1,0 +1,6 @@
+[Network]
+NetworkName={{ podman_network_name }}
+Subnet={{ podman_network_subnet }}
+Internal=false
+IPAM=host-local
+Label=fabric_cluster={{ cluster_prefix }}
