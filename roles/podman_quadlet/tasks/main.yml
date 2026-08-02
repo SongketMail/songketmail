@@ -27,7 +27,7 @@
   loop: "{{ songketmail_services }}"
 
 - name: Force systemd daemon-reload for rootless user session
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     daemon_reload: yes
     scope: user
   environment:
@@ -35,7 +35,7 @@
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
 
 - name: Ensure Pod systemd service is enabled and running
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: "{{ cluster_prefix }}_pod-pod"
     state: started
     enabled: yes
@@ -45,7 +45,7 @@
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
 
 - name: Ensure Container systemd services are enabled and running
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: "{{ cluster_prefix }}_{{ item }}"
     state: started
     enabled: yes

@@ -5,8 +5,8 @@
 podman_min_version: "5.0.0"
 
 # Fabric Isolation settings
-cluster_prefix: "skm_fabric"
-podman_network_name: "{{ cluster_prefix }}_net"
+cluster_prefix: "songketmail"
+podman_network_name: "songketmail-net"
 podman_network_subnet: "10.89.0.0/16"
 
 # Host details & Rootless run configurations
@@ -19,13 +19,30 @@ songketmail_home: "/home/{{ songketmail_user }}"
 vm_max_map_count_value: 262144
 
 # Storage Base
-storage_base_path: "/opt/songketmail"
+storage_base_path: "/var/srv/songketmail"
 
-# Service names list
+# Service names list (modern decoupled SongketMail equivalents)
 songketmail_services:
-  - emailserver
-  - spam
-  - antivirus
-  - webmail
-  - imap
-  - pop
+  - proxy
+  - postfix
+  - dovecot
+  - db
+  - s3
+  - web
+  - rspamd
+
+# Subdirectories for keep-id mapping (UID/GID 2001:2001) host persistence
+songketmail_storage_dirs:
+  - "nginx/conf"
+  - "certs"
+  - "postfix/config"
+  - "postfix/spool"
+  - "dovecot/config"
+  - "dovecot/indexes"
+  - "dovecot/cache"
+  - "postgres/data"
+  - "minio/data"
+  - "roundcube/config"
+  - "roundcube/db"
+  - "rspamd/config"
+  - "rspamd/data"

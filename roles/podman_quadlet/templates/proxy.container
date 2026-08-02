@@ -1,0 +1,22 @@
+[Unit]
+Description=SongketMail Ingress and Mail Proxy Container (Nginx)
+After=network-online.target
+
+[Container]
+ContainerName={{ cluster_prefix }}-proxy
+Image=docker.io/library/nginx:alpine
+Network={{ podman_network_name }}
+UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
+Volume={{ storage_base_path }}/nginx/conf:/etc/nginx:Z
+Volume={{ storage_base_path }}/certs:/etc/letsencrypt:ro
+PublishPort=80:80
+PublishPort=443:443
+PublishPort=25:25
+PublishPort=587:587
+PublishPort=993:993
+Environment=TZ=UTC
+Label=fabric_cluster={{ cluster_prefix }}
+Label=service_type=proxy
+
+[Install]
+WantedBy=default.target

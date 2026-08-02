@@ -1,0 +1,17 @@
+[Unit]
+Description=SongketMail Webmail Client Container (Roundcube - SnappyMail recommended as a lightweight stateless alternative)
+After=network-online.target
+
+[Container]
+ContainerName={{ cluster_prefix }}-web
+Image=docker.io/roundcube/roundcubemail:latest
+Network={{ podman_network_name }}
+UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
+Volume={{ storage_base_path }}/roundcube/config:/var/www/html/config:Z
+Volume={{ storage_base_path }}/roundcube/db:/var/www/html/db:Z
+Environment=TZ=UTC
+Label=fabric_cluster={{ cluster_prefix }}
+Label=service_type=web
+
+[Install]
+WantedBy=default.target

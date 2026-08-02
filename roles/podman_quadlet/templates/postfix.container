@@ -1,0 +1,18 @@
+[Unit]
+Description=SongketMail Mail Transfer Agent Container (Postfix)
+After=network-online.target
+
+[Container]
+ContainerName={{ cluster_prefix }}-postfix
+Image=docker.io/library/postfix:latest
+Network={{ podman_network_name }}
+UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
+Volume={{ storage_base_path }}/postfix/config:/etc/postfix:Z
+Volume={{ storage_base_path }}/postfix/spool:/var/spool/postfix:Z
+Environment=TZ=UTC
+Exec=/usr/sbin/postfix start-fg
+Label=fabric_cluster={{ cluster_prefix }}
+Label=service_type=postfix
+
+[Install]
+WantedBy=default.target
