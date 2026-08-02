@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (theme === 'dark') return true;
+        if (theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project References & Resources — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Part 10: Project References & Resource Compilation
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="nginx-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. Nginx Mail Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+
+            <!-- Hero Header -->
+            <div class="border-b-2 border-violet-600 pb-4">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
+                    <span>📚</span>
+                    <span>Project References & Resources</span>
+                </h1>
+            </div>
+
+            <!-- Introduction Section -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                    Master Compiled Resource Log
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    To maintain absolute reproducibility, architectural clarity, and alignment with enterprise best practices, this master document contains the complete list of verified URLs, documentation pages, Wikipedia links, and internal resources utilized to build and deploy the unprivileged <strong>SongketMail</strong> email server fabric.
+                </p>
+            </div>
+
+            <!-- Content Segments mapped into Tailwind Cards -->
+
+            <!-- Section 1: Container Engines -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🐳</span>
+                    <span>1. Container Engines & Orchestration</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SongketMail services are containerized natively on rootless Podman 5+ and systemd Quadlets.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Podman Official Site:</strong> <a href="https://podman.io/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://podman.io/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Podman Documentation:</strong> <a href="https://docs.podman.io/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://docs.podman.io/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Podman Quadlet Unit Specs:</strong> <a href="https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Quadlet Specifications Manual</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Systemd User Manager:</strong> <a href="https://www.freedesktop.org/software/systemd/man/latest/systemd-user.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Systemd User Manager Guide</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Podman Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Podman" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Podman</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 2: Automation -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🤖</span>
+                    <span>2. Automation Framework</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">All deployment configuration, privilege separation, and environment preparation run via Ansible playbooks.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Ansible Official Site:</strong> <a href="https://www.ansible.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://www.ansible.com/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Ansible Documentation:</strong> <a href="https://docs.ansible.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://docs.ansible.com/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Ansible FQCN Standards:</strong> <a href="https://docs.ansible.com/ansible/latest/user_guide/collections_using.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Using FQCN Collections</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Ansible Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Ansible_(software)" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Ansible</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 3: Mail Servers -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">✉️</span>
+                    <span>3. Mail Servers & Transport Protocols</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Decoupled MTA (Postfix) and MDA (Dovecot) are interconnected over LMTP inside the isolated bridge network.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Postfix Official Site:</strong> <a href="https://www.postfix.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://www.postfix.org/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Postfix PostgreSQL Guide:</strong> <a href="https://www.postfix.org/PGSQL_README.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Postfix PGSQL Lookup Maps</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Postfix Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Postfix_(software)" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Postfix</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Dovecot Official Site:</strong> <a href="https://www.dovecot.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://www.dovecot.org/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Dovecot Obox/S3 Reference:</strong> <a href="https://doc.dovecot.org/configuration_manual/mailbox_formats/obox/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Dovecot Object Storage Plugin</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Dovecot Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Dovecot_(software)" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Dovecot</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 4: Web Proxy -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🌐</span>
+                    <span>4. Web Proxy & Protocol Preservation</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Nginx handles front-end webmail proxying and TCP mail connection load balancing with client IP preservation.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Nginx Official Site:</strong> <a href="https://nginx.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://nginx.org/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Nginx Mail Core Module:</strong> <a href="https://nginx.org/en/docs/mail/ngx_mail_core_module.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">ngx_mail_core_module Documentation</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Nginx PROXY Protocol:</strong> <a href="https://docs.nginx.com/nginx/admin-guide/load-balancer/using-proxy-protocol/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Client IP Preservation via PROXY Protocol</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Nginx Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Nginx" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Nginx</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 5: Spam Mitigation -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🛡️</span>
+                    <span>5. Spam Mitigation & Content Policies</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Rspamd applies filtering, graylisting, and milter integration dynamically.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Rspamd Official Site:</strong> <a href="https://rspamd.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://rspamd.com/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Rspamd Documentation:</strong> <a href="https://rspamd.com/doc/quickstart.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Rspamd Quickstart Guide</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Rspamd Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Rspamd" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Rspamd</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 6: Relational Database -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🗄️</span>
+                    <span>6. Relational Database & Account Virtualization</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">PostgreSQL is utilized to map virtual domains, user accounts, and alias records securely.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">PostgreSQL Official Site:</strong> <a href="https://www.postgresql.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://www.postgresql.org/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Postgres Docker Hub:</strong> <a href="https://hub.docker.com/_/postgres" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">PostgreSQL Docker Image</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">PostgreSQL Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/PostgreSQL" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: PostgreSQL</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 7: S3 Storage -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🪣</span>
+                    <span>7. S3-Compatible Object Storage Engines</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">We evaluated and compared multiple scalable object storage backends before adopting MinIO.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">MinIO Official Site:</strong> <a href="https://min.io/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://min.io/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">MinIO Container Guide:</strong> <a href="https://min.io/docs/minio/container/index.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">MinIO Podman/Docker Deployment Manual</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">MinIO Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/MinIO" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: MinIO</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">SeaweedFS GitHub:</strong> <a href="https://github.com/seaweedfs/seaweedfs" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">SeaweedFS Source Code</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Garage S3:</strong> <a href="https://garagehq.oberspace.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Garage S3 Project</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Ceph Official Site:</strong> <a href="https://ceph.io/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://ceph.io/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Ceph Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Ceph_(software)" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Ceph</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 8: Webmail -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">📧</span>
+                    <span>8. Open-Source Webmail Clients</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Roundcube was chosen as the baseline for user interface settings persistence and mail access.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Roundcube Official Site:</strong> <a href="https://roundcube.net/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://roundcube.net/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Roundcube Docker Hub:</strong> <a href="https://hub.docker.com/r/roundcube/roundcubemail" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Roundcube Docker Container</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Roundcube Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Roundcube" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Roundcube</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">SnappyMail:</strong> <a href="https://snappymail.eu/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">SnappyMail Project Home</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Nextcloud Mail:</strong> <a href="https://nextcloud.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Nextcloud Suite</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 9: Hardening & Security -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">🛡️</span>
+                    <span>9. Security Hardening, Compliance & Audits</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Compliance scanning and packages integrity verification are modeled after the ASIMP deployment methodology.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Lynis Auditing Tool:</strong> <a href="https://cisofy.com/lynis/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://cisofy.com/lynis/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Lynis Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Lynis" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Lynis</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">OpenSCAP Compliance:</strong> <a href="https://www.open-scap.org/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://www.open-scap.org/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">OpenSCAP Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/OpenSCAP" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: OpenSCAP</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Debsums Package Checker:</strong> <a href="https://manpages.debian.org/unstable/debsums/debsums.1.en.html" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Debsums Man Pages</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section 10: Docs & AI -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-violet-500">📜</span>
+                    <span>10. Documentation Standards & AI Synergy</span>
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">The developer workflow is assisted by Gemini and Jules, leveraging structured frontmatter (OKF v0.1) and GitBook/GitHub Pages rendering.</p>
+                    <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong class="text-slate-900 dark:text-white">Deep State of Mind (DSOM) AI Repository:</strong> <a href="https://github.com/linuxmalaysia/deep-state-of-mind-for-my-ai" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://github.com/linuxmalaysia/deep-state-of-mind-for-my-ai</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">GitHub Pages:</strong> <a href="https://pages.github.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://pages.github.com/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Jekyll Static Engine:</strong> <a href="https://jekyllrb.com/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">https://jekyllrb.com/</a></li>
+                        <li><strong class="text-slate-900 dark:text-white">Jekyll Wikipedia Page:</strong> <a href="https://en.wikipedia.org/wiki/Jekyll_(software)" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">Wikipedia: Jekyll</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Back navigation / Action links -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏠</span>
+                    <span>Return Home</span>
+                </a>
+                <a href="ai-dev.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>🤖</span>
+                    <span>AI Development Synergy</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Specs Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Resource Specs</h4>
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Total Categories</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">10</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Total Resources</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">35+ Links</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Documentation</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">HTML & MD</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Metadata Spec</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Links & Community Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
+                </div>
+                <hr class="border-slate-100 dark:border-slate-700">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
+                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Visit Group
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+            <span>[ TOPIC: 10 ]</span>
+            <span>|</span>
+            <span>[ ORCH: ANSIBLE ]</span>
+            <span>|</span>
+            <span>[ STANDARD: OKF ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>
