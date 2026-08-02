@@ -204,12 +204,12 @@
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
                     By default, rootless Podman remaps container UID 0 (root) to the host user's UID (e.g., 2001), and maps internal non-root container UIDs (like 2001 inside the container) to high-range subuids (e.g. 102000).
-                    This causes significant issues for **Storage Sovereignty**: host-mounted directories become owned by random, high-range UIDs on the host, preventing standard host-level backups, manual analysis, and unprivileged administration.
+                    Without explicit user namespace mapping, files created inside a container by an internal user are assigned arbitrary subuid ownership on the host, complicating backup operations and permission management.
                 </p>
                 <div class="bg-violet-50 dark:bg-slate-900/60 p-4 rounded-lg border border-violet-100 dark:border-slate-755 text-xs">
-                    <p class="font-semibold text-violet-750 dark:text-violet-350">💡 Storage Sovereignty via keep-id:uid=2001,gid=2001</p>
+                    <p class="font-semibold text-violet-750 dark:text-violet-350">💡 Storage Sovereignty via UserNS=keep-id:uid=2001,gid=2001</p>
                     <p class="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
-                        By enforcing the <code>UserNS=keep-id:uid=2001,gid=2001</code> parameter, Podman maps the host user UID 2001 directly to UID 2001 inside the container. This guarantees that files created inside the container match the exact host UID/GID (<code>2001:2001</code>). Storage sovereignty is maintained!
+                        SongketMail enforces namespace mapping using <strong>keep-id</strong> with UID/GID 2001:2001 at the container and pod levels. A dedicated non-root user and group (<code>songket:songket</code>, UID/GID 2001:2001) are provisioned on the host OS. System storage directories are created under a standardized path structure (e.g., <code>/var/srv/songketmail/data/</code>) and assigned ownership to 2001:2001. By specifying <code>UserNS=keep-id:uid=2001,gid=2001</code> in Quadlet unit files, Podman maps UID 2001 inside the container directly to UID 2001 on the host OS. This aligns host and container permissions natively without requiring elevated privileges or dynamic ownership modifications.
                     </p>
                 </div>
             </div>
@@ -248,9 +248,10 @@ Internal=false</pre>
                         <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto">[Container]
 ContainerName=skm_fabric_emailserver
 Pod=skm_fabric_pod.pod
-Image=docker.io/library/postfix-dovecot:latest
-Volume=/opt/songketmail/emailserver/%H/data:/var/mail:Z
-Exec=/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+Image=docker.io/library/postfix:latest
+Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
+Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
+UserNS=keep-id:uid=2001,gid=2001
 
 [Service]
 Restart=always</pre>
@@ -262,13 +263,13 @@ Restart=always</pre>
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white">Enabling Systemd Lingering for Rootless Users</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    By default, user-level systemd processes are killed when the user logs out. To allow background mail services to run persistently on system startup and survive logouts, systemd lingering must be enabled for the target user (UID 2001).
+                    By default, user-level systemd processes are killed when the user logs out. To allow background mail services to run persistently on system startup and survive logouts, systemd lingering must be enabled for the service account via loginctl enable-linger songket (UID 2001).
                 </p>
                 <div class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-- name: Enable systemd lingering for songketmail user
+- name: Enable systemd lingering for songket user
   ansible.builtin.command:
-    cmd: "loginctl enable-linger songketmail"
-    creates: "/var/lib/systemd/linger/songketmail"
+    cmd: "loginctl enable-linger songket"
+    creates: "/var/lib/systemd/linger/songket"
   become: yes</div>
             </div>
 

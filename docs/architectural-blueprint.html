@@ -177,28 +177,28 @@
                │                                       │
                ▼                                       ▼
     ┌─────────────────────────────────────────────────────────────────────┐
-    │                         NGINX PROXY POD                             │
+    │                        songketmail-proxy                            │
     │                   (SSL Termination & Hardening)                     │
     └──────────────────────────────────┬──────────────────────────────────┘
                                        │
-                         Isolated Cluster Network (skm_fabric_net)
+                         Isolated Cluster Network (songketmail-net)
                                        │
             ┌──────────────────────────┴──────────────────────────┐
             ▼                                                     ▼
 ┌───────────────────────┐                               ┌───────────────────┐
-│     SNAPPYMAIL        │                               │    POSTFIX SMTP   │
-│ (Stateless Web Client)│                               │ (Mail Receiver)   │
+│   songketmail-web     │                               │songketmail-postfix│
+│  (Roundcube Webmail)  │                               │ (Mail Receiver)   │
 └───────────┬───────────┘                               └─────────┬─────────┘
             │                                                     │ (LMTP, Port 24)
             ▼                                                     ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
-│                              DOVECOT IMAP                                 │
+│                            songketmail-dovecot                            │
 │                      (Mail Store & Delivery Agent)                        │
 └─────┬───────────────────────────────────────────────────────────────┬─────┘
       │                                                               │
       ▼ (SQL Queries)                                                 ▼ (S3 Protocol)
 ┌───────────────────────┐                               ┌───────────────────┐
-│  POSTGRESQL DATABASE  │                               │    SEAWEEDFS S3   │
+│    songketmail-db     │                               │  songketmail-s3   │
 │ (Virtual Accounts Map)│                               │ (Body/Attachments)│
 └───────────────────────┘                               └───────────────────┘</pre>
             </div>
@@ -214,21 +214,137 @@
                     <div>
                         <strong class="text-violet-600 dark:text-violet-400 font-bold">1. Cluster-Prefixed Network & Pod Fabric Isolation</strong>
                         <p class="text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                            Every running component sits in the unprivileged user namespace pod <code>skm_fabric_pod</code>. Intra-container communications occur inside the virtual network <code>skm_fabric_net</code>. This prevents outside host containers from querying internal Postgres parameters or sniffing raw SMTP/LMTP TCP payloads.
+                            Every running component sits in the unprivileged user namespace pod <code>songketmail</code>. Intra-container communications occur inside the virtual network <code>songketmail-net</code>. This prevents outside host containers from querying internal Postgres parameters or sniffing raw SMTP/LMTP TCP payloads.
                         </p>
                     </div>
                     <div>
                         <strong class="text-violet-600 dark:text-violet-400 font-bold">2. Native User-Level Systemd Quadlet Orchestration</strong>
                         <p class="text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                            No docker-compose dependency or custom wrapper scripts. Everything is run as rootless, unprivileged systemd user-units under the unprivileged <code>songketmail</code> user (UID 2001). Lingering makes units auto-start on boot and auto-recover on failures.
+                            No docker-compose dependency or custom wrapper scripts. Service lifecycle management is delegated directly to systemd via Podman 5 Quadlets. Running container services under unprivileged user accounts requires interfacing with systemd's user session daemon. When managing systemd user services via Ansible, tasks must explicitly define environment variables to bind to the rootless user runtime context: <code>XDG_RUNTIME_DIR</code> configured to <code>/run/user/2001</code> and <code>DBUS_SESSION_BUS_ADDRESS</code> configured to <code>unix:path=/run/user/2001/bus</code>. To allow background services to run continuously without active SSH sessions, systemd linger must be enabled for the service account via <code>loginctl enable-linger songket</code>.
                         </p>
                     </div>
                     <div>
-                        <strong class="text-violet-600 dark:text-violet-400 font-bold">3. Node-Isolated Host Storage Sovereignty</strong>
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">3. Node-Isolated Host Storage Sovereignty and Namespace Mapping</strong>
                         <p class="text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                            Volume mapping points to node-isolated host directories: <code>/opt/songketmail/{{ service }}/{{ inventory_hostname }}/data</code>. Because we declare <code>UserNS=keep-id:uid=2001,gid=2001</code> at the Pod level, host-level administrative operations (such as rsync backups and log audits) can be executed cleanly without <code>sudo</code>.
+                            Volume mapping points to node-isolated host directories: <code>/var/srv/songketmail/{{ service }}/data</code>. Because we declare <code>UserNS=keep-id:uid=2001,gid=2001</code> at the Pod level, host-level administrative operations (such as rsync backups and log audits) can be executed cleanly without <code>sudo</code>. This maps unprivileged process UIDs to subuid/subgid ranges natively, preventing file ownership from complicating permissions.
                         </p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Service Fabric and Quadlet Configuration Matrix -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>📋</span>
+                    <span>Containerized Service Fabric and Quadlet Configuration Matrix</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    The podman-systemd-generator parses the unprivileged <code>.container</code>, <code>.network</code>, and <code>.volume</code> Quadlet definition files located in <code>$HOME/.config/containers/systemd/</code>, automatically producing standard systemd unit services. Below is the official specifications matrix:
+                </p>
+
+                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Container Service Name</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Quadlet Key Definitions</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Mapped Host Storage Paths</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Network Ports & Exposure</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-proxy</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=nginx:alpine<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/nginx/conf:/etc/nginx:Z<br>
+                                    /var/srv/songketmail/certs:/etc/letsencrypt:ro
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Public: 80, 443, 25, 587, 993</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-postfix</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=postfix:latest<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/postfix/config:/etc/postfix:Z<br>
+                                    /var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: Port 25</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-dovecot</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=dovecot:latest<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/dovecot/config:/etc/dovecot:Z<br>
+                                    /var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z<br>
+                                    /var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: 24 (LMTP), 143 (IMAP), 4190 (Sieve)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-db</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=postgres:16-alpine<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/postgres/data:/var/lib/postgresql/data:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: Port 5432</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-s3</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=minio/minio:latest<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/minio/data:/data:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: 9000 (S3 API), 9001 (Console)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-web</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=roundcube/roundcubemail:latest<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/roundcube/config:/var/www/html/config:Z<br>
+                                    /var/srv/songketmail/roundcube/db:/var/www/html/db:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: Port 8080</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">songketmail-rspamd</td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    Image=rspamd/rspamd:latest<br>
+                                    Network=songketmail-net<br>
+                                    UserNS=keep-id:uid=2001,gid=2001
+                                </td>
+                                <td class="px-3 py-3 font-mono leading-relaxed">
+                                    /var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z<br>
+                                    /var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z
+                                </td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Internal Fabric: 11333 (Web UI), 11334 (Milter)</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -267,7 +383,7 @@ CREATE TABLE virtual_aliases (
             <!-- Summary Conclusion -->
             <div class="bg-emerald-50/20 dark:bg-emerald-950/10 p-6 rounded-xl border border-emerald-500/20 shadow-sm space-y-3 text-xs leading-relaxed">
                 <p class="text-slate-700 dark:text-slate-300">
-                    By binding unprivileged Quadlet designs, FQCN-compliant Ansible code, PostgreSQL virtualization, LMTP isolated traffic, SeaweedFS attachments, and Nginx proxying together, **SongketMail** guarantees high-availability email operations with robust host level protection.
+                    By binding unprivileged Quadlet designs, FQCN-compliant Ansible code, PostgreSQL virtualization, LMTP isolated traffic, MinIO S3 attachments, and Nginx proxying together, **SongketMail** guarantees high-availability email operations with robust host level protection.
                 </p>
             </div>
 
@@ -302,11 +418,11 @@ CREATE TABLE virtual_aliases (
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
                         <span class="text-slate-500 dark:text-slate-400">Mail Store</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">SeaweedFS S3</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">MinIO S3</span>
                     </div>
                     <div class="flex justify-between pb-1">
                         <span class="text-slate-500 dark:text-slate-400">Web Mail Portal</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">SnappyMail</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Roundcube</span>
                     </div>
                 </div>
             </div>

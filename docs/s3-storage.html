@@ -213,38 +213,58 @@
                 </div>
             </div>
 
-            <!-- Deep Dive on SeaweedFS for Email Attachments -->
+            <!-- Our Deployed S3 Store: MinIO -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>💡</span>
-                    <span>Our Recommendation: SeaweedFS</span>
+                    <span>Our Deployed S3 Engine: MinIO</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    For containerized email infrastructures, **SeaweedFS** emerges as the absolute victor:
+                    For this SongketMail fabric baseline, we deploy <strong>MinIO</strong> as our primary S3-compatible object storage server. This provides a highly standardized, performant, and reliable storage backend with a complete administrative Console interface.
                 </p>
-                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
-                    <li><strong>Small File Optimization:</strong> Emails consist of millions of small files. While traditional S3 engines suffer severe I/O penalties due to key/metadata searches, SeaweedFS stores small files together in volumes, making retrievals extremely fast with a single disk seek.</li>
-                    <li><strong>Apache 2.0 Licensing:</strong> Avoids the compliance anxieties of AGPL-3.0, allowing commercial modifications and private SaaS executions without legal risks.</li>
-                    <li><strong>Stateless Scaling:</strong> Easily scales out volume servers as attachments grow, without needing intricate network re-routing.</li>
-                </ul>
+                <div class="bg-violet-50 dark:bg-slate-900/60 p-4 rounded-lg border border-violet-100 dark:border-slate-755 text-xs">
+                    <p class="font-semibold text-violet-750 dark:text-violet-350">🛠️ MinIO Storage Sovereignty</p>
+                    <p class="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        By utilizing unprivileged namespaces mapped to UID/GID 2001:2001, MinIO accesses host directories directly under <code>/var/srv/songketmail/minio/data</code> securely without dynamic permission shifts or root privileges.
+                    </p>
+                </div>
             </div>
 
-            <!-- Deployment Blueprint: SeaweedFS Quadlet -->
+            <!-- Deployment Blueprint: MinIO Quadlet -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">SeaweedFS Declarative Container Quadlet</h3>
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">MinIO Declarative Container Quadlet</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By launching a lightweight SeaweedFS server inside our unprivileged container fabric, we instantly gain a high-performance S3 endpoint.
+                    By launching a standard MinIO server inside our unprivileged container fabric, we instantly gain a high-performance S3 endpoint.
                 </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-[Container]
-ContainerName=skm_fabric_seaweedfs
-Pod=skm_fabric_pod.pod
-Image=docker.io/chrislusf/seaweedfs:latest
-Volume=/opt/songketmail/seaweedfs/%H/data:/data:Z
-Exec=server -dir=/data -s3 -s3.port=8333
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
+ContainerName=songketmail-s3
+Network=songketmail-net
+Image=minio/minio:latest
+Volume=/var/srv/songketmail/minio/data:/data:Z
+Exec=server /data --console-address ":9001"
+UserNS=keep-id:uid=2001,gid=2001
 
 [Service]
 Restart=always</pre>
+            </div>
+
+            <!-- Dovecot MDA to MinIO S3 Object Storage Architecture -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>🏗️</span>
+                    <span>Dovecot MDA to MinIO S3 Object Storage Architecture</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    Dovecot separates indexing metadata from message payloads. Structural index files (<code>dovecot.index</code>) are stored on high-speed host NVMe volumes mounted at <code>/var/srv/songketmail/dovecot/indexes</code>. Message bodies are transmitted to MinIO S3 object storage via Dovecot's <strong>obox / s3</strong> plugin drivers.
+                </p>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    This storage pipeline integrates three primary performance mechanisms:
+                </p>
+                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
+                    <li><strong>Local Filesystem Caching (fscache):</strong> A local ring-buffer cache (e.g., 512MB) configured on NVMe host storage at <code>/var/srv/songketmail/dovecot/cache</code> retains recently accessed message bodies. This reduces S3 API read requests during active IMAP client synchronization.</li>
+                    <li><strong>Data Compression (compress:zstd:3):</strong> Message bodies are compressed using Zstandard (level 3) before storage in MinIO, reducing network transfer overhead and storage utilization.</li>
+                    <li><strong>Dispersion Prefix Hashing (%8Mu/%u):</strong> An MD5 hash of the recipient's username is calculated, and the first 8 characters are prepended to the S3 object key path. This dispersion prefix prevents object key grouping, enabling MinIO to distribute object listings and I/O operations evenly across storage disks.</li>
+                </ul>
             </div>
 
             <!-- Back navigation / Action links -->

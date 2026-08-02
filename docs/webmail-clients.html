@@ -218,34 +218,35 @@
                 </div>
             </div>
 
-            <!-- Recommendation Focus on SnappyMail -->
+            <!-- Chosen Client: Roundcube -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>⚡</span>
-                    <span>Top Choice: SnappyMail</span>
+                    <span>Chosen Baseline: Roundcube Webmail</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    **SnappyMail** is a modern, lightweight fork of Rainloop. It is engineered from the ground up for speed, security, and native stateless architecture:
+                    <strong>Roundcube</strong> is the chosen, production-ready webmail client deployed in the SongketMail configuration matrix. It offers classic, fully-featured, and highly intuitive desktop and mobile web interfaces with extensive plugin ecosystems.
                 </p>
                 <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
-                    <li><strong>No Database Required:</strong> SnappyMail holds no state on the server. User accounts, settings, and mail caching occur entirely client-side, making scaling webmail as simple as launching more stateless unprivileged containers behind a load balancer.</li>
-                    <li><strong>Modern Security Integrations:</strong> Offers built-in support for security keys (FIDO2/WebAuthn), TOTP, PGPMime, and strict Content Security Policies (CSP).</li>
-                    <li><strong>Resource Footprint:</strong> Uses up to 90% less RAM and CPU compared to Roundcube, as HTML rendering occurs inside the client browser.</li>
+                    <li><strong>State Persistence Architecture:</strong> Unlike stateless clients like SnappyMail, Roundcube utilizes an internal SQLite/Postgres database to persistently store user session caches, active address books, and interface customization settings. This ensures absolute stability and standard-compliant mail interactions.</li>
+                    <li><strong>Secure Host Persistence:</strong> All configuration variables and sqlite database files are mapped directly under <code>/var/srv/songketmail/roundcube/config</code> and <code>/var/srv/songketmail/roundcube/db</code> respectively, maintaining storage sovereignty via keep-id.</li>
+                    <li><strong>Internal Port Binding:</strong> Roundcube runs on unprivileged internal port <code>8080</code> inside the secure <code>songketmail-net</code> network, accepting requests exclusively from the hardened Nginx proxy.</li>
                 </ul>
             </div>
 
-            <!-- Quadlet Deployment Code for SnappyMail -->
+            <!-- Quadlet Deployment Code for Roundcube -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">SnappyMail Container Quadlet</h3>
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Roundcube Container Quadlet</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By running SnappyMail in our unprivileged systemd Quadlet mesh, it connects to Dovecot inside the cluster network.
+                    By running Roundcube in our unprivileged systemd Quadlet mesh, it connects to Dovecot and Postgres inside the secure cluster network.
                 </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-[Container]
-ContainerName=skm_fabric_webmail
-Pod=skm_fabric_pod.pod
-Image=docker.io/snappymail/snappymail:latest
-Volume=/opt/songketmail/webmail/%H/data:/var/www/snappymail/data:Z
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
+ContainerName=songketmail-web
+Network=songketmail-net
+Image=roundcube/roundcubemail:latest
+Volume=/var/srv/songketmail/roundcube/config:/var/www/html/config:Z
+Volume=/var/srv/songketmail/roundcube/db:/var/www/html/db:Z
+UserNS=keep-id:uid=2001,gid=2001
 
 [Service]
 Restart=always</pre>
