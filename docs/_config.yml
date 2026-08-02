@@ -1,0 +1,8 @@
+title: CMSForNerd :: LAB
+description: PHP 8.4 LABORATORY // STRICT MODE
+theme: jekyll-theme-primer
+markdown: kramdown
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
