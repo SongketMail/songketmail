@@ -1,0 +1,31 @@
+---
+# Global configuration variables for SongketMail fabric deployment
+
+# Podman options
+podman_min_version: "5.0.0"
+
+# Fabric Isolation settings
+cluster_prefix: "skm_fabric"
+podman_network_name: "{{ cluster_prefix }}_net"
+podman_network_subnet: "10.89.0.0/16"
+
+# Host details & Rootless run configurations
+songketmail_user: "songketmail"
+songketmail_uid: 2001
+songketmail_gid: 2001
+songketmail_home: "/home/{{ songketmail_user }}"
+
+# OS Tuning parameters
+vm_max_map_count_value: 262144
+
+# Storage Base
+storage_base_path: "/opt/songketmail"
+
+# Service names list
+songketmail_services:
+  - emailserver
+  - spam
+  - antivirus
+  - webmail
+  - imap
+  - pop

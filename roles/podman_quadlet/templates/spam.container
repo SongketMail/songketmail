@@ -1,0 +1,15 @@
+[Unit]
+Description=SongketMail Spam Filter Service Container
+After=network-online.target
+
+[Container]
+ContainerName={{ cluster_prefix }}_spam
+Image=docker.io/library/rspamd:latest
+Pod={{ cluster_prefix }}_pod.pod
+Volume={{ storage_base_path }}/spam/{{ inventory_hostname }}/data:/var/lib/rspamd:Z
+Environment=TZ=UTC
+Label=fabric_cluster={{ cluster_prefix }}
+Label=service_type=spam
+
+[Install]
+WantedBy=default.target

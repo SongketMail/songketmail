@@ -1,0 +1,16 @@
+[Pod]
+PodName={{ cluster_prefix }}_pod
+Network={{ podman_network_name }}
+PublishPort=25:25
+PublishPort=110:110
+PublishPort=143:143
+PublishPort=465:465
+PublishPort=587:587
+PublishPort=993:993
+PublishPort=995:995
+PublishPort=80:80
+PublishPort=443:443
+# Namespace mapping with keep-id is mandatory at the Pod level to ensure
+# storage sovereignty and direct container-to-host UID/GID mapping (2001:2001)
+UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
+Label=fabric_cluster={{ cluster_prefix }}

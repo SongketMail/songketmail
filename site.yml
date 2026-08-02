@@ -1,0 +1,15 @@
+---
+- name: Hardening, Host Preparation and Podman 5+ Email Server Deployment
+  hosts: email_servers
+  become: yes
+  tasks:
+    - name: Run Host Preparation and Hardening
+      ansible.builtin.import_role:
+        name: host_prepare
+
+    - name: Run Rootless Podman Quadlet Deployment
+      ansible.builtin.import_role:
+        name: podman_quadlet
+      vars:
+        ansible_become: yes
+        ansible_become_user: "{{ songketmail_user }}"
