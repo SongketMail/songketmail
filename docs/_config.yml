@@ -1,5 +1,5 @@
-title: CMSForNerd :: LAB
-description: PHP 8.4 LABORATORY // STRICT MODE
+title: "SongketMail :: LAB"
+description: "Secure Email Server Fabric // Podman 5+ & Systemd Quadlet"
 theme: jekyll-theme-primer
 markdown: kramdown
 exclude:
