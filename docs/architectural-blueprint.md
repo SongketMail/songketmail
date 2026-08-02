@@ -50,7 +50,10 @@ No docker-compose dependency or custom wrapper scripts. Service lifecycle manage
 Running container services under unprivileged user accounts requires interfacing with systemd's user session daemon. When managing systemd user services via Ansible, tasks must explicitly define environment variables to bind to the rootless user runtime context: `XDG_RUNTIME_DIR` configured to `/run/user/2001` and `DBUS_SESSION_BUS_ADDRESS` configured to `unix:path=/run/user/2001/bus`. To allow background services to run continuously without active SSH sessions, systemd linger must be enabled for the service account via `loginctl enable-linger songket`.
 
 ### 3. Node-Isolated Host Storage Sovereignty and Namespace Mapping
-Volume mapping points to node-isolated host directories: `/var/srv/songketmail/{{ service }}/data`. Because we declare `UserNS=keep-id:uid=2001,gid=2001` at the Pod level, host-level administrative operations (such as rsync backups and log audits) can be executed cleanly without `sudo`. This maps unprivileged process UIDs to subuid/subgid ranges natively, preventing file ownership from complicating permissions.
+{% raw %}
+Volume mapping points to node-isolated host directories: `/var/srv/songketmail/{{ service }}/data`.
+{% endraw %}
+Because we declare `UserNS=keep-id:uid=2001,gid=2001` at the Pod level, host-level administrative operations (such as rsync backups and log audits) can be executed cleanly without `sudo`. This maps unprivileged process UIDs to subuid/subgid ranges natively, preventing file ownership from complicating permissions.
 
 ---
 
