@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (theme === 'dark') return true;
+        if (theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nginx Proxy Configurations — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 6: Nginx Proxy & Protocol Handling
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="nginx-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>🌐</span>
+                        <span>6. Nginx Mail Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+
+            <!-- Hero Header -->
+            <div class="border-b-2 border-violet-600 pb-4">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
+                    <span>🌐</span>
+                    <span>Nginx Proxy and Mail Protocol Handling</span>
+                </h1>
+            </div>
+
+            <!-- Introduction Section -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                    Unified Web and Mail Proxying
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    Nginx is globally recognized for its HTTP reverse proxying capabilities, but it also contains a native **mail proxy module**. This allows a single unprivileged Nginx container to terminate SSL/TLS certificates and securely proxy **HTTP/HTTPS webmail** as well as classic TCP mail protocols (**IMAP, IMAPS, SMTP, SMTPS**). This minimizes attack surfaces and centralizes certificate rotation (e.g. Let's Encrypt).
+                </p>
+            </div>
+
+            <!-- HTTP/HTTPS Webmail Proxy Configuration -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>🔒</span>
+                    <span>HTTPS Webmail Reverse Proxy</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    The block below represents the traditional <code>http {}</code> reverse proxy configuring SSL termination and security headers for SnappyMail.
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
+http {
+    # Hardened Security Protocol Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384';
+
+    server {
+        listen 443 ssl http2;
+        server_name mail.songketmail.internal;
+
+        ssl_certificate /etc/letsencrypt/live/songketmail/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/songketmail/privkey.pem;
+
+        # Hardening Headers
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+
+        location / {
+            proxy_pass http://skm_fabric_webmail:80;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+        }
+    }
+}</pre>
+            </div>
+
+            <!-- Mail TCP Proxy Configuration -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>✉️</span>
+                    <span>The Native Nginx mail {} Block</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    Nginx uses a separate <code>mail {}</code> configuration block to proxy IMAP, POP3, and SMTP traffic. Because Nginx doesn't read password databases directly, it uses an internal **HTTP Authentication Service** to validate the credentials before routing TCP connections.
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
+mail {
+    # Auth Service endpoint that resolves destination IP/Port
+    auth_http http://skm_fabric_webmail:80/mail-auth.php;
+
+    # SSL Termination for Secure Protocols
+    ssl_certificate /etc/letsencrypt/live/songketmail/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/songketmail/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # SMTP SMTPS IMAP IMAPS Servers
+    server {
+        listen 25;
+        protocol smtp;
+        smtp_auth none; # Let backend authenticate SMTP relays
+    }
+
+    server {
+        listen 465 ssl;
+        protocol smtp;
+        smtp_auth login plain;
+    }
+
+    server {
+        listen 143;
+        protocol imap;
+        starttls on;
+    }
+
+    server {
+        listen 993 ssl;
+        protocol imap;
+    }
+}</pre>
+            </div>
+
+            <!-- HTTP Auth Protocol Explanation -->
+            <div class="bg-violet-50 dark:bg-slate-900/60 p-5 rounded-xl border border-violet-100 dark:border-slate-755 space-y-3 text-xs leading-relaxed">
+                <h4 class="font-bold text-violet-750 dark:text-violet-350">💡 How Nginx Mail Authentication Works</h4>
+                <p class="text-slate-600 dark:text-slate-400">
+                    When a mail client connects to Nginx on port 993 (IMAPS), Nginx intercepts the credentials and sends a background HTTP POST query to the configured <code>auth_http</code> service.
+                </p>
+                <p class="text-slate-600 dark:text-slate-400">
+                    If the database authentication succeeds, the PHP auth script replies to Nginx with:
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
+HTTP/1.1 200 OK
+Auth-Status: OK
+Auth-Server: 10.89.1.15  # Internal IP of Dovecot container
+Auth-Port: 143           # Internal IMAP Port</pre>
+                <p class="text-slate-600 dark:text-slate-400 mt-2">
+                    Nginx then transparently bridges the IMAPS TCP stream directly to the Dovecot container, ensuring seamless performance.
+                </p>
+            </div>
+
+            <!-- Back navigation / Action links -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <a href="architectural-blueprint.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏗️</span>
+                    <span>Next: SongketMail Architectural Blueprint</span>
+                </a>
+                <a href="webmail-clients.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>📧</span>
+                    <span>Back: Webmail Evaluation</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Specs Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Proxy Ports</h4>
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">HTTPS Webmail</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Port 443</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">SMTP / SMTPS</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Port 25 / 465</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">IMAP / IMAPS</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Port 143 / 993</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">SSL Protocols</span>
+                        <span class="font-bold text-green-600">TLSv1.2, TLSv1.3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Links & Community Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
+                </div>
+                <hr class="border-slate-100 dark:border-slate-700">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
+                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Visit Group
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+            <span>[ TOPIC: 6 ]</span>
+            <span>|</span>
+            <span>[ REVERSE PROXY: NGINX ]</span>
+            <span>|</span>
+            <span>[ PROTOCOLS: SMTP/IMAP/HTTP ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

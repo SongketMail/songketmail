@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (theme === 'dark') return true;
+        if (theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3-Compatible Object Storage — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 4: S3-Compatible Object Storage Options
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="nginx-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. Nginx Mail Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+
+            <!-- Hero Header -->
+            <div class="border-b-2 border-violet-600 pb-4">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
+                    <span>🪣</span>
+                    <span>S3-Compatible Object Storage Options</span>
+                </h1>
+            </div>
+
+            <!-- Introduction Section -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                    Why Move Email Storage to Object Storage?
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    Email files historically reside in local maildirs on high-performance SAN or NAS structures. As email body and attachment sizes grow, local hardware limits scalability. Storing mail bodies and attachments in an **S3-compatible object storage cluster** allows IMAP and SMTP servers to remain largely stateless, shifting heavy storage lifting to distributed, highly-redundant storage fabrics.
+                </p>
+            </div>
+
+            <!-- Comparative Analysis Table -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Comparing Open-Source S3 Store Solutions</h3>
+
+                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Software</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">License</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Pros</th>
+                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Cons</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tr>
+                                <td class="px-3 py-3 font-bold">MinIO</td>
+                                <td class="px-3 py-3 font-mono">AGPL-3.0</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Extremely popular, rich UI, highly optimized S3 API compatibility.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">AGPL license is highly restrictive; heavy memory footprint on multiple buckets.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold">SeaweedFS</td>
+                                <td class="px-3 py-3 font-mono">Apache-2.0</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Blazing fast small-file storage (via Haystack-like model), low metadata overhead.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Relatively less known; UI dashboard is minimal.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold">Garage S3</td>
+                                <td class="px-3 py-3 font-mono">AGPL-3.0</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Written in Rust, incredibly lightweight, designed for multi-region mesh replication.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Not suitable for multi-petabyte datasets.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3 font-bold">Ceph RADOS</td>
+                                <td class="px-3 py-3 font-mono">LGPL-2.1</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Enterprise standard, massive scalability, robust high-availability structure.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Huge administrative overhead; requires dedicated disks and intense resource tuning.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Deep Dive on SeaweedFS for Email Attachments -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>💡</span>
+                    <span>Our Recommendation: SeaweedFS</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    For containerized email infrastructures, **SeaweedFS** emerges as the absolute victor:
+                </p>
+                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
+                    <li><strong>Small File Optimization:</strong> Emails consist of millions of small files. While traditional S3 engines suffer severe I/O penalties due to key/metadata searches, SeaweedFS stores small files together in volumes, making retrievals extremely fast with a single disk seek.</li>
+                    <li><strong>Apache 2.0 Licensing:</strong> Avoids the compliance anxieties of AGPL-3.0, allowing commercial modifications and private SaaS executions without legal risks.</li>
+                    <li><strong>Stateless Scaling:</strong> Easily scales out volume servers as attachments grow, without needing intricate network re-routing.</li>
+                </ul>
+            </div>
+
+            <!-- Deployment Blueprint: SeaweedFS Quadlet -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">SeaweedFS Declarative Container Quadlet</h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    By launching a lightweight SeaweedFS server inside our unprivileged container fabric, we instantly gain a high-performance S3 endpoint.
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
+[Container]
+ContainerName=skm_fabric_seaweedfs
+Pod=skm_fabric_pod.pod
+Image=docker.io/chrislusf/seaweedfs:latest
+Volume=/opt/songketmail/seaweedfs/%H/data:/data:Z
+Exec=server -dir=/data -s3 -s3.port=8333
+
+[Service]
+Restart=always</pre>
+            </div>
+
+            <!-- Back navigation / Action links -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <a href="webmail-clients.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>📧</span>
+                    <span>Next: Webmail Clients Comparison</span>
+                </a>
+                <a href="postfix-dovecot.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>✉️</span>
+                    <span>Back: Postfix & Dovecot</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Specs Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Storage Stats</h4>
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">MinIO License</span>
+                        <span class="font-bold text-red-500">AGPLv3</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Seaweed License</span>
+                        <span class="font-bold text-green-500">Apache 2</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Ideal for Mail</span>
+                        <span class="font-bold text-violet-600">SeaweedFS</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">S3 Port</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">8333</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Links & Community Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
+                </div>
+                <hr class="border-slate-100 dark:border-slate-700">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
+                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Visit Group
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+            <span>[ TOPIC: 4 ]</span>
+            <span>|</span>
+            <span>[ TYPE: S3 OBJECT ]</span>
+            <span>|</span>
+            <span>[ RECOMMEND: SEAWEEDFS ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>
