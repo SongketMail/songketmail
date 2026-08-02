@@ -75,3 +75,7 @@ protocol lmtp {
 ## 🛡️ Fabric Isolation Advantage
 
 Because Postfix and Dovecot talk over the isolated `songketmail-net`, LMTP and DB socket traffic never gets exposed to host ports (such as host ports 80, 443, etc.). The database server (PostgreSQL) is placed deep within the network fabric and only responds to verified interior container IPs, maintaining complete defense-in-depth security.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

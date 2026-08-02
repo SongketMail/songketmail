@@ -85,3 +85,7 @@ Once the build and deployment run successfully (which usually takes 1–2 minute
 
 ### ❌ Action fails with `Permission Denied`
 - Ensure you updated the **Workflow permissions** to **Read and write permissions** as described in Method 1, Step 1.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

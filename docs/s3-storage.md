@@ -61,3 +61,7 @@ This storage pipeline integrates three primary performance mechanisms:
 1. **Local Filesystem Caching (fscache)**: A local ring-buffer cache (e.g., 512MB) configured on NVMe host storage at `/var/srv/songketmail/dovecot/cache` retains recently accessed message bodies. This reduces S3 API read requests during active IMAP client synchronization.
 2. **Data Compression (compress:zstd:3)**: Message bodies are compressed using Zstandard (level 3) before storage in MinIO, reducing network transfer overhead and storage utilization.
 3. **Dispersion Prefix Hashing (%8Mu/%u)**: An MD5 hash of the recipient's username is calculated, and the first 8 characters are prepended to the S3 object key path. This dispersion prefix prevents object key grouping, enabling MinIO to distribute object listings and I/O operations evenly across storage disks.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

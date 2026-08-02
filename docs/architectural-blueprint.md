@@ -116,3 +116,7 @@ CREATE TABLE virtual_aliases (
 ## 🏁 Summary Conclusion
 
 By binding unprivileged Quadlet designs, FQCN-compliant Ansible code, PostgreSQL virtualization, LMTP isolated traffic, MinIO S3 attachments, and Nginx proxying together, **SongketMail** guarantees high-availability email operations with robust host level protection.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

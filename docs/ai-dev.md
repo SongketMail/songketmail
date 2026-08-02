@@ -43,3 +43,7 @@ We use three layers to ensure search engines and AI crawlers accurately index yo
 - **Must**: Verify all Markdown/MDX page frontmatter parameters adhere strictly to schema validation.
 - **Must Not**: Bypass build checks. If `npm run build` fails, the AI's code is rejected.
 - **Should**: Ask your AI partner to structure new pages cleanly using semantic sections.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
