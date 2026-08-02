@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SongketMail — Enterprise Podman Email Server Deployment Fabric</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for interactive elements -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f5ff',
+                            100: '#e1ecff',
+                            500: '#1d4ed8',
+                            600: '#1e40af',
+                            700: '#1d3557',
+                            800: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased" x-data="{ mobileMenuOpen: false }">
+
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l8-5.333a2 2 0 012.22 0l8 5.333A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-2.25-1.5a2 2 0 00-2.22 0l-2.25 1.5M12 14v4M12 18v2"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold tracking-tight text-white">Songket<span class="text-blue-500">Mail</span></span>
+                        <span class="block text-xs text-slate-400 font-medium tracking-widest uppercase">Deployment Fabric</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                    <a href="#about" class="text-slate-300 hover:text-blue-400 transition">About</a>
+                    <a href="#persistence-trinity" class="text-slate-300 hover:text-blue-400 transition">Persistence Trinity</a>
+                    <a href="#security" class="text-slate-300 hover:text-blue-400 transition">Security</a>
+                    <a href="#repository" class="text-slate-300 hover:text-blue-400 transition">Repository</a>
+                    <a href="#deployment" class="text-slate-300 hover:text-blue-400 transition">Deployment</a>
+                    <a href="github-pages-setup.html" class="text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
+                        Setup Guide
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-slate-400 hover:text-white focus:outline-none">
+                        <svg class="h-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" class="md:hidden bg-slate-900 border-b border-slate-800" @click.away="mobileMenuOpen = false">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#about" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">About</a>
+                <a href="#persistence-trinity" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Persistence Trinity</a>
+                <a href="#security" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Security</a>
+                <a href="#repository" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Repository</a>
+                <a href="#deployment" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Deployment</a>
+                <a href="github-pages-setup.html" class="block px-3 py-2 rounded-md text-base font-medium text-blue-400 hover:text-blue-300 hover:bg-slate-800">Setup Guide</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 md:py-32 overflow-hidden bg-slate-950 border-b border-slate-800">
+        <!-- Glow effects -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto">
+                <span class="px-3 py-1 text-xs font-semibold text-blue-400 bg-blue-500/10 rounded-full border border-blue-500/20 uppercase tracking-widest">
+                    Enterprise Ansible & Podman Orchestration
+                </span>
+                <h1 class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-none">
+                    Songket<span class="text-blue-500">Mail</span>
+                </h1>
+                <p class="mt-6 text-xl text-slate-400 leading-relaxed">
+                    An enterprise-grade, highly secure, and horizontally scalable email server baseline orchestrated using <strong>Ansible</strong> and <strong>Podman 5+</strong>.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#deployment" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition shadow-lg shadow-blue-500/20 text-center">
+                        Quick Start Guide
+                    </a>
+                    <a href="github-pages-setup.html" class="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-lg border border-slate-700 transition text-center">
+                        GitHub Pages Setup Guide
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+
+            <!-- Sidebar Table of Contents (Sticky) -->
+            <aside class="hidden lg:block lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                    <div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Documentation</h3>
+                        <ul class="mt-4 space-y-3 text-sm">
+                            <li><a href="#about" class="text-slate-400 hover:text-blue-400 transition">About the Fabric</a></li>
+                            <li><a href="#persistence-trinity" class="text-slate-400 hover:text-blue-400 transition">The Persistence Trinity</a></li>
+                            <li><a href="#security" class="text-slate-400 hover:text-blue-400 transition">Security Architecture</a></li>
+                            <li><a href="#repository" class="text-slate-400 hover:text-blue-400 transition">Repository Structure</a></li>
+                            <li><a href="#deployment" class="text-slate-400 hover:text-blue-400 transition">Deployment Guide</a></li>
+                            <li><a href="#maintenance" class="text-slate-400 hover:text-blue-400 transition">Maintenance & Auditing</a></li>
+                        </ul>
+                    </div>
+                    <hr class="border-slate-800">
+                    <div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Setup & Deployment</h3>
+                        <a href="github-pages-setup.html" class="mt-3 inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
+                            GitHub Pages Setup
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Document Content Area -->
+            <div class="lg:col-span-3 space-y-20">
+
+                <!-- About Section -->
+                <section id="about" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">🛰️ Distributed Node Strategy</h2>
+                    <p class="mt-6 text-lg text-slate-300 leading-relaxed">
+                        To support production-level horizontal scaling, high availability, and localized file execution, the fabric enforces a unique architectural concept called the <strong>Persistence Trinity</strong>.
+                    </p>
+                </section>
+
+                <!-- Persistence Trinity Section -->
+                <section id="persistence-trinity" class="scroll-mt-24 space-y-8">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">📐 The Persistence Trinity</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Quadlet Orchestration -->
+                        <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 hover:border-blue-500/50 transition">
+                            <div class="text-blue-500 font-bold text-xl mb-3">1. Quadlet Orchestration</div>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Avoids legacy docker-compose or run scripts. Uses native <strong>Podman Quadlets</strong> for unprivileged user-level systemd integration, guaranteeing container recovery on host boot.
+                            </p>
+                        </div>
+
+                        <!-- Storage Sovereignty -->
+                        <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 hover:border-blue-500/50 transition">
+                            <div class="text-blue-500 font-bold text-xl mb-3">2. Storage Sovereignty</div>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Solves the rootless UID mapping problem. Standard setups map internal container processes to random host UIDs. By enforcing <code>keep-id</code>, host processes match the container precisely!
+                            </p>
+                        </div>
+
+                        <!-- Fabric Isolation -->
+                        <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 hover:border-blue-500/50 transition">
+                            <div class="text-blue-500 font-bold text-xl mb-3">3. Fabric Isolation</div>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Isolates all containers and networks by prefixing them with <code>skm_fabric_</code>, permitting multiple isolated structures to run alongside each other seamlessly.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Explainer Panel on keep-id -->
+                    <div class="bg-blue-950/30 border border-blue-500/30 rounded-xl p-6">
+                        <div class="flex items-start space-x-3">
+                            <div class="p-1 bg-blue-500/15 rounded text-blue-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-blue-300">Why keep-id? The Storage Mapping Solution</h4>
+                                <p class="mt-2 text-slate-300 text-sm leading-relaxed">
+                                    In conventional rootless container execution, internal users like UID <code>2001</code> get remapped on the host to massive, arbitrary ranges (e.g., <code>101000</code>). When backing up or executing audits directly on the host, the files appear as belonging to <code>nobody:nogroup</code>. By specifying <code>UserNS=keep-id:uid=2001,gid=2001</code> at the Pod level, we align Host and Container permissions natively without needing root or <code>sudo</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Security Section -->
+                <section id="security" class="scroll-mt-24 space-y-6">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">🔒 Security Architecture</h2>
+                    <p class="text-slate-300 leading-relaxed">
+                        Aligned with standard hardening frameworks and the <strong>ASIMP (Ansible System Integrity Management Platform)</strong> directives:
+                    </p>
+                    <ul class="space-y-4 text-slate-400">
+                        <li class="flex items-start">
+                            <span class="mr-3 text-emerald-500">✔</span>
+                            <div>
+                                <strong class="text-slate-200 block">Rootful Host-Level Tuning</strong>
+                                Ansible performs system-level optimizations (e.g. kernel limits, <code>vm.max_map_count</code>, bridge configurations, lingering) in the preparation phase.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-emerald-500">✔</span>
+                            <div>
+                                <strong class="text-slate-200 block">Strict Rootless Execution</strong>
+                                Services (SMTP, IMAP, Spam control) execute under the unprivileged, non-sudo system user <code>songketmail</code> (UID/GID 2001).
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-emerald-500">✔</span>
+                            <div>
+                                <strong class="text-slate-200 block">System Integrity & Security Audits</strong>
+                                Automated scanning integrated inside execution playbooks verifying host setups with <strong>Lynis</strong>, <strong>OpenSCAP</strong>, and <strong>Debsums</strong>.
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Repository Structure -->
+                <section id="repository" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">📁 Repository Structure</h2>
+                    <p class="mt-4 text-slate-300 mb-6">Explore the modular layout of the Ansible playbook and templates:</p>
+
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 overflow-x-auto">
+                        <pre class="text-sm font-mono text-blue-300">
+.
+├── ansible.cfg                    # Custom Ansible execution settings & privilege escalation
+├── site.yml                       # Unified deployment playbook
+├── group_vars/
+│   └── all.yml                    # Global constants, UID/GID mapping, and service variables
+├── inventory/
+│   └── hosts.ini                  # Target server host configurations
+├── roles/
+│   ├── host_prepare/              # Rootful OS hardening, namespace mapping, and ASIMP audits
+│   │   └── tasks/
+│   │       ├── main.yml           # Host tuning, subuid/subgid setup, lingering configurations
+│   │       └── audit.yml          # ASIMP-style debsums, Lynis, and OpenSCAP baseline scanners
+│   └── podman_quadlet/            # Rootless deployment of Podman 5+ Quadlets
+│       ├── tasks/
+│       │   └── main.yml           # Deploys configurations, reloads user systemd daemon & starts units
+│       └── templates/
+│           ├── skm_network.network # Declarative container network definition
+│           ├── skm_pod.pod         # Declarative shared Pod specification (defines UserNS=keep-id)
+│           ├── emailserver.container
+│           ├── spam.container
+│           ├── antivirus.container
+│           ├── webmail.container
+│           ├── imap.container
+│           └── pop.container
+└── README.md                      # Comprehensive baseline documentation</pre>
+                    </div>
+                </section>
+
+                <!-- Deployment Guide Section -->
+                <section id="deployment" class="scroll-mt-24 space-y-6">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">🚀 Deployment Guide</h2>
+
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold text-slate-200">Prerequisites</h3>
+                        <ul class="list-disc list-inside text-slate-400 space-y-1">
+                            <li><strong>Podman:</strong> Version 5.0.0 or higher is required on all target nodes.</li>
+                            <li><strong>Ansible:</strong> Version 9.0.0 or higher is recommended.</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-6 mt-8">
+                        <div>
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold mr-3 text-sm">1</span>
+                            <strong class="text-lg text-slate-200">Configuration Check</strong>
+                            <p class="mt-2 text-slate-400 pl-11">Review global parameters in <code>group_vars/all.yml</code> to ensure correct subnetting and volume locations:</p>
+                            <div class="mt-3 pl-11">
+                                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 font-mono text-sm text-indigo-300">
+                                    cluster_prefix: "skm_fabric"<br>
+                                    songketmail_uid: 2001<br>
+                                    storage_base_path: "/opt/songketmail"
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold mr-3 text-sm">2</span>
+                            <strong class="text-lg text-slate-200">Update Inventory</strong>
+                            <p class="mt-2 text-slate-400 pl-11">Add your remote hosts and target server IPs inside the inventory configuration:</p>
+                            <div class="mt-3 pl-11">
+                                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 font-mono text-sm text-indigo-300">
+                                    [email_servers]<br>
+                                    node1.songketmail.internal ansible_host=10.0.1.11<br>
+                                    node2.songketmail.internal ansible_host=10.0.1.12
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold mr-3 text-sm">3</span>
+                            <strong class="text-lg text-slate-200">Run the Playbook</strong>
+                            <p class="mt-2 text-slate-400 pl-11">Deploy, optimize, and launch all the container instances via a single execution:</p>
+                            <div class="mt-3 pl-11">
+                                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 font-mono text-sm text-indigo-300">
+                                    ansible-playbook -i inventory/hosts.ini site.yml
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Maintenance & Auditing Section -->
+                <section id="maintenance" class="scroll-mt-24 space-y-6">
+                    <h2 class="text-3xl font-bold text-white border-b border-slate-800 pb-4">🛠️ Service Maintenance & Auditing</h2>
+                    <p class="text-slate-300 leading-relaxed">
+                        Because <strong>Storage Sovereignty</strong> is guaranteed by our unique <code>keep-id</code> setup, backup processes, maintenance operations, and auditing protocols are simplified. They execute under the non-sudo <code>songketmail</code> user seamlessly:
+                    </p>
+
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 font-mono text-sm text-blue-300 space-y-3">
+                        <div>
+                            <span class="text-slate-500"># View Postfix logs or mail queues directly from the host storage</span><br>
+                            ls -lh /opt/songketmail/emailserver/node1.songketmail.internal/data/
+                        </div>
+                        <div>
+                            <span class="text-slate-500"># Verify running rootless systemd services for our fabric</span><br>
+                            systemctl --user status skm_fabric_emailserver<br>
+                            systemctl --user status skm_fabric_pod-pod
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center space-x-3">
+                <span class="text-base font-bold text-white">Songket<span class="text-blue-500">Mail</span></span>
+            </div>
+            <p class="text-sm text-slate-500">
+                &copy; <script>document.write(new Date().getFullYear())</script> SongketMail Deployment Fabric. Built for performance and absolute compliance.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
