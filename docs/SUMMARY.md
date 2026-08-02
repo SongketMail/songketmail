@@ -19,3 +19,7 @@ timestamp: 2026-07-04T09:40:04Z
 * [Part 7: Unified Architectural Blueprint](architectural-blueprint.md)
 * [Part 8: AI-Assisted Development](ai-dev.md)
 * [Part 9: GitHub Pages Automation Setup](github-pages-setup.md)
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

@@ -125,3 +125,7 @@ Below is an explicit, production-grade Ansible task list utilizing proper FQCN s
 
 - **Error: Failed to connect to bus**: Double check that systemd lingering is enabled for the target user, and ensure both `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` are explicitly passed inside the Ansible task environment block.
 - **Error: Permission denied /var/srv/songketmail/**: Ensure the storage mount path permissions are configured recursively for the UID/GID 2001:2001 host user before initiating the unprivileged Podman deployment.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

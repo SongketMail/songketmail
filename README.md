@@ -136,3 +136,7 @@ ls -lh /opt/songketmail/emailserver/node1.songketmail.internal/data/
 systemctl --user status skm_fabric_emailserver
 systemctl --user status skm_fabric_pod-pod
 ```
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

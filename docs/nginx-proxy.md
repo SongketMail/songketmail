@@ -130,3 +130,7 @@ PROXY TCP4 203.0.113.50 10.89.1.1 43212 993
 ```
 
 This preserves the client's public IP address (`203.0.113.50`) inside Postfix and Dovecot's logs, enabling fail2ban and audit routines natively.
+
+---
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
