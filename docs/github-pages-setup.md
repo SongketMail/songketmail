@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Comprehensive Guide: Setting up GitHub Pages for SongketMail"
+description: "Step-by-step instructions on activating, configuring, and automating deployments to GitHub Pages."
+resource: "file:///docs/github-pages-setup.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🌐 Comprehensive Guide: Setting up GitHub Pages for SongketMail
 
 This guide provides explicit, step-by-step instructions on how to activate, configure, and automate the deployment of the SongketMail documentation site to **GitHub Pages**.

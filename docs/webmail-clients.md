@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "Open-Source Webmail Clients Comparison"
+description: "Evaluating containerized webmail clients (Roundcube, SnappyMail, RainLoop, Nextcloud) for persistence, security, and performance."
+resource: "file:///docs/webmail-clients.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 📧 Open-Source Webmail Clients Comparison
 
 Selecting a containerized webmail client requires careful assessment of scalability, state persistence, security, and performance. Traditional webmail (like Roundcube) requires dedicated MySQL/PostgreSQL databases to hold session and cache states. Modern webmail engines act as stateless client-side rendering portals, connecting directly to IMAP/SMTP backends on demand.

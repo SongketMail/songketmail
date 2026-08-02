@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "SongketMail: Secure Email Server Fabric"
+description: "Welcome to SongketMail, an enterprise-grade, highly secure, and scalable email server baseline."
+resource: "file:///docs/index.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # 🏠 SongketMail: Secure Email Server Fabric
 
 Welcome to **SongketMail**, an enterprise-grade, highly secure, and scalable email server baseline orchestrated using **Ansible** and unprivileged **Podman 5+ Quadlets**.

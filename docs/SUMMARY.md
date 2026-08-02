@@ -1,3 +1,11 @@
+---
+okf_version: 0.1
+type: documentation
+title: "SongketMail Documentation Summary"
+description: "Chronological index and navigation structure of the SongketMail documentation book."
+resource: "file:///docs/SUMMARY.md"
+timestamp: 2026-07-04T09:40:04Z
+---
 # Summary
 
 * [Introduction](README.md)
