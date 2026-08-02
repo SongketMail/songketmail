@@ -1,0 +1,17 @@
+[Unit]
+Description=SongketMail Anti-Spam Container (Rspamd)
+After=network-online.target
+
+[Container]
+ContainerName={{ cluster_prefix }}-rspamd
+Image=docker.io/rspamd/rspamd:latest
+Network={{ podman_network_name }}
+UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
+Volume={{ storage_base_path }}/rspamd/config:/etc/rspamd/local.d:Z
+Volume={{ storage_base_path }}/rspamd/data:/var/lib/rspamd:Z
+Environment=TZ=UTC
+Label=fabric_cluster={{ cluster_prefix }}
+Label=service_type=rspamd
+
+[Install]
+WantedBy=default.target

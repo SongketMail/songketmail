@@ -62,17 +62,18 @@
 
 - name: Create base storage and service directories for SongketMail
   ansible.builtin.file:
-    path: "{{ storage_base_path }}/{{ item }}/{{ inventory_hostname }}/data"
+    path: "{{ storage_base_path }}/{{ item }}"
     state: directory
     owner: "{{ songketmail_user }}"
     group: "{{ songketmail_user }}"
     mode: '0755'
     recurse: yes
-  loop: "{{ songketmail_services }}"
+  loop: "{{ songketmail_storage_dirs }}"
 
 - name: Enable systemd lingering for the non-privileged user to run persistent services
   ansible.builtin.command:
     cmd: "loginctl enable-linger {{ songketmail_user }}"
+    creates: "/var/lib/systemd/linger/{{ songketmail_user }}"
   register: linger_result
   changed_when: false
 
