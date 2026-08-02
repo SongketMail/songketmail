@@ -59,6 +59,7 @@ Explore our interactive and interconnected deep research topics:
 7. [Comprehensive Architectural Blueprint](architectural-blueprint.md)
 8. [AI-Assisted Development: Gemini + Jules](ai-dev.md)
 9. [GitHub Pages Automation Setup Guide](github-pages-setup.md)
+10. [Project References & Resource Compilation](references.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
