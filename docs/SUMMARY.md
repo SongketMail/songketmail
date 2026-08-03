@@ -15,7 +15,7 @@ timestamp: 2026-07-04T12:00:00Z
 * [Part 3: Postfix & Dovecot Integration](postfix-dovecot.md)
 * [Part 4: S3 Object Storage Options](s3-storage.md)
 * [Part 5: Webmail Clients Comparison](webmail-clients.md)
-* [Part 6: Nginx Proxy Configuration](nginx-proxy.md)
+* [Part 6: BunkerWeb Proxy Configuration](bunkerweb-proxy.md)
 * [Part 7: Unified Architectural Blueprint](architectural-blueprint.md)
 * [Part 8: AI-Assisted Development](ai-dev.md)
 * [Part 9a: Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)

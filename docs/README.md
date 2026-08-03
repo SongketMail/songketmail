@@ -45,7 +45,7 @@ This documentation book is structured into several progressive parts:
 * **[Part 3: Postfix & Dovecot Integration](postfix-dovecot.md)**: Details on Local Mail Transport Protocol (LMTP) delivery patterns over isolated networks.
 * **[Part 4: S3 Object Storage Options](s3-storage.md)**: Comparing S3 engines (MinIO, SeaweedFS, Ceph) and configuring fscache with compression.
 * **[Part 5: Webmail Clients Comparison](webmail-clients.md)**: Evaluation matrix between Roundcube, SnappyMail, RainLoop, and Nextcloud.
-* **[Part 6: Nginx Proxy Configuration](nginx-proxy.md)**: Reverse proxying, HTTP mail authentication protocols, and client IP preservation.
+* **[Part 6: BunkerWeb Proxy Configuration](bunkerweb-proxy.md)**: Reverse proxying HTTP/HTTPS webmail traffic and inbound SMTP/IMAP streams with client IP preservation.
 * **[Part 7: Unified Architectural Blueprint](architectural-blueprint.md)**: Master block diagrams, container matrix, and PostgreSQL schemas.
 * **[Part 8: AI-Assisted Development](ai-dev.md)**: Workflow practices with Google Gemini and Jules developer synergy.
 * **[Part 9: GitHub Pages Automation Setup](github-pages-setup.md)**: Walkthrough of setup procedures and automated Actions deployment workflows.

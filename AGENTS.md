@@ -18,7 +18,7 @@ Welcome! This document serves as the absolute source of truth for AI agents (inc
 SongketMail is a modern, enterprise-grade, highly secure, and horizontally scalable email server fabric orchestrated via **Ansible** and **Podman 5+** using systemd Quadlets.
 
 The core service fabric is fully decoupled and consists of **seven container services**:
-1.  **`proxy`**: Reverse proxy utilizing Nginx.
+1.  **`proxy`**: Reverse proxy utilizing BunkerWeb All-In-One WAF.
 2.  **`postfix`**: MTA (Mail Transfer Agent) for incoming/outgoing SMTP.
 3.  **`dovecot`**: IMAP/POP3 storage and access server.
 4.  **`db`**: PostgreSQL database storing virtual mail accounts, domains, and aliases.
@@ -104,8 +104,8 @@ When editing, implementing, or running Ansible plays, tasks, and playbooks in th
 ## ✉️ Ingress Proxying & Client IP Preservation
 
 The mail server uses a decoupled ingress mechanism:
-- **Proxy Configuration**: The ingress mail proxy utilizes Nginx's `ngx_mail_auth_http_module` to validate inbound SMTP/IMAP credentials against PostgreSQL virtual user maps.
-- **Client IP Preservation**: To ensure correct rate-limiting, IP reputation checks, and audit trails across backend Dovecot and Postfix listeners, Nginx transmits the original client IP addresses via **PROXY protocol headers** (`proxy_protocol on;`).
+- **Proxy Configuration**: The ingress proxy utilizes BunkerWeb as the security-hardened reverse proxy layer, terminating SSL/TLS certificates and securing HTTP/HTTPS webmail traffic as well as classic TCP mail streams.
+- **Client IP Preservation**: To ensure correct rate-limiting, IP reputation checks, and audit trails across backend Dovecot and Postfix listeners, BunkerWeb transmits the original client IP addresses via **PROXY protocol headers** (`proxy_protocol on;`) on its TCP mail streams.
 
 ---
 

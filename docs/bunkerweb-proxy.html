@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nginx Proxy Configurations — SongketMail :: LAB</title>
+    <title>BunkerWeb Proxy Configurations — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 6: Nginx Proxy & Protocol Handling
+                    Deep Research // Topic 6: BunkerWeb Proxy & Protocol Handling
                 </div>
             </div>
 
@@ -128,9 +128,9 @@
                         <span>📧</span>
                         <span>5. Webmail Integration</span>
                     </a>
-                    <a href="nginx-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
-                        <span>🌐</span>
-                        <span>6. Nginx Mail Proxy</span>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>🛡️</span>
+                        <span>6. BunkerWeb Proxy</span>
                     </a>
                     <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🏗️</span>
@@ -150,7 +150,7 @@
                         <span>10. References & Resources</span>
                     </a>
 
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
@@ -159,7 +159,7 @@
                         <span>12. Jules Planning Document</span>
                     </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -176,18 +176,18 @@
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>🌐</span>
-                    <span>Nginx Proxy and Mail Protocol Handling</span>
+                    <span>🛡️</span>
+                    <span>BunkerWeb Proxy and Mail Protocol Handling</span>
                 </h1>
             </div>
 
             <!-- Introduction Section -->
             <div class="space-y-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    Unified Web and Mail Proxying
+                    Hardened Ingress and Mail Proxying
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Nginx is globally recognized for its HTTP reverse proxying capabilities, but it also contains a native **mail proxy module**. This allows a single unprivileged Nginx container to terminate SSL/TLS certificates and securely proxy **HTTP/HTTPS webmail** as well as classic TCP mail protocols (**IMAP, IMAPS, SMTP, SMTPS**). This minimizes attack surfaces and centralizes certificate rotation (e.g. Let's Encrypt).
+                    BunkerWeb is an enterprise-grade, security-hardened Web Application Firewall (WAF) and reverse proxy built on Nginx. In the **SongketMail** architecture, we deploy BunkerWeb all-in-one in Podman as our primary ingress proxy layer. It terminates SSL/TLS certificates and securely reverse proxies both **HTTP/HTTPS webmail traffic** and classic TCP mail streams (**SMTP, SMTP Submission, and IMAPS**).
                 </p>
             </div>
 
@@ -198,119 +198,55 @@
                     <span>HTTPS Webmail Reverse Proxy</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    The block below represents the traditional <code>http {}</code> reverse proxy configuring SSL termination and security headers for Roundcube, routing unencrypted internal TCP streams to backend containers inside <code>songketmail-net</code>.
+                    BunkerWeb serves as the reverse proxy for our Roundcube webmail instance (`songketmail-web`). It handles SSL termination and injects hardened security headers (e.g. HSTS, X-Frame-Options, X-Content-Type-Options) automatically, routing unencrypted internal HTTP traffic to the backend containers inside `songketmail-net`.
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-http {
-    # Hardened Security Protocol Settings
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384';
-
-    server {
-        listen 443 ssl http2;
-        server_name mail.songketmail.internal;
-
-        ssl_certificate /etc/letsencrypt/live/songketmail/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/songketmail/privkey.pem;
-
-        # Hardening Headers
-        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-        add_header X-Frame-Options DENY;
-        add_header X-Content-Type-Options nosniff;
-
-        location / {
-            proxy_pass http://songketmail-web:8080;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto https;
-        }
-    }
-}</pre>
+# Webmail (HTTP/HTTPS) Ingress configuration
+Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://songketmail-web:8080
+Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/</pre>
             </div>
 
             <!-- Mail TCP Proxy Configuration -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>✉️</span>
-                    <span>The Native Nginx mail {} Block with PROXY Protocol</span>
+                    <span>TCP Mail Stream Proxying with PROXY Protocol</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    Nginx uses a separate <code>mail {}</code> configuration block to proxy IMAP, POP3, and SMTP traffic. Because Nginx doesn't read password databases directly, it uses an internal **HTTP Authentication Service** to validate the credentials before routing TCP connections.
+                    BunkerWeb supports stream-level reverse proxying for generic TCP/UDP applications using the Nginx `stream` module. In SongketMail, we leverage this capability to proxy inbound SMTP and IMAP mail streams.
                 </p>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    Proxying connections directly typically replaces the client's public IP address with Nginx's internal container IP, which disrupts log analysis and fail2ban security mechanisms. SongketMail addresses this by configuring <code>proxy_protocol on;</code> within Nginx mail server blocks and enabling PROXY protocol parsing on Dovecot and Postfix listeners. This forwards a PROXY header containing the original client IP and port information to backend services before protocol handshakes initiate.
+                    Proxying connections directly typically replaces the client's public IP address with Nginx's internal container IP, which disrupts log analysis and fail2ban security mechanisms. SongketMail addresses this by configuring <code>proxy_protocol on;</code> within the BunkerWeb server blocks and enabling PROXY protocol parsing on Dovecot and Postfix listeners. This forwards a PROXY header containing the original client IP and port information to backend services before protocol handshakes initiate.
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-mail {
-    # Auth Service endpoint that resolves destination IP/Port
-    auth_http http://songketmail-web:8080/mail-auth.php;
+# SMTP Stream (Port 25)
+Environment=smtp.songketmail.internal_SERVER_TYPE=stream
+Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST=songketmail-postfix:25
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT=25
+# Enforce PROXY protocol on SMTP connections to backend Postfix to preserve client IP
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
 
-    # SSL Termination for Secure Protocols
-    ssl_certificate /etc/letsencrypt/live/songketmail/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/songketmail/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
+# SMTP Submission Stream (Port 587)
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT_1=587
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST_1=songketmail-postfix:587
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol_1=proxy_protocol on;
 
-    # Enable client IP forwarding via PROXY protocol
-    proxy_protocol on;
-
-    # SMTP SMTPS IMAP IMAPS Servers
-    server {
-        listen 25;
-        protocol smtp;
-        smtp_auth none; # Let backend authenticate SMTP relays
-    }
-
-    server {
-        listen 587;
-        protocol smtp;
-        smtp_auth login plain;
-    }
-
-    server {
-        listen 465 ssl;
-        protocol smtp;
-        smtp_auth login plain;
-    }
-
-    server {
-        listen 143;
-        protocol imap;
-        starttls on;
-    }
-
-    server {
-        listen 993 ssl;
-        protocol imap;
-    }
-}</pre>
+# IMAP Stream (Port 143/993)
+Environment=imap.songketmail.internal_SERVER_TYPE=stream
+Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=imap.songketmail.internal_REVERSE_PROXY_HOST=songketmail-dovecot:993
+Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
+# Enforce PROXY protocol on IMAP connections to backend Dovecot
+Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;</pre>
             </div>
 
             <!-- HTTP Auth Protocol Explanation -->
             <div class="bg-violet-50 dark:bg-slate-900/60 p-5 rounded-xl border border-violet-100 dark:border-slate-755 space-y-3 text-xs leading-relaxed">
-                <h4 class="font-bold text-violet-750 dark:text-violet-350">💡 How Nginx Mail Authentication & Client IP Preservation Works</h4>
+                <h4 class="font-bold text-violet-750 dark:text-violet-350">💡 How Client IP Preservation Works</h4>
                 <p class="text-slate-600 dark:text-slate-400">
-                    For incoming mail protocol connections, Nginx uses the <strong>ngx_mail_auth_http_module</strong> to validate user credentials against an HTTP authentication service before proxying the session.
-                </p>
-                <p class="text-slate-600 dark:text-slate-400">
-                    Upon receiving a client connection, Nginx issues an HTTP GET request to the authentication endpoint, passing headers such as:
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
-Auth-User: user@songketmail.internal
-Auth-Pass: plain_or_hashed_password
-Auth-Protocol: imap
-Client-IP: 203.0.113.50</pre>
-                <p class="text-slate-600 dark:text-slate-400 mt-2">
-                    When the authentication service validates the user against the database, it returns an HTTP 200 OK containing the destination details:
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
-HTTP/1.1 200 OK
-Auth-Status: OK
-Auth-Server: 10.89.1.15  # Internal IP of Dovecot container
-Auth-Port: 143           # Internal IMAP Port</pre>
-                <p class="text-slate-600 dark:text-slate-400 mt-2">
-                    Nginx then transparently bridges the IMAPS TCP stream directly to the Dovecot container. Since <code>proxy_protocol on;</code> is enabled, Nginx prepends the PROXY header:
+                    For incoming mail protocol connections, BunkerWeb acts as the sole exposed gatekeeper. When a client initiates a connection to the mail stream, BunkerWeb accepts it and prepends a PROXY protocol header to the upstream TCP connection:
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-3 rounded mt-2">
 PROXY TCP4 203.0.113.50 10.89.1.1 43212 993</pre>
@@ -389,7 +325,7 @@ PROXY TCP4 203.0.113.50 10.89.1.1 43212 993</pre>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
             <span>[ TOPIC: 6 ]</span>
             <span>|</span>
-            <span>[ REVERSE PROXY: NGINX ]</span>
+            <span>[ REVERSE PROXY: BUNKERWEB ]</span>
             <span>|</span>
             <span>[ PROTOCOLS: SMTP/IMAP/HTTP ]</span>
         </div>

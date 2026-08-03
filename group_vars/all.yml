@@ -19,6 +19,7 @@ songketmail_home: "/home/{{ songketmail_user }}"
 vm_max_map_count_value: 262144
 
 # Container Image Tags (Security Hardening: avoid :latest tags)
+bunkerweb_image_tag: "1.6.13"
 postfix_image_tag: "3.9.0"
 dovecot_image_tag: "2.3.21.1"
 roundcube_image_tag: "1.6.8-apache"
@@ -40,6 +41,7 @@ songketmail_services:
 
 # Subdirectories for keep-id mapping (UID/GID 2001:2001) host persistence
 songketmail_storage_dirs:
+  - "bunkerweb/data"
   - "nginx/conf"
   - "certs"
   - "postfix/config"
