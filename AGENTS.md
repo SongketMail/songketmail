@@ -91,11 +91,13 @@ When editing, implementing, or running Ansible plays, tasks, and playbooks in th
       - `community.general.modprobe`
 2.  **Rootless Systemd Execution Context**:
     - When invoking systemd tasks via Ansible for the rootless user, you must explicitly declare the session environment variables:
+      {% raw %}
       ```yaml
       environment:
-        XDG_RUNTIME_DIR: "/run/user/{{ "{{ songketmail_uid }}" }}"
-        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ "{{ songketmail_uid }}" }}/bus"
+        XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
       ```
+      {% endraw %}
 
 ---
 
@@ -134,7 +136,7 @@ To prevent build issues and maintain semantic standards, all AI agents **must** 
       - `resource`
       - `timestamp`
 2.  **Jekyll Template Escaping**:
-    - Jekyll builds require wrapping any code blocks containing Jinja2-style braces (such as `{{ ... }}` or `{% ... %}` commonly used in Ansible templates) inside `{% raw %}` and `{% endraw %}` Liquid template tags. Failure to do so will cause Jekyll parsing exceptions on the `gh-pages` branch.
+    - Jekyll builds require wrapping any code blocks containing Jinja2-style braces (such as `{ { ... } }` or `{ % ... % }` commonly used in Ansible templates) inside `{ % raw % }` and `{ % endraw % }` Liquid template tags. Failure to do so will cause Jekyll parsing exceptions on the `gh-pages` branch.
 3.  **GitHub Pages Setup**:
     - The repository uses a `gh-pages` branch configured with Jekyll using `_config.yml`, `Gemfile`, and `.nojekyll` files at both the root level and the `docs/` level to ensure correct static site hosting.
 4.  **Ignore Jekyll Artifacts**:

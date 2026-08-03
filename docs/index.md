@@ -4,7 +4,7 @@ type: documentation
 title: "SongketMail: Secure Email Server Fabric"
 description: "Welcome to SongketMail, an enterprise-grade, highly secure, and scalable email server baseline."
 resource: "file:///docs/index.md"
-timestamp: 2026-07-04T09:40:04Z
+timestamp: 2026-07-04T12:00:00Z
 ---
 # 🏠 SongketMail: Secure Email Server Fabric
 
@@ -58,7 +58,8 @@ Explore our interactive and interconnected deep research topics:
 6. [Nginx Proxy and Mail Protocol Handling](nginx-proxy.md)
 7. [Comprehensive Architectural Blueprint](architectural-blueprint.md)
 8. [AI-Assisted Development: Gemini + Jules](ai-dev.md)
-9. [GitHub Pages Automation Setup Guide](github-pages-setup.md)
+9a. [Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)
+9b. [GitHub Pages Automation Setup Guide](github-pages-setup.md)
 10. [Project References & Resource Compilation](references.md)
 
 ---

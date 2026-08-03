@@ -4,7 +4,7 @@ type: documentation
 title: "SongketMail Documentation Summary"
 description: "Chronological index and navigation structure of the SongketMail documentation book."
 resource: "file:///docs/SUMMARY.md"
-timestamp: 2026-07-04T09:40:04Z
+timestamp: 2026-07-04T12:00:00Z
 ---
 # Summary
 
@@ -18,7 +18,8 @@ timestamp: 2026-07-04T09:40:04Z
 * [Part 6: Nginx Proxy Configuration](nginx-proxy.md)
 * [Part 7: Unified Architectural Blueprint](architectural-blueprint.md)
 * [Part 8: AI-Assisted Development](ai-dev.md)
-* [Part 9: GitHub Pages Automation Setup](github-pages-setup.md)
+* [Part 9a: Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)
+* [Part 9b: GitHub Pages Automation Setup](github-pages-setup.md)
 * [Part 10: Reference Sources Compilation](references.md)
 
 ---
