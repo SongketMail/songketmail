@@ -6,15 +6,15 @@
         localStorage.setItem('theme', val);
     },
     isDark() {
-        if (this.theme === 'dark') return true;
-        if (this.theme === 'light') return false;
+        if (theme === 'dark') return true;
+        if (theme === 'light') return false;
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 }" :class="{ 'dark': isDark() }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creating a GitHub Pages Site with Jekyll — SongketMail :: LAB</title>
+    <title>DockPod Integration — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 9a: Creating a GitHub Pages Site with Jekyll
+                    Deep Research // Part 11: DockPod Integration & Agentic Control
                 </div>
             </div>
 
@@ -136,7 +136,7 @@
                         <span>🏗️</span>
                         <span>7. SKM Blueprint</span>
                     </a>
-                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🌐</span>
                         <span>9a. Jekyll Site Creation</span>
                     </a>
@@ -150,16 +150,17 @@
                         <span>10. References & Resources</span>
                     </a>
 
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
+
                     <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📋</span>
                         <span>12. Jules Planning Document</span>
                     </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -176,142 +177,175 @@
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>🌐</span>
-                    <span>Creating a GitHub Pages Site with Jekyll</span>
+                    <span>📊</span>
+                    <span>DockPod Integration: Unprivileged Podman & Agentic Management</span>
                 </h1>
             </div>
 
-            <!-- Introduction Section -->
+            <!-- Tags / Badge Pills Row -->
+            <div class="flex flex-wrap gap-2.5">
+                <span class="px-3.5 py-1.5 bg-violet-600 text-white rounded-md text-xs font-bold tracking-wide uppercase">
+                    Control Plane
+                </span>
+                <span class="px-3.5 py-1.5 bg-emerald-600 text-white rounded-md text-xs font-bold tracking-wide uppercase">
+                    MCP Server Enabled
+                </span>
+                <span class="px-3.5 py-1.5 bg-amber-500 text-white rounded-md text-xs font-bold tracking-wide uppercase">
+                    Unprivileged Socket
+                </span>
+            </div>
+
+            <!-- Overview Section -->
             <div class="space-y-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    Why Use Jekyll for GitHub Pages?
+                    1. Executive Summary
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    <strong>Jekyll</strong> is a blog-aware, static site generator written in Ruby that integrates natively with GitHub Pages. With Jekyll, you can publish documentation, portfolios, and websites directly from your markdown source files. It eliminates the need for database administration, provides incredible loading speeds, and guarantees robust security under static site immunity.
+                    This deep research document explores the integration of <strong>DockPod</strong> (available at <a href="https://guide.dockpod.io/" target="_blank" class="text-violet-600 dark:text-violet-400 hover:underline">guide.dockpod.io</a>) within the <strong>SongketMail</strong> ecosystem. SongketMail is an enterprise-grade, rootless, unprivileged email server fabric orchestrated via Podman 5+ and systemd Quadlets.
+                </p>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    Our primary objective is to evaluate DockPod as a lightweight, zero-dependency control plane to manage, monitor, and troubleshoot all Podman containers within this project. Additionally, we analyze how DockPod's native <strong>Model Context Protocol (MCP)</strong> server can be leveraged by AI agents—such as <strong>Google Jules</strong>—to perform real-time autonomous container operations, log monitoring, and automated deployments securely.
                 </p>
             </div>
 
-            <!-- Step 1: Install Prerequisite Tools -->
+            <!-- DockPod Capabilities Card -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>🛠️</span>
-                    <span>Step 1: Install Prerequisite Tools</span>
+                    <span>⚡</span>
+                    <span>2. DockPod Overview & Core Capabilities</span>
                 </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm">
-                    Before you can run Jekyll locally, make sure your host machine has Git, Ruby, and Bundler installed.
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    DockPod is a single, compiled Go binary with less than a 30MB RAM footprint, containing an embedded React web UI and SQLite.
                 </p>
-                <div class="space-y-3 text-xs font-mono">
-                    <div>
-                        <div class="font-bold text-slate-500 mb-1">Verify Git Installation</div>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto">git --version</pre>
-                    </div>
-                    <div>
-                        <div class="font-bold text-slate-500 mb-1">Install Ruby & Compiler Packages (Debian/Ubuntu)</div>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto">sudo apt-get install ruby-full build-essential zlib1g-dev</pre>
-                    </div>
-                    <div>
-                        <div class="font-bold text-slate-500 mb-1">Install Bundler and Jekyll Gem</div>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto">gem install jekyll bundler</pre>
-                    </div>
-                </div>
+                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400">
+                    <li class="flex items-start">
+                        <span class="text-violet-600 dark:text-violet-400 mr-2">•</span>
+                        <span><strong>Dual-Engine Auto-Detection:</strong> Auto-detects Docker and Podman sockets, making it highly versatile.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-violet-600 dark:text-violet-400 mr-2">•</span>
+                        <span><strong>Embedded Console & Live Logs:</strong> Streams log outputs via WebSockets and launches full container exec terminals.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-violet-600 dark:text-violet-400 mr-2">•</span>
+                        <span><strong>Built-In MCP Server:</strong> Provides an out-of-the-box Model Context Protocol (MCP) server on port <code>8090</code>, granting LLM agents robust troubleshooting tools.</span>
+                    </li>
+                </ul>
             </div>
 
-            <!-- Step 2: Initialize Your Jekyll Site -->
+            <!-- Persistence Trinity & Socket Architecture -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>📂</span>
-                    <span>Step 2: Initialize Your Jekyll Site</span>
+                    <span>🏗️</span>
+                    <span>3. Architectural Alignment with the Persistence Trinity</span>
                 </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm">
-                    You can initialize a Jekyll site in a completely brand new repository or inject it into an existing repository.
-                </p>
-                <div class="space-y-4">
-                    <div class="border-l-2 border-violet-500 pl-3">
-                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">Case A: Creating a Site in a New Repository</h4>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto text-xs font-mono mt-1.5">mkdir my-jekyll-site
-cd my-jekyll-site
-git init
-jekyll new . --force</pre>
-                    </div>
-                    <div class="border-l-2 border-violet-500 pl-3">
-                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">Case B: Injecting Jekyll into an Existing Repository</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            If you already have a repository and want to serve files from a custom folder (like <code>/docs</code>), create <code>_config.yml</code>, <code>Gemfile</code>, <code>index.md</code>, and <code>.nojekyll</code> inside that folder manually.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Configure Gemfile & _config.yml -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>⚙️</span>
-                    <span>Step 3: Configure Gemfile &amp; _config.yml</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm">
-                    Configure the standard <code>github-pages</code> gem bundle to ensure your local site matches GitHub's remote builder environments.
-                </p>
-                <div class="space-y-3 font-mono text-xs">
-                    <div>
-                        <div class="font-bold text-slate-500 mb-1">Gemfile</div>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto">source "https://rubygems.org"
-
-gem "github-pages", group: :jekyll_plugins</pre>
-                    </div>
-                    <div>
-                        <div class="font-bold text-slate-500 mb-1">_config.yml</div>
-                        <pre class="bg-slate-950 text-emerald-400 p-3 rounded-lg overflow-x-auto">title: "SongketMail :: LAB"
-theme: jekyll-theme-primer
-markdown: kramdown
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - vendor/</pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 4: Local Testing & Building -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>🖥️</span>
-                    <span>Step 4: Local Testing &amp; Building</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm">
-                    Run the following bundler commands to fetch assets, resolve plugins, and launch the development server locally.
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono"># Install the specified gems
-bundle install
-
-# Run local development server
-bundle exec jekyll serve</pre>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    By default, Jekyll will build your site and launch a local web server at <code>http://localhost:4000/</code>. It watches for file saves and hot-reloads instantly.
-                </p>
-            </div>
-
-            <!-- Step 5: Escaping Template Conflict Errors -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>⚠️</span>
-                    <span>Step 5: Liquid Template Escaping</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm">
-                    Because Jekyll is powered by the Liquid templating engine, any code blocks containing Jinja2 syntax (e.g. <code>{{ ... }}</code> or <code>{% ... %}</code> in Ansible files) will trigger compile-time exceptions.
+                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                    DockPod executes perfectly as an unprivileged, user-level systemd service under the target <code>songket</code> user session (UID 2001). By mounting the user-level rootless socket <code>/run/user/2001/podman/podman.sock</code>, DockPod achieves complete visibility over SongketMail containers without requiring any root privileges or elevated host permissions.
                 </p>
                 <div class="bg-violet-50 dark:bg-slate-900/60 p-4 rounded-lg border border-violet-100 dark:border-slate-755 text-xs">
-                    <p class="font-semibold text-violet-750 dark:text-violet-350">💡 Solution: Wrap with raw / endraw Tags</p>
+                    <p class="font-semibold text-violet-750 dark:text-violet-350">🔒 Storage Sovereignty Maintained</p>
                     <p class="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Wrap any Jinja2 blocks inside <code>{% raw %}{% raw %}{% endraw %}</code> and <code>{% raw %}{% endraw %}{% endraw %}</code> template tags. This tells Liquid to skip processing the block and output the exact text natively.
+                        DockPod requires zero write privileges to host mail directories (under <code>/var/srv/songketmail/</code>). It interacts strictly with the Podman daemon over the UNIX socket, preventing un-audited file mutations.
                     </p>
                 </div>
             </div>
 
-            <!-- Back navigation / Action links -->
+            <!-- Rootless Socket Setup Code Block -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">4. Rootless Podman Socket Activation</h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    By default, Podman's rootless API socket is inactive. It must be enabled under the target user's systemd context:
+                </p>
+                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono"># Switch to songket user shell environment
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+
+# Enable and start user socket
+systemctl --user enable --now podman.socket
+
+# Export the socket for DockPod configuration
+export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
+            </div>
+
+            <!-- Agentic Control Section -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">5. Agentic Control via Model Context Protocol (MCP)</h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    For AI agents like <strong>Google Jules</strong>, the Model Context Protocol (MCP) server acts as a structured API gateway. Instead of running fragile shell scripts to extract log lines or diagnose failures, Jules can fetch real-time container metrics, list active networks, or trigger service updates through standardized JSON-RPC schemas.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div class="border border-slate-100 dark:border-slate-700 p-3 rounded-lg bg-slate-50/50 dark:bg-slate-900/30">
+                        <strong class="text-violet-600 dark:text-violet-400">Diagnostic Tools</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-500">
+                            <li>list_containers</li>
+                            <li>get_container_logs</li>
+                            <li>get_system_info</li>
+                        </ul>
+                    </div>
+                    <div class="border border-slate-100 dark:border-slate-700 p-3 rounded-lg bg-slate-50/50 dark:bg-slate-900/30">
+                        <strong class="text-violet-600 dark:text-violet-400">Control Actions</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-500">
+                            <li>restart_container</li>
+                            <li>pull_image</li>
+                            <li>set_deploy_app_resources</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparative Analysis table -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">6. Operational Boundaries & Recommendations</h3>
+                <div class="overflow-hidden border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                        <thead class="bg-slate-100 dark:bg-slate-900">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-bold text-slate-700 dark:text-slate-300">Feature</th>
+                                <th class="px-4 py-2 text-left font-bold text-slate-700 dark:text-slate-300">Manual Quadlets</th>
+                                <th class="px-4 py-2 text-left font-bold text-slate-700 dark:text-slate-300">DockPod Mode</th>
+                                <th class="px-4 py-2 text-left font-bold text-slate-700 dark:text-slate-300">Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-slate-50/30 dark:bg-slate-900/10">
+                            <tr>
+                                <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">Orchestration</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Git-tracked Quadlet files</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Ad-hoc Compose / Git deploys</td>
+                                <td class="px-4 py-3 font-semibold text-emerald-600">Keep Quadlets as single source of truth.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">Ingress Proxy</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Nginx + PROXY protocol</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Embedded Traefik Proxy</td>
+                                <td class="px-4 py-3 font-semibold text-emerald-600">Disable Traefik. Keep Nginx to preserve client IP.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">Scope</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Full lifecycle deploys</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Web dashboard log streams</td>
+                                <td class="px-4 py-3 font-semibold text-emerald-600">Utilise DockPod strictly for read-only diagnosis.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Conclusion and Strategic Recommendation -->
+            <div class="bg-violet-50 dark:bg-slate-800/80 p-6 rounded-xl border border-violet-100 dark:border-slate-700 space-y-3">
+                <h3 class="text-base font-bold text-violet-900 dark:text-violet-300 flex items-center space-x-2">
+                    <span>💡</span>
+                    <span>Strategic Integration Recommendation</span>
+                </h3>
+                <p class="text-xs text-slate-700 dark:text-slate-400 leading-relaxed">
+                    We recommend deploying <strong>DockPod</strong> as a user-level background systemd service for the unprivileged <code>songket</code> user session. The panel's role should be locked down to read-only container monitoring, metrics plotting, and log inspections, while its Model Context Protocol (MCP) server should be configured to grant secure, schema-validated operational diagnostics directly to <strong>Google Jules</strong>. This gives the developers an exceptional real-time view of the mail fabric without compromising the security of rootless container sandboxing.
+                </p>
+            </div>
+
+            <!-- Navigation Links -->
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="github-pages-setup.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
-                    <span>⚙️</span>
-                    <span>Next: GH Pages Automation</span>
+                <a href="jules-planning.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>📋</span>
+                    <span>Next: Jules Planning Document</span>
                 </a>
                 <a href="index.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
                     <span>🏠</span>
@@ -319,78 +353,41 @@ bundle exec jekyll serve</pre>
                 </a>
             </div>
 
-            <!-- Footer Meta Modules section -->
-            <div class="bg-slate-100 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase block mb-3">&lt; Deep_Research_Series /&gt;</span>
-                <div class="flex flex-wrap gap-2 text-xs">
-                    <a href="index.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">Home</a>
-                    <a href="podman-rootless.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">1. Podman Rootless</a>
-                    <a href="ansible-fqcn.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">2. Ansible Best Practices</a>
-                    <a href="postfix-dovecot.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">3. Postfix & Dovecot</a>
-                    <a href="s3-storage.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">4. S3 Object Storage</a>
-                    <a href="webmail-clients.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">5. Webmail Integration</a>
-                    <a href="nginx-proxy.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">6. Nginx Mail Proxy</a>
-                    <a href="architectural-blueprint.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">7. SKM Blueprint</a>
-                    <a href="creating-a-github-pages-site-with-jekyll.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">9a. Jekyll Site Creation</a>
-                    <a href="github-pages-setup.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">9b. GH Pages Automation</a>
-                    <a href="references.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">10. References</a>
-                    <a href="ai-dev.html" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 rounded font-semibold text-slate-600 dark:text-slate-300">AI Development</a>
-                </div>
-            </div>
-
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-            <!-- Technical Specs Widget Card -->
+            <!-- Technical Summary Specs Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
                 <div class="text-xs space-y-2">
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Jekyll Version</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">4.3.0+</span>
+                        <span class="text-slate-500 dark:text-slate-400">Main Port</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">8080 (Web UI)</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Gem Bundle</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">github-pages</span>
+                        <span class="text-slate-500 dark:text-slate-400">MCP Port</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">8090 (SSE)</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Ruby Core</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">3.0.0+</span>
+                        <span class="text-slate-500 dark:text-slate-400">RAM Overhead</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">&lt; 30MB</span>
                     </div>
                     <div class="flex justify-between pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Markdown Engine</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">kramdown</span>
+                        <span class="text-slate-500 dark:text-slate-400">Socket Protocol</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Podman API v1.44</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Google Search Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 text-center">
-                <div class="flex justify-center py-2">
-                    <!-- Google stylized text logo -->
-                    <span class="text-2xl font-bold tracking-tight font-serif select-none">
-                        <span class="text-blue-500">G</span><span class="text-red-500">o</span><span class="text-yellow-500">o</span><span class="text-blue-500">g</span><span class="text-green-500">l</span><span class="text-red-500">e</span>
-                    </span>
-                </div>
-
-                <form action="https://www.google.com/search" method="get" target="_blank" class="space-y-2">
-                    <input type="text" name="q" placeholder="Search..." class="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-violet-500">
-                    <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-600 transition">
-                        Search
-                    </button>
-                </form>
-            </div>
-
-            <!-- Tidy Validator Validation Widget Card -->
+            <!-- Tidy HTML Validation Widget -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <a href="https://github.com/htacg/tidy-html5" target="_blank" class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-violet-600">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400">
                     <span class="text-emerald-500">✓</span>
                     <span>Validated by HTML Validator (based on Tidy)</span>
-                </a>
+                </div>
                 <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg flex justify-center border border-slate-100 dark:border-slate-800">
-                    <!-- Stylized tidy icon -->
                     <div class="flex items-center space-x-1 text-xs font-bold tracking-wider text-emerald-600">
                         <span>[</span>
                         <span class="text-slate-700 dark:text-slate-300">TIDY</span>
@@ -428,13 +425,11 @@ bundle exec jekyll serve</pre>
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-            <span>[ REL: 5.0.0 ]</span>
+            <span>[ TOPIC: 11 ]</span>
             <span>|</span>
-            <span>[ STD: RFC_9116 ]</span>
+            <span>[ ORCH: PODMAN_MCP ]</span>
             <span>|</span>
-            <span>[ ENV: JEKYLL ]</span>
-            <span>|</span>
-            <span>[ VIEW: STANDARD ]</span>
+            <span>[ COMPLIANCE: OKF ]</span>
         </div>
     </footer>
 

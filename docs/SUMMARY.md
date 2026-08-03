@@ -21,6 +21,8 @@ timestamp: 2026-07-04T12:00:00Z
 * [Part 9a: Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)
 * [Part 9b: GitHub Pages Automation Setup](github-pages-setup.md)
 * [Part 10: Reference Sources Compilation](references.md)
+* [Part 11: DockPod Integration](dockpod-integration.md)
+* [Part 12: Google Jules Operational Plan](jules-planning.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
