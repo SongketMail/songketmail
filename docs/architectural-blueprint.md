@@ -72,12 +72,12 @@ The `podman-systemd-generator` parses the unprivileged `.container`, `.network`,
 | Container Service Name | Quadlet Key Definitions | Mapped Host Storage Paths | Network Ports & Exposure |
 |---|---|---|---|
 | **songketmail-proxy** | `Image=nginx:alpine`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/nginx/conf:/etc/nginx:Z`<br>`/var/srv/songketmail/certs:/etc/letsencrypt:ro` | Public: 80, 443, 25, 587, 993 |
-| **songketmail-postfix** | `Image=postfix:latest`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/postfix/config:/etc/postfix:Z`<br>`/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z` | Internal Fabric: Port 25 |
-| **songketmail-dovecot** | `Image=dovecot:latest`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/dovecot/config:/etc/dovecot:Z`<br>`/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z`<br>`/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z` | Internal Fabric: 24 (LMTP), 143 (IMAP), 4190 (Sieve) |
+| **songketmail-postfix** | `Image=postfix:3.9.0`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/postfix/config:/etc/postfix:Z`<br>`/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z` | Internal Fabric: Port 25 |
+| **songketmail-dovecot** | `Image=dovecot:2.3.21.1`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/dovecot/config:/etc/dovecot:Z`<br>`/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z`<br>`/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z` | Internal Fabric: 24 (LMTP), 143 (IMAP), 4190 (Sieve) |
 | **songketmail-db** | `Image=postgres:16-alpine`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/postgres/data:/var/lib/postgresql/data:Z` | Internal Fabric: Port 5432 |
-| **songketmail-s3** | `Image=minio/minio:latest`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/minio/data:/data:Z` | Internal Fabric: 9000 (S3 API), 9001 (Console) |
-| **songketmail-web** | `Image=roundcube/roundcubemail:latest`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/roundcube/config:/var/www/html/config:Z`<br>`/var/srv/songketmail/roundcube/db:/var/www/html/db:Z` | Internal Fabric: Port 8080 |
-| **songketmail-rspamd** | `Image=rspamd/rspamd:latest`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z`<br>`/var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z` | Internal Fabric: 11333 (Web UI), 11334 (Milter) |
+| **songketmail-s3** | `Image=minio/minio:RELEASE.2024-07-04T14-25-45Z`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/minio/data:/data:Z` | Internal Fabric: 9000 (S3 API), 9001 (Console) |
+| **songketmail-web** | `Image=roundcube/roundcubemail:1.6.8-apache`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/roundcube/config:/var/www/html/config:Z`<br>`/var/srv/songketmail/roundcube/db:/var/www/html/db:Z` | Internal Fabric: Port 8080 |
+| **songketmail-rspamd** | `Image=rspamd/rspamd:3.9.1`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z`<br>`/var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z` | Internal Fabric: 11333 (Web UI), 11334 (Milter) |
 
 ---
 

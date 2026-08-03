@@ -4,7 +4,7 @@ After=network-online.target
 
 [Container]
 ContainerName={{ cluster_prefix }}-rspamd
-Image=docker.io/rspamd/rspamd:latest
+Image=docker.io/rspamd/rspamd:{{ rspamd_image_tag }}
 Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/rspamd/config:/etc/rspamd/local.d:Z

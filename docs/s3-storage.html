@@ -252,7 +252,7 @@
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
 ContainerName=songketmail-s3
 Network=songketmail-net
-Image=minio/minio:latest
+Image=minio/minio:RELEASE.2024-07-04T14-25-45Z
 Volume=/var/srv/songketmail/minio/data:/data:Z
 Exec=server /data --console-address ":9001"
 UserNS=keep-id:uid=2001,gid=2001
