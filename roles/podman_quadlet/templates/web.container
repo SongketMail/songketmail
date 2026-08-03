@@ -4,7 +4,7 @@ After=network-online.target
 
 [Container]
 ContainerName={{ cluster_prefix }}-web
-Image=docker.io/roundcube/roundcubemail:latest
+Image=docker.io/roundcube/roundcubemail:{{ roundcube_image_tag }}
 Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/roundcube/config:/var/www/html/config:Z

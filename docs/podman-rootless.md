@@ -59,7 +59,7 @@ Internal=false
 [Container]
 ContainerName=skm_fabric_emailserver
 Pod=skm_fabric_pod.pod
-Image=docker.io/library/postfix:latest
+Image=docker.io/library/postfix:3.9.0
 Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
 Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
 UserNS=keep-id:uid=2001,gid=2001

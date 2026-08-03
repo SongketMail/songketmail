@@ -41,7 +41,7 @@ By launching a standard MinIO server inside our unprivileged container fabric, w
 [Container]
 ContainerName=songketmail-s3
 Network=songketmail-net
-Image=minio/minio:latest
+Image=minio/minio:RELEASE.2024-07-04T14-25-45Z
 Volume=/var/srv/songketmail/minio/data:/data:Z
 Exec=server /data --console-address ":9001"
 UserNS=keep-id:uid=2001,gid=2001

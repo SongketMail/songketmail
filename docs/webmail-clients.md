@@ -41,7 +41,7 @@ By running Roundcube in our unprivileged systemd Quadlet mesh, it connects to Do
 [Container]
 ContainerName=songketmail-web
 Network=songketmail-net
-Image=roundcube/roundcubemail:latest
+Image=roundcube/roundcubemail:1.6.8-apache
 Volume=/var/srv/songketmail/roundcube/config:/var/www/html/config:Z
 Volume=/var/srv/songketmail/roundcube/db:/var/www/html/db:Z
 UserNS=keep-id:uid=2001,gid=2001
