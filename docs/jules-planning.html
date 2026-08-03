@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webmail Clients Comparison — SongketMail :: LAB</title>
+    <title>Google Jules Planning Document — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 5: Webmail Client Evaluation Matrix
+                    Deep Research // Part 12: Google Jules Implementation Planning Document
                 </div>
             </div>
 
@@ -124,7 +124,7 @@
                         <span>🪣</span>
                         <span>4. S3 Object Storage</span>
                     </a>
-                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📧</span>
                         <span>5. Webmail Integration</span>
                     </a>
@@ -150,16 +150,17 @@
                         <span>10. References & Resources</span>
                     </a>
 
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
-                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>📋</span>
                         <span>12. Jules Planning Document</span>
                     </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -176,113 +177,121 @@
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>📧</span>
-                    <span>Open-Source Webmail Clients Comparison</span>
+                    <span>📋</span>
+                    <span>Google Jules Operational Plan: DockPod Integration</span>
                 </h1>
             </div>
 
-            <!-- Introduction Section -->
-            <div class="space-y-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    Evaluating Webmail Solutions for Rootless Containers
-                </h2>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Selecting a containerized webmail client requires careful assessment of scalability, state persistence, security, and performance. Traditional webmail (like Roundcube) requires dedicated MySQL/PostgreSQL databases to hold session and cache states. Modern webmail engines act as stateless client-side rendering portals, connecting directly to IMAP/SMTP backends on demand.
+            <!-- Description -->
+            <div class="space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                <p>
+                    This operational document provides a highly structured, multi-session tactical roadmap for **Google Jules** (and subsequent autonomous agent sessions) to safely deploy, configure, and verify <strong>DockPod</strong> within SongketMail's unprivileged user context.
                 </p>
             </div>
 
-            <!-- Detailed Comparison Matrix -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Webmail Comparison Matrix</h3>
+            <!-- Multi-Session Timelines Cards -->
 
-                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Client</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Architecture</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Database Req.</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Security / 2FA</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Roundcube</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Server-Side PHP (GPL-3.0+)</td>
-                                <td class="px-3 py-3 text-emerald-600 font-bold">Yes (SQL)</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Supported via Plugins</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Moderate (heavy server load)</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">SnappyMail</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">SPA/Client-Side Render (AGPL-3.0)</td>
-                                <td class="px-3 py-3 text-red-500 font-bold">No (Stateless)</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Native 2FA / Security Hardened</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Incredibly Fast / Low memory</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">RainLoop</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Legacy SPA (CC BY-NC-SA 3.0)</td>
-                                <td class="px-3 py-3 text-red-500 font-bold">No</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Outdated dependencies</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Moderate (unmaintained)</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Nextcloud Mail</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Heavy Suite App (AGPL-3.0)</td>
-                                <td class="px-3 py-3 text-emerald-600 font-bold">Yes</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Native via Nextcloud Suite</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Very heavy (resource intense)</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Session 1 -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 1</span>
+                        <span>Environment Prep & Socket Activation</span>
+                    </h3>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    <p><strong>Objective:</strong> Ensure unprivileged session persistence and expose rootless Podman API socket.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Enable systemd lingering: <code>loginctl enable-linger songket</code>.</li>
+                        <li>Set user environments: <code>export XDG_RUNTIME_DIR="/run/user/2001"</code>.</li>
+                        <li>Enable the socket: <code>systemctl --user enable --now podman.socket</code>.</li>
+                        <li>Verify access permission on <code>/run/user/2001/podman/podman.sock</code>.</li>
+                    </ol>
                 </div>
             </div>
 
-            <!-- Chosen Client: Roundcube -->
+            <!-- Session 2 -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>⚡</span>
-                    <span>Chosen Baseline: Roundcube Webmail</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    <strong>Roundcube</strong> is the chosen, production-ready webmail client deployed in the SongketMail configuration matrix. It offers classic, fully-featured, and highly intuitive desktop and mobile web interfaces with extensive plugin ecosystems.
-                </p>
-                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
-                    <li><strong>State Persistence Architecture:</strong> Unlike stateless clients like SnappyMail, Roundcube utilizes an internal SQLite/Postgres database to persistently store user session caches, active address books, and interface customization settings. This ensures absolute stability and standard-compliant mail interactions.</li>
-                    <li><strong>Secure Host Persistence:</strong> All configuration variables and sqlite database files are mapped directly under <code>/var/srv/songketmail/roundcube/config</code> and <code>/var/srv/songketmail/roundcube/db</code> respectively, maintaining storage sovereignty via keep-id.</li>
-                    <li><strong>Internal Port Binding:</strong> Roundcube runs on unprivileged internal port <code>8080</code> inside the secure <code>songketmail-net</code> network, accepting requests exclusively from the hardened Nginx proxy.</li>
-                </ul>
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 2</span>
+                        <span>DockPod Service Provisioning</span>
+                    </h3>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    <p><strong>Objective:</strong> Download, configure and start the unprivileged DockPod daemon as a systemd user service.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Download stable executable binary to <code>~/.local/bin/dockpod</code>.</li>
+                        <li>Write declarative systemd service unit: <code>~/.config/systemd/user/dockpod.service</code>.</li>
+                        <li>Define environment configurations binding to localhost IP address <code>127.0.0.1</code> to block public exposures.</li>
+                        <li>Reload systemd user daemon and start service: <code>systemctl --user enable --now dockpod.service</code>.</li>
+                    </ol>
+                </div>
             </div>
 
-            <!-- Quadlet Deployment Code for Roundcube -->
+            <!-- Session 3 -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Roundcube Container Quadlet</h3>
-                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By running Roundcube in our unprivileged systemd Quadlet mesh, it connects to Dovecot and Postgres inside the secure cluster network.
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
-ContainerName=songketmail-web
-Network=songketmail-net
-Image=roundcube/roundcubemail:1.6.8-apache
-Volume=/var/srv/songketmail/roundcube/config:/var/www/html/config:Z
-Volume=/var/srv/songketmail/roundcube/db:/var/www/html/db:Z
-UserNS=keep-id:uid=2001,gid=2001
-
-[Service]
-Restart=always</pre>
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 3</span>
+                        <span>Nginx SSL/TLS Ingress Configuration</span>
+                    </h3>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    <p><strong>Objective:</strong> Route external requests to the locally bound panel and MCP endpoints safely through SSL/TLS proxies.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Create a virtual host proxy blocks under Nginx directories pointing to <code>127.0.0.1:8080</code> (Web UI).</li>
+                        <li>Isolate Server-Sent Events (SSE) buffering by routing <code>mcp.songketmail.local</code> requests directly to <code>127.0.0.1:8090</code>.</li>
+                        <li>Verify and hot-reload Nginx routing inside the unprivileged container pod.</li>
+                    </ol>
+                </div>
             </div>
 
-            <!-- Back navigation / Action links -->
+            <!-- Session 4 -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 4</span>
+                        <span>Security Hardening & Token Generation</span>
+                    </h3>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    <p><strong>Objective:</strong> Secure API authentication credentials and drop direct public ports exposure.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Run firewall configuration dropping direct public traffic to ports <code>8080</code> and <code>8090</code>.</li>
+                        <li>Register the primary admin user with high-entropy passwords.</li>
+                        <li>Generate a Bcrypt-hashed API key starting with <code>dp_mcp_</code> from Settings.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Session 5 -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 5</span>
+                        <span>Agentic Verification Workflows</span>
+                    </h3>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    <p><strong>Objective:</strong> Register the MCP Server inside the Google Jules workspace and execute diagnostic audits.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Bind <code>mcp-remote</code> parameters matching the proxy headers and authorization token.</li>
+                        <li>Perform live LLM inquiries checking container lists and log tails dynamically.</li>
+                        <li>Document and audit standard memory footprint values to confirm success.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="nginx-proxy.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
-                    <span>🌐</span>
-                    <span>Next: Nginx Proxy Configuration</span>
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏠</span>
+                    <span>Return Home</span>
                 </a>
-                <a href="s3-storage.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
-                    <span>🪣</span>
-                    <span>Back: S3 Object Storage</span>
+                <a href="dockpod-integration.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>📊</span>
+                    <span>Back to Integration Research</span>
                 </a>
             </div>
 
@@ -291,25 +300,41 @@ Restart=always</pre>
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-            <!-- Specs Widget Card -->
+            <!-- Planning specs widget -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Webmail Scores</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Planning Metadata</h4>
                 <div class="text-xs space-y-2">
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Stateless Rating</span>
-                        <span class="font-bold text-green-500">10 / 10 (Snappy)</span>
+                        <span class="text-slate-500 dark:text-slate-400">Total Sessions</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">5 Sessions</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Roundcube DB Req</span>
-                        <span class="font-bold text-red-500">MySQL / PG</span>
+                        <span class="text-slate-500 dark:text-slate-400">Target Role</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Google Jules</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Security / 2FA</span>
-                        <span class="font-bold text-violet-600">WebAuthn Native</span>
+                        <span class="text-slate-500 dark:text-slate-400">Document Standard</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
                     </div>
                     <div class="flex justify-between pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">PHP Requirement</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">PHP 8.2+</span>
+                        <span class="text-slate-500 dark:text-slate-400">Security Model</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Bcrypt / SSL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tidy validation badge -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span class="text-emerald-500">✓</span>
+                    <span>Validated by HTML Validator (based on Tidy)</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg flex justify-center border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center space-x-1 text-xs font-bold tracking-wider text-emerald-600">
+                        <span>[</span>
+                        <span class="text-slate-700 dark:text-slate-300">TIDY</span>
+                        <span class="text-emerald-500">✓</span>
+                        <span>]</span>
                     </div>
                 </div>
             </div>
@@ -342,11 +367,11 @@ Restart=always</pre>
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-            <span>[ TOPIC: 5 ]</span>
+            <span>[ TOPIC: 12 ]</span>
             <span>|</span>
-            <span>[ COMPARE: WEBMAIL ]</span>
+            <span>[ ROLE: GOOGLE_JULES ]</span>
             <span>|</span>
-            <span>[ RECOMMEND: SNAPPYMAIL ]</span>
+            <span>[ STANDARD: DSOM ]</span>
         </div>
     </footer>
 
