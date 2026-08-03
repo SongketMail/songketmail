@@ -66,7 +66,7 @@
     state: directory
     owner: "{{ songketmail_user }}"
     group: "{{ songketmail_user }}"
-    mode: '0755'
+    mode: '0700'
     recurse: yes
   loop: "{{ songketmail_storage_dirs }}"
 
