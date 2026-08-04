@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Part 12: Google Jules Implementation Planning Document
+                    Deep Research // Part 12: Google Jules End-to-End Operational Plan
                 </div>
             </div>
 
@@ -172,125 +172,239 @@
         </aside>
 
         <!-- Column 2: Center Main Content Area (span 6) -->
-        <section class="lg:col-span-6 space-y-8">
+        <section class="lg:col-span-6 space-y-8" x-data="{ currentTab: 'phase1' }">
 
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
                     <span>📋</span>
-                    <span>Google Jules Operational Plan: DockPod Integration</span>
+                    <span>Google Jules End-to-End Operational Plan</span>
                 </h1>
             </div>
 
             <!-- Description -->
             <div class="space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                 <p>
-                    This operational document provides a highly structured, multi-session tactical roadmap for **Google Jules** (and subsequent autonomous agent sessions) to safely deploy, configure, and verify <strong>DockPod</strong> within SongketMail's unprivileged user context.
+                    This comprehensive operational roadmap outlines the step-by-step procedures to bootstrap a bare-metal minimal Linux server, automate the deployment of the secure <strong>SongketMail Email Server Fabric</strong> via FQCN-compliant <strong>Ansible Playbooks</strong>, and integrate <strong>DockPod</strong> for unprivileged container control and AI Model Context Protocol (MCP) diagnostics.
                 </p>
             </div>
 
-            <!-- Multi-Session Timelines Cards -->
+            <!-- Tab Selectors -->
+            <div class="flex border-b border-slate-200 dark:border-slate-700">
+                <button @click="currentTab = 'phase1'"
+                        :class="currentTab === 'phase1' ? 'border-violet-600 text-violet-600 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                        class="flex-1 py-3 text-center border-b-2 text-sm font-semibold transition uppercase tracking-wider">
+                    Phase 1: Core Fabric Setup
+                </button>
+                <button @click="currentTab = 'phase2'"
+                        :class="currentTab === 'phase2' ? 'border-violet-600 text-violet-600 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                        class="flex-1 py-3 text-center border-b-2 text-sm font-semibold transition uppercase tracking-wider">
+                    Phase 2: DockPod & MCP
+                </button>
+            </div>
 
-            <!-- Session 1 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 1</span>
-                        <span>Environment Prep & Socket Activation</span>
+            <!-- TAB CONTENT: PHASE 1 -->
+            <div x-show="currentTab === 'phase1'" class="space-y-8" x-cloak>
+                <div class="bg-violet-50 dark:bg-violet-950/20 p-4 rounded-xl border border-violet-100 dark:border-violet-900/50">
+                    <h3 class="text-sm font-bold text-violet-800 dark:text-violet-400 mb-1 flex items-center space-x-1.5">
+                        <span>🚀</span>
+                        <span>Phase 1 Goal</span>
                     </h3>
+                    <p class="text-xs text-violet-700 dark:text-violet-300 leading-relaxed">
+                        Deploy a fully decoupled, unprivileged 7-service container mesh (BunkerWeb, Postfix, Dovecot, PostgreSQL, MinIO, Roundcube, Rspamd) starting from a minimum Linux OS, configured recursively with storage sovereignty (keep-id) and standard-compliant Ansible.
+                    </p>
                 </div>
-                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p><strong>Objective:</strong> Ensure unprivileged session persistence and expose rootless Podman API socket.</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Enable systemd lingering: <code>loginctl enable-linger songket</code>.</li>
-                        <li>Set user environments: <code>export XDG_RUNTIME_DIR="/run/user/2001"</code>.</li>
-                        <li>Enable the socket: <code>systemctl --user enable --now podman.socket</code>.</li>
-                        <li>Verify access permission on <code>/run/user/2001/podman/podman.sock</code>.</li>
-                    </ol>
+
+                <!-- Step 1.1 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 1.1</span>
+                            <span>Host OS Preparation & Tuning (Rootful)</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Configure the underlying OS host environment with necessary kernel parameter optimizations and the non-privileged user account:</p>
+                        <ul class="list-disc list-inside space-y-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 font-mono">
+                            <li># Install podman & ansible</li>
+                            <li>apt update && apt install ansible podman -y</li>
+                            <li># Unprivileged port binds start at 25</li>
+                            <li>sysctl -w net.ipv4.ip_unprivileged_port_start=25</li>
+                            <li># Add user & group 2001:2001</li>
+                            <li>useradd -u 2001 -g 2001 -m -s /bin/bash songketmail</li>
+                            <li># Enable systemd user session lingering</li>
+                            <li>loginctl enable-linger songketmail</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 1.2 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 1.2</span>
+                            <span>Sovereign Storage Path Creation (UID 2001)</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Construct physical host volumes under <code>/var/srv/songketmail</code> with strict ownership mapped directly to the unprivileged owner namespace:</p>
+                        <ul class="list-disc list-inside space-y-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 font-mono">
+                            <li>mkdir -p /var/srv/songketmail</li>
+                            <li># Create 14 isolated subdirectories</li>
+                            <li># (postfix, dovecot, postgres, etc.)</li>
+                            <li>chmod 0700 /var/srv/songketmail</li>
+                            <li>chown -R 2001:2001 /var/srv/songketmail</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 1.3 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 1.3</span>
+                            <span>Ansible Playbook Orchestration</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Write standard FQCN-compliant variables and templates. Execute the playbook cleanly via local or remote Ansible orchestration:</p>
+                        <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 font-mono text-2xs">
+                            <span class="text-blue-600 dark:text-blue-400">ansible-playbook -i inventory/hosts.ini site.yml</span>
+                        </div>
+                        <p>This playbook automates host preparations as root, then switches to unprivileged context to deploy Quadlets seamlessly.</p>
+                    </div>
+                </div>
+
+                <!-- Step 1.4 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 1.4</span>
+                            <span>Quadlet Generation & Activation</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Generate native user-level systemd service files by reloading the unprivileged session manager daemon:</p>
+                        <ul class="list-disc list-inside space-y-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 font-mono text-2xs">
+                            <li>export XDG_RUNTIME_DIR="/run/user/2001"</li>
+                            <li>export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"</li>
+                            <li>systemctl --user daemon-reload</li>
+                            <li>systemctl --user enable --now songketmail_pod-pod.service</li>
+                            <li>systemctl --user enable --now songketmail_proxy.service</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 1.5 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 1.5</span>
+                            <span>Verify Mail Web Application</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Verify that services are running and accessible. Ports 25, 80, 443, 587, and 993 will be bound securely on the host by BunkerWeb:</p>
+                        <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-2xs font-mono">
+                            ss -tulnp | grep -E "25|80|443|587|993"
+                        </div>
+                        <p>Access the Roundcube client through your web browser at <code>https://mail.songketmail.internal/</code>. The email web is now fully ready!</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Session 2 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 2</span>
-                        <span>DockPod Service Provisioning</span>
+            <!-- TAB CONTENT: PHASE 2 -->
+            <div x-show="currentTab === 'phase2'" class="space-y-8" x-cloak>
+                <div class="bg-violet-50 dark:bg-violet-950/20 p-4 rounded-xl border border-violet-100 dark:border-violet-900/50">
+                    <h3 class="text-sm font-bold text-violet-800 dark:text-violet-400 mb-1 flex items-center space-x-1.5">
+                        <span>📊</span>
+                        <span>Phase 2 Goal</span>
                     </h3>
+                    <p class="text-xs text-violet-700 dark:text-violet-300 leading-relaxed">
+                        Provision DockPod as a secure, local, unprivileged management portal and Model Context Protocol (MCP) server, allowing AI clients to stream live container logs and inspect cluster performance safely.
+                    </p>
                 </div>
-                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p><strong>Objective:</strong> Download, configure and start the unprivileged DockPod daemon as a systemd user service.</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Download stable executable binary to <code>~/.local/bin/dockpod</code>.</li>
-                        <li>Write declarative systemd service unit: <code>~/.config/systemd/user/dockpod.service</code>.</li>
-                        <li>Define environment configurations binding to localhost IP address <code>127.0.0.1</code> to block public exposures.</li>
-                        <li>Reload systemd user daemon and start service: <code>systemctl --user enable --now dockpod.service</code>.</li>
-                    </ol>
-                </div>
-            </div>
 
-            <!-- Session 3 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 3</span>
-                        <span>Nginx SSL/TLS Ingress Configuration</span>
-                    </h3>
+                <!-- Step 2.1 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 2.1</span>
+                            <span>Enable Podman Rootless Socket</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Enable and start the user-level Podman API socket within the unprivileged <code>songketmail</code> user session context:</p>
+                        <ul class="list-disc list-inside space-y-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 font-mono">
+                            <li>systemctl --user enable --now podman.socket</li>
+                            <li>ls -la /run/user/2001/podman/podman.sock</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p><strong>Objective:</strong> Route external requests to the locally bound panel and MCP endpoints safely through SSL/TLS proxies.</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Create a virtual host proxy blocks under Nginx directories pointing to <code>127.0.0.1:8080</code> (Web UI).</li>
-                        <li>Isolate Server-Sent Events (SSE) buffering by routing <code>mcp.songketmail.local</code> requests directly to <code>127.0.0.1:8090</code>.</li>
-                        <li>Verify and hot-reload Nginx routing inside the unprivileged container pod.</li>
-                        <li>Configure Traefik coexistence/bypass: disable Traefik for <em>Option A (Pure Decoupled Mode)</em>, set up loopback bindings for <em>Option B (Split-Horizon Ingress)</em>, or specify <code>trustedIPs</code> (e.g. <code>10.89.0.0/16</code>) in Traefik's <code>forwardedHeaders</code> for <em>Option C (Nested Proxying)</em>.</li>
-                    </ol>
-                </div>
-            </div>
 
-            <!-- Session 4 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 4</span>
-                        <span>Security Hardening & Token Generation</span>
-                    </h3>
+                <!-- Step 2.2 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 2.2</span>
+                            <span>Deploy DockPod Systemd Service</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Deploy the DockPod binary to <code>~/.local/bin/dockpod</code> and write the unprivileged service unit <code>~/.config/systemd/user/dockpod.service</code> binding strictly to localhost loopback addresses:</p>
+                        <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-2xs font-mono">
+                            systemctl --user daemon-reload && systemctl --user enable --now dockpod.service
+                        </div>
+                    </div>
                 </div>
-                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p><strong>Objective:</strong> Secure API authentication credentials and drop direct public ports exposure.</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Run firewall configuration dropping direct public traffic to ports <code>8080</code> and <code>8090</code>.</li>
-                        <li>Register the primary admin user with high-entropy passwords.</li>
-                        <li>Generate a Bcrypt-hashed API key starting with <code>dp_mcp_</code> from Settings.</li>
-                    </ol>
-                </div>
-            </div>
 
-            <!-- Session 5 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                        <span class="px-2.5 py-1 bg-violet-600 text-white rounded text-xs font-bold uppercase">Session 5</span>
-                        <span>Agentic Verification Workflows</span>
-                    </h3>
+                <!-- Step 2.3 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 2.3</span>
+                            <span>Route Traffic through BunkerWeb Ingress</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Create secure proxy routing configurations inside the BunkerWeb proxy layer to map SSL traffic for the <code>panel.songketmail.local</code> and <code>mcp.songketmail.local</code> (SSE disabled buffer) domains.</p>
+                    </div>
                 </div>
-                <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    <p><strong>Objective:</strong> Register the MCP Server inside the Google Jules workspace and execute diagnostic audits.</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Bind <code>mcp-remote</code> parameters matching the proxy headers and authorization token.</li>
-                        <li>Perform live LLM inquiries checking container lists and log tails dynamically.</li>
-                        <li>Document and audit standard memory footprint values to confirm success.</li>
-                    </ol>
+
+                <!-- Step 2.4 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 2.4</span>
+                            <span>API Token Generation & Hardening</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Secure administrative access to DockPod, register the primary admin user with high entropy credentials, and generate a secure, Bcrypt-hashed MCP access token starting with <code>dp_mcp_</code> from Settings.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2.5 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-violet-600 text-white rounded text-2xs font-bold uppercase">Step 2.5</span>
+                            <span>Connect External AI Clients (Google Jules)</span>
+                        </h4>
+                    </div>
+                    <div class="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p>Add the secure remote SSE server definition inside the client's configuration file to enable real-time container log analysis and automated server monitoring.</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Navigation Links -->
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+            <div class="flex flex-col sm:flex-row gap-4 pt-4 font-bold text-sm">
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition">
                     <span>🏠</span>
                     <span>Return Home</span>
                 </a>
-                <a href="dockpod-integration.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                <a href="dockpod-integration.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
                     <span>📊</span>
                     <span>Back to Integration Research</span>
                 </a>
@@ -306,16 +420,16 @@
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Planning Metadata</h4>
                 <div class="text-xs space-y-2">
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Total Sessions</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">5 Sessions</span>
+                        <span class="text-slate-500 dark:text-slate-400">Deployment Phases</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">2 Phases</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Target Role</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Google Jules</span>
+                        <span class="text-slate-500 dark:text-slate-400">Total Steps</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">10 Steps</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Document Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
+                        <span class="text-slate-500 dark:text-slate-400">Target User</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">songketmail (2001)</span>
                     </div>
                     <div class="flex justify-between pb-1">
                         <span class="text-slate-500 dark:text-slate-400">Security Model</span>
