@@ -293,9 +293,48 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
                 </div>
             </div>
 
+            <!-- Developer Feedback & BunkerWeb's Impact on Traefik -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>⚠️</span>
+                    <span>6. Developer Feedback & BunkerWeb's Impact on Traefik</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-semibold italic text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/20 p-3.5 rounded-lg border-l-4 border-violet-600">
+                    "Ni mungkin tak jalan. Sebab DockPod release permulaan guna traefik setakat ni untuk wired manage db, crowdsec, ssl etc ke containers" <br>
+                    <span class="text-xs font-normal text-slate-500 dark:text-slate-400 mt-1 block">(This might not work. Because DockPod's initial release uses Traefik so far to manage db, crowdsec, ssl, etc., wired to containers)</span>
+                </p>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    This section assesses how DockPod's native Traefik integration impacts the security-hardened <strong>SongketMail</strong> environment, specifically looking at how <strong>BunkerWeb</strong> coexists with or overrides it.
+                </p>
+
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white mt-4">⚠️ Potential Architectural Conflicts</h4>
+                <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-2 leading-relaxed">
+                    <li><strong>Port Contention (80 / 443):</strong> Both BunkerWeb and Traefik attempt to bind to ports 80 and 443 on the host, causing startup failures.</li>
+                    <li><strong>Client IP Loss (Double-Proxying):</strong> If BunkerWeb reverse proxies to Traefik, which then proxies to containers, the original client IP is lost. This breaks Postfix, Dovecot, and fail2ban rate-limiting unless complex PROXY protocol forwarding is chained.</li>
+                    <li><strong>SSL/TLS Cert Redundancy:</strong> Both proxies try to solve Let's Encrypt SSL/TLS challenges simultaneously.</li>
+                    <li><strong>WAF Coverage:</strong> BunkerWeb is a dedicated security-hardened WAF, whereas Traefik is a dynamic router. Double routing wastes resources and increases latencies.</li>
+                </ul>
+
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white mt-4">🔄 Strategic Coexistence Options</h4>
+                <div class="space-y-3 text-xs leading-relaxed">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-100 dark:border-slate-800">
+                        <strong class="text-emerald-600 dark:text-emerald-400">Option A: Pure Decoupled Mode (Disable Traefik - Recommended)</strong>
+                        <p class="mt-1 text-slate-500">Disable the embedded Traefik instance inside DockPod entirely. Since SongketMail's containers are already declared as unprivileged systemd Quadlet files, DockPod does not need to deploy any infrastructure. Instead, DockPod connects strictly to <code>/run/user/2001/podman/podman.sock</code> for read-only metrics, log streaming, and container state inspections.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-100 dark:border-slate-800">
+                        <strong class="text-violet-600 dark:text-violet-400">Option B: Split-Horizon Ingress</strong>
+                        <p class="mt-1 text-slate-500">If Traefik must remain enabled to support specific backend containers managed independently of systemd Quadlets, BunkerWeb binds to the host's public IP on ports <code>80</code>, <code>443</code>, <code>25</code>, <code>587</code>, and <code>993</code> to secure the public-facing mail server fabric, while Traefik binds to a private loopback interface (e.g., <code>127.0.0.1:8081</code>) strictly to handle DockPod's internal database and CrowdSec helpers.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-100 dark:border-slate-800">
+                        <strong class="text-blue-600 dark:text-blue-400">Option C: Nested Proxying (BunkerWeb as Edge, Traefik as Backend)</strong>
+                        <p class="mt-1 text-slate-500">Configure BunkerWeb as the primary public-facing edge proxy (handling TLS termination and WAF) and forward requests to Traefik. To preserve client IPs, BunkerWeb must forward standard headers, and Traefik must trust BunkerWeb's internal IP range.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Comparative Analysis table -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">6. Operational Boundaries & Recommendations</h3>
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">7. Operational Boundaries & Recommendations</h3>
                 <div class="overflow-hidden border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
                     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                         <thead class="bg-slate-100 dark:bg-slate-900">
@@ -317,7 +356,7 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
                                 <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">Ingress Proxy</td>
                                 <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Nginx + PROXY protocol</td>
                                 <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Embedded Traefik Proxy</td>
-                                <td class="px-4 py-3 font-semibold text-emerald-600">Disable Traefik. Keep Nginx to preserve client IP.</td>
+                                <td class="px-4 py-3 font-semibold text-emerald-600">Disable Traefik or use Nested Proxying behind BunkerWeb.</td>
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">Scope</td>
@@ -328,6 +367,35 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- Security Implications & Hardening -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>🛡️</span>
+                    <span>8. Security Implications & Hardening</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    Exposing a container management panel introduces a high-value attack vector. To maintain SongketMail's secure posture, we must apply strict hardening:
+                </p>
+                <ol class="list-decimal list-inside text-xs text-slate-600 dark:text-slate-400 space-y-3 leading-relaxed">
+                    <li>
+                        <strong>Localhost Ingress Restriction:</strong>
+                        DockPod's main web UI (<code>:8080</code>) and MCP server (<code>:8090</code>) should only bind to local loopback addresses (<code>127.0.0.1</code>) on the host. External ingress must be routed through BunkerWeb with TLS termination.
+                    </li>
+                    <li>
+                        <strong>Bcrypt-Hashed API Keys:</strong>
+                        All MCP requests require a secure Bearer token prefixed with <code>dp_mcp_</code>. These keys must be rotated regularly and stored using unprivileged file permissions (<code>0600</code>) on the host filesystem.
+                    </li>
+                    <li>
+                        <strong>Systemd Sandboxing:</strong>
+                        Run the DockPod service under a sandboxed systemd service file limiting write permissions to its own database folder:
+                        <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-[11px] font-mono mt-2">ProtectSystem=strict
+ReadWritePaths=/var/lib/dockpod
+PrivateDevices=true
+ProtectHome=true</pre>
+                    </li>
+                </ol>
             </div>
 
             <!-- Conclusion and Strategic Recommendation -->
