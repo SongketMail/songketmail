@@ -61,6 +61,9 @@ Explore our interactive and interconnected deep research topics:
 9a. [Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)
 9b. [GitHub Pages Automation Setup Guide](github-pages-setup.md)
 10. [Project References & Resource Compilation](references.md)
+11. [DockPod Control Plane Integration](dockpod-integration.md)
+12. [Google Jules End-to-End Operational Plan](jules-planning.md)
+13. [ASIMP OS Hardening and Compliance Report](asimp-hardening-report.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
