@@ -14,3 +14,5 @@ exclude:
   - ansible.cfg
   - LICENSE
   - README.md
+  - asimp_hardening_playbook.yml
+  - templates/

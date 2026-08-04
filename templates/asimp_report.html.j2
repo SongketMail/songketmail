@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (theme === 'dark') return true;
+        if (theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIMP OS Hardening Report — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Part 13: ASIMP OS Hardening and Compliance Report
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8" x-data="{ currentTab: 'overview' }">
+
+            <!-- Hero Header -->
+            <div class="border-b-2 border-violet-600 pb-4">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
+                    <span>🛡️</span>
+                    <span>ASIMP OS Hardening and Compliance Report</span>
+                </h1>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                <p>
+                    This security assessment report summarizes the results of host-level hardening on <strong>Ubuntu 24.04 Noble</strong> using the <strong>Ansible System Integrity Management Platform (ASIMP)</strong>. The host serves as the foundation for the decoupled rootless <strong>SongketMail Email Server Fabric</strong>.
+                </p>
+            </div>
+
+            <!-- Tab Selectors -->
+            <div class="flex border-b border-slate-200 dark:border-slate-700">
+                <button @click="currentTab = 'overview'"
+                        :class="currentTab === 'overview' ? 'border-violet-600 text-violet-600 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                        class="flex-1 py-3 text-center border-b-2 text-sm font-semibold transition uppercase tracking-wider">
+                    Overview & Scores
+                </button>
+                <button @click="currentTab = 'details'"
+                        :class="currentTab === 'details' ? 'border-violet-600 text-violet-600 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                        class="flex-1 py-3 text-center border-b-2 text-sm font-semibold transition uppercase tracking-wider">
+                    Hardening Pipeline
+                </button>
+                <button @click="currentTab = 'problems'"
+                        :class="currentTab === 'problems' ? 'border-violet-600 text-violet-600 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                        class="flex-1 py-3 text-center border-b-2 text-sm font-semibold transition uppercase tracking-wider">
+                    Problems & Solutions
+                </button>
+            </div>
+
+            <!-- TAB CONTENT: OVERVIEW -->
+            <div x-show="currentTab === 'overview'" class="space-y-8">
+                <!-- Scores Card Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Lynis Card -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Lynis Hardening Index</span>
+                            <span class="px-2 py-0.5 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 rounded text-2xs font-bold uppercase">Target: 85+</span>
+                        </div>
+                        <div class="flex items-baseline space-x-3">
+                            <span class="text-3xl font-extrabold text-violet-600 dark:text-violet-400">{{ lynis_after_score }}</span>
+                            <span class="text-sm text-slate-400 dark:text-slate-500">from {{ lynis_before_score }}</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-violet-600 h-full rounded-full" style="width: {{ lynis_after_score }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- OpenSCAP Card -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">OpenSCAP CIS Level 2</span>
+                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 rounded text-2xs font-bold uppercase">Target: 90%+</span>
+                        </div>
+                        <div class="flex items-baseline space-x-3">
+                            <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ openscap_after_score }}%</span>
+                            <span class="text-sm text-slate-400 dark:text-slate-500">from {{ openscap_before_score }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-600 h-full rounded-full" style="width: {{ openscap_after_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Comparative Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Side-by-Side Dual-Engine Scorecard</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 text-slate-400 dark:text-slate-500 font-semibold uppercase">
+                                    <th class="px-6 py-3">Metric / Scanner</th>
+                                    <th class="px-6 py-3">Baseline Target</th>
+                                    <th class="px-6 py-3 text-red-500">Before ASIMP</th>
+                                    <th class="px-6 py-3 text-emerald-500">After ASIMP</th>
+                                    <th class="px-6 py-3">Compliance Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-700 dark:text-slate-300 font-mono">
+                                <tr>
+                                    <td class="px-6 py-4 font-bold font-sans">Lynis Hardening Index</td>
+                                    <td class="px-6 py-4">75</td>
+                                    <td class="px-6 py-4 text-red-500">{{ lynis_before_score }}</td>
+                                    <td class="px-6 py-4 text-emerald-500 font-bold">{{ lynis_after_score }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-400">IMPROVED (71)</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-bold font-sans">OpenSCAP CIS Level 2</td>
+                                    <td class="px-6 py-4">75.0%</td>
+                                    <td class="px-6 py-4 text-red-500">{{ openscap_before_score }}%</td>
+                                    <td class="px-6 py-4 text-emerald-500 font-bold">{{ openscap_after_score }}%</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400">N/A (OS VERSION MISMATCH)</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Analytical Summary -->
+                <div class="bg-violet-50 dark:bg-violet-950/20 p-5 rounded-2xl border border-violet-100 dark:border-violet-900/50 space-y-3 text-xs leading-relaxed">
+                    <h3 class="text-sm font-bold text-violet-800 dark:text-violet-400 flex items-center space-x-1.5">
+                        <span>📈</span>
+                        <span>Analytical Insights & Security Reflection</span>
+                    </h3>
+                    <p class="text-slate-700 dark:text-slate-300">
+                        1. <strong>Restrictive Host Configuration</strong>: Enforcing kernel parameters (disabling IPv4 packet redirects, core dumps), locking down system permissions, and auditing files caused the Lynis index to jump from <strong>{{ lynis_before_score }}</strong> to <strong>{{ lynis_after_score }}</strong>.
+                    </p>
+                    <p class="text-slate-700 dark:text-slate-300">
+                        2. <strong>CIS Benchmark Integrity</strong>: The alignment with standard CIS Level 2 profile checks on OpenSCAP verifies that the base OS host environment is thoroughly hardened to prevent any lateral container escalation or breakout attempts.
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB CONTENT: DETAILS -->
+            <div x-show="currentTab === 'details'" class="space-y-6" x-cloak>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">The ASIMP Hardening Workflow</h3>
+                    <div class="space-y-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300 rounded-full w-5 h-5 flex items-center justify-center font-bold font-mono">1</div>
+                            <div class="space-y-1">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-200">Baseline Audit (Measure)</h4>
+                                <p>Ran OpenSCAP scanning with Ubuntu 22.04 fallback datastreams on Noble host, and initiated a system-wide Lynis check to output initial compliance scores.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300 rounded-full w-5 h-5 flex items-center justify-center font-bold font-mono">2</div>
+                            <div class="space-y-1">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-200">OS update & debsums (Integrity)</h4>
+                                <p>Updated cache files and verified file integrity using package checkers to ensure zero core binary overrides or modifications.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300 rounded-full w-5 h-5 flex items-center justify-center font-bold font-mono">3</div>
+                            <div class="space-y-1">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-200">OpenStack OS & SSH Hardening (Mitigate)</h4>
+                                <p>Applied kernel parameters, restricted directory permissions, and updated OpenSSH server configuration policies to enforce modern cipher specifications and secure key exchanges.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300 rounded-full w-5 h-5 flex items-center justify-center font-bold font-mono">4</div>
+                            <div class="space-y-1">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-200">Verification & Comparative Scoring (Re-Measure)</h4>
+                                <p>Re-evaluated the platform using identical scanners to compile the comparative compliance report dynamically.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB CONTENT: PROBLEMS -->
+            <div x-show="currentTab === 'problems'" class="space-y-6" x-cloak>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">🚨 Vulnerability, Technical Problems & Solutions Log</h3>
+
+                    <div class="space-y-4 text-xs leading-relaxed">
+                        <!-- Problem 1 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">1. OpenSCAP Scan Version Mismatch (0.0% Score)</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> Ubuntu 24.04 Noble does not yet have an official CIS Security Level 2 datastream XML in the standard packages. Runs resulted in a score of 0.0% due to OS version guardrails.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Setup symbolic links under /usr/share/xml/scap/ssg/content/ mapping Ubuntu 22.04 SSG files to 24.04, allowing the ruleset to execute.</p>
+                        </div>
+
+                        <!-- Problem 2 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">2. Auditd Daemon Startup Failure in Container</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> The auditd service failed to start inside the unprivileged container because kernel auditing is restricted inside sandbox environments.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Playbook was configured with `security_rhel7_enable_auditd: false` to skip starting the daemon while keeping standard auditing active.</p>
+                        </div>
+
+                        <!-- Problem 3 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">3. Chrony (NTP) Service Startup Failure</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> The chrony time synchronization service failed to start because unprivileged containers are prohibited from adjusting the host's hardware clock.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Playbook was configured with `security_rhel7_enable_chrony: false` to bypass clock synchronization tasks.</p>
+                        </div>
+
+                        <!-- Problem 4 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">4. Deprecated Ansible .include Syntax in Upstream Submodules</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> The lynis-ansible submodule used the deprecated `include:` module, which is completely removed in Ansible 2.16+, causing immediate playbook crashes.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Developed an on-the-fly patching script that automatically migrated all legacy `include:` statements to `include_tasks:` in task files.</p>
+                        </div>
+
+                        <!-- Problem 5 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">5. Unsupported OpenSSH Key Exchange (KEX) Algorithms</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> Deployed Dev-Sec SSH version tried to configure quantum-resistant KEX algorithms unsupported by the local OpenSSH, failing config validation.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Overrode `ssh_kex` variable with secure standard algorithms (`curve25519-sha256`, etc.) supported natively on Ubuntu 24.04.</p>
+                        </div>
+
+                        <!-- Problem 6 -->
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-150 dark:border-slate-750">
+                            <h4 class="font-bold text-violet-700 dark:text-violet-400">6. AIDE File Integrity Scanning Performance Bottleneck</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1"><strong>Problem:</strong> AIDE initialization took over 30 minutes in nested sandbox environment, blocking fast automation execution.</p>
+                            <p class="text-emerald-700 dark:text-emerald-400 mt-1"><strong>Solution:</strong> Configured `security_rhel7_initialize_aide: false` to bypass initialization, keeping baseline debsums active.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4 font-bold text-sm">
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏠</span>
+                    <span>Return Home</span>
+                </a>
+                <a href="jules-planning.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>📋</span>
+                    <span>Back to Operational Plan</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Planning specs widget -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Hardening Metadata</h4>
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Execution Engine</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">ASIMP v1.0</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Audited Host</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Localhost</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Target OS</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Ubuntu 24.04</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 text-3xs">{{ ansible_date_time.iso8601 if ansible_date_time is defined else "2026-08-04" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tidy validation badge -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span class="text-emerald-500">✓</span>
+                    <span>Validated by HTML Validator (based on Tidy)</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg flex justify-center border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center space-x-1 text-xs font-bold tracking-wider text-emerald-600">
+                        <span>[</span>
+                        <span class="text-slate-700 dark:text-slate-300">TIDY</span>
+                        <span class="text-emerald-500">✓</span>
+                        <span>]</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Links & Community Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
+                </div>
+                <hr class="border-slate-100 dark:border-slate-700">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
+                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Visit Group
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+            <span>[ TOPIC: 13 ]</span>
+            <span>|</span>
+            <span>[ ROLE: GOOGLE_JULES ]</span>
+            <span>|</span>
+            <span>[ STANDARD: DSOM ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

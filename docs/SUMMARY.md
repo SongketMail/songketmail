@@ -12,7 +12,7 @@ timestamp: 2026-07-04T12:00:00Z
 * [SongketMail Documentation Home](index.md)
 * [Part 1: Podman Rootless & Quadlets](podman-rootless.md)
 * [Part 2: Ansible Best Practices](ansible-fqcn.md)
-* [Part 3: Postfix & Dovecot Integration](postfix-dovecot.md)
+* [Part 3: Postfix & Dovecot Integration Patterns](postfix-dovecot.md)
 * [Part 4: S3 Object Storage Options](s3-storage.md)
 * [Part 5: Webmail Clients Comparison](webmail-clients.md)
 * [Part 6: BunkerWeb Proxy Configuration](bunkerweb-proxy.md)
@@ -23,6 +23,7 @@ timestamp: 2026-07-04T12:00:00Z
 * [Part 10: Reference Sources Compilation](references.md)
 * [Part 11: DockPod Integration](dockpod-integration.md)
 * [Part 12: Google Jules Operational Plan](jules-planning.md)
+* [Part 13: ASIMP OS Hardening and Compliance Report](asimp-hardening-report.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
