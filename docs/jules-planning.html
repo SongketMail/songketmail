@@ -243,7 +243,7 @@
                         <li>Create a virtual host proxy blocks under Nginx directories pointing to <code>127.0.0.1:8080</code> (Web UI).</li>
                         <li>Isolate Server-Sent Events (SSE) buffering by routing <code>mcp.songketmail.local</code> requests directly to <code>127.0.0.1:8090</code>.</li>
                         <li>Verify and hot-reload Nginx routing inside the unprivileged container pod.</li>
-                        <li>Configure Traefik coexistence/bypass: disable Traefik for <em>Option A (Pure Decoupled Mode)</em>, or specify <code>trustedIPs</code> (e.g. <code>10.89.0.0/16</code>) in Traefik's <code>forwardedHeaders</code> for <em>Option C (Nested Proxying)</em>.</li>
+                        <li>Configure Traefik coexistence/bypass: disable Traefik for <em>Option A (Pure Decoupled Mode)</em>, set up loopback bindings for <em>Option B (Split-Horizon Ingress)</em>, or specify <code>trustedIPs</code> (e.g. <code>10.89.0.0/16</code>) in Traefik's <code>forwardedHeaders</code> for <em>Option C (Nested Proxying)</em>.</li>
                     </ol>
                 </div>
             </div>
