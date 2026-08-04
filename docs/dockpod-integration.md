@@ -52,7 +52,7 @@ SongketMail's architectural integrity relies on the **"Persistence Trinity"**:
 |         |             |                                      +--------------------------+         |
 |         |             |                                      |   songketmail_pod        |         |
 |         v             v                                      | (UserNS=keep-id:2001)    |         |
-|   [Nginx Proxy]  [Google Jules]                              |  - proxy, postfix, db,   |         |
+|  [BunkerWeb Proxy][Google Jules]                             |  - proxy, postfix, db,   |         |
 |   (SSL Ingress)  (Remote Agent)                              |    dovecot, s3, web...   |         |
 |                                                              +--------------------------+         |
 +---------------------------------------------------------------------------------------------------+
@@ -116,7 +116,7 @@ Rather than requiring raw, open SSH access with complex terminal command executi
 | **Orchestration Source** | Decoupled `.container` and `.pod` files under systemd Quadlet paths. | Ad-hoc docker-compose files and pasted configurations. | **Keep Quadlets as Source of Truth**. Use DockPod purely as a **Read-Only monitoring & troubleshooting plane** to protect the Persistence Trinity. |
 | **Agentic Access** | Complex bash executions over unprivileged SSH connections. | Highly structured, schema-validated MCP tool calls. | Enable DockPod's **MCP server** on port `8090` for secure AI agent diagnostics. |
 | **Service Control** | Managed natively via `systemctl --user restart <service>`. | Web-based live restart and cgroup memory limits adjustment. | Utilize DockPod's live adjustments for emergency scaling, but persist settings in Ansible. |
-| **Ingress Routing** | Nginx reverse proxy with PROXY protocol headers. | Embedded Traefik reverse proxy with Let's Encrypt. | Disable DockPod's embedded Traefik proxy. Route all external HTTP traffic through SongketMail's central **Nginx Proxy** to preserve client IP headers. |
+| **Ingress Routing** | BunkerWeb reverse proxy with PROXY protocol headers. | Embedded Traefik reverse proxy with Let's Encrypt. | Disable DockPod's embedded Traefik proxy. Route all external HTTP traffic through SongketMail's central **BunkerWeb Proxy** to preserve client IP headers. |
 
 ---
 
@@ -125,7 +125,7 @@ Rather than requiring raw, open SSH access with complex terminal command executi
 Exposing a container management panel introduces a high-value attack vector. To maintain SongketMail's secure posture, we must apply strict hardening:
 
 1. **Localhost Ingress Restriction**:
-   DockPod's main web UI (`:8080`) and MCP server (`:8090`) should only bind to local loopback addresses (`127.0.0.1`) on the host. External ingress must be routed through Nginx with TLS termination.
+   DockPod's main web UI (`:8080`) and MCP server (`:8090`) should only bind to local loopback addresses (`127.0.0.1`) on the host. External ingress must be routed through BunkerWeb with TLS termination.
 2. **Bcrypt-Hashed API Keys**:
    All MCP requests require a secure Bearer token prefixed with `dp_mcp_`. These keys must be rotated regularly and stored using unprivileged file permissions (`0600`) on the host filesystem.
 3. **Systemd Sandboxing**:

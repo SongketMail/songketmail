@@ -81,12 +81,13 @@ To ensure maximum host integrity and protect against vulnerabilities, our setup 
 │       └── templates/
 │           ├── skm_network.network # Declarative container network definition
 │           ├── skm_pod.pod         # Declarative shared Pod specification (defines UserNS=keep-id)
-│           ├── emailserver.container
-│           ├── spam.container
-│           ├── antivirus.container
-│           ├── webmail.container
-│           ├── imap.container
-│           └── pop.container
+│           ├── proxy.container     # Ingress Proxy (BunkerWeb WAF)
+│           ├── postfix.container   # Mail Transfer Agent (Postfix)
+│           ├── dovecot.container   # Mail Delivery Agent (Dovecot)
+│           ├── db.container        # Database (PostgreSQL)
+│           ├── s3.container        # S3 Storage (MinIO)
+│           ├── web.container       # Webmail Client (Roundcube)
+│           └── rspamd.container    # Spam Filtering (Rspamd)
 └── README.md                      # Comprehensive baseline documentation
 ```
 

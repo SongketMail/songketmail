@@ -29,7 +29,7 @@ Selecting a containerized webmail client requires careful assessment of scalabil
 
 - **State Persistence Architecture**: Unlike stateless clients like SnappyMail, Roundcube utilizes an internal SQLite/Postgres database to persistently store user session caches, active address books, and interface customization settings. This ensures absolute stability and standard-compliant mail interactions.
 - **Secure Host Persistence**: All configuration variables and sqlite database files are mapped directly under `/var/srv/songketmail/roundcube/config` and `/var/srv/songketmail/roundcube/db` respectively, maintaining storage sovereignty via keep-id.
-- **Internal Port Binding**: Roundcube runs on unprivileged internal port `8080` inside the secure `songketmail-net` network, accepting requests exclusively from the hardened Nginx proxy.
+- **Internal Port Binding**: Roundcube runs on unprivileged internal port `8080` inside the secure `songketmail-net` network, accepting requests exclusively from the hardened BunkerWeb proxy.
 
 ---
 

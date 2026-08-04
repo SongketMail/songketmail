@@ -65,14 +65,13 @@ The inbound and outbound mail flows are split between Postfix (MTA) and Dovecot 
 
 ## 🌐 4. Web Proxy & Protocol Preservation
 
-Nginx acts as the primary ingress controller, handling SSL/TLS termination and reverse proxying HTTP webmail as well as TCP mail protocols via PROXY protocol.
+BunkerWeb is used as the security-hardened reverse proxy layer, handling SSL/TLS termination, acting as a Web Application Firewall (WAF), and reverse proxying HTTP/HTTPS webmail as well as TCP mail streams with PROXY protocol support.
 
-### Nginx
-- **Official Website:** [nginx.org](https://nginx.org/)
-- **Mail Core Module Documentation:** [ngx_mail_core_module](https://nginx.org/en/docs/mail/ngx_mail_core_module.html)
-- **PROXY Protocol Guide:** [Using the PROXY Protocol](https://docs.nginx.com/nginx/admin-guide/load-balancer/using-proxy-protocol/)
-- **Wikipedia Reference:** [Nginx on Wikipedia](https://en.wikipedia.org/wiki/Nginx)
-- **Internal Reference:** See [Part 6: Nginx Proxy Configuration](nginx-proxy.md)
+### BunkerWeb
+- **Official Website:** [bunkerweb.io](https://www.bunkerweb.io/)
+- **Official Documentation:** [docs.bunkerweb.io](https://docs.bunkerweb.io/)
+- **BunkerWeb GitHub Repository:** [bunkerity/bunkerweb](https://github.com/bunkerity/bunkerweb)
+- **Internal Reference:** See [Part 6: BunkerWeb Proxy Configuration](bunkerweb-proxy.md)
 
 ---
 

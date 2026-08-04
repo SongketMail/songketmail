@@ -1,20 +1,45 @@
 [Unit]
-Description=SongketMail Ingress and Mail Proxy Container (Nginx)
+Description=SongketMail Ingress and Mail Proxy Container (BunkerWeb All-In-One WAF and Reverse Proxy)
 After=network-online.target
 
 [Container]
 ContainerName={{ cluster_prefix }}-proxy
-Image=docker.io/library/nginx:alpine
+Image=docker.io/bunkerity/bunkerweb-all-in-one:{{ bunkerweb_image_tag }}
 Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
-Volume={{ storage_base_path }}/nginx/conf:/etc/nginx:Z
-Volume={{ storage_base_path }}/certs:/etc/letsencrypt:ro
-PublishPort=80:80
-PublishPort=443:443
+Volume={{ storage_base_path }}/bunkerweb/data:/data:Z
+PublishPort=80:8080
+PublishPort=443:8443
+PublishPort=443:8443/udp
 PublishPort=25:25
 PublishPort=587:587
 PublishPort=993:993
 Environment=TZ=UTC
+Environment=MULTISITE=yes
+Environment=SERVER_NAME=mail.songketmail.internal smtp.songketmail.internal imap.songketmail.internal
+# Webmail (HTTP/HTTPS)
+Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://{{ cluster_prefix }}-web:8080
+Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/
+# SMTP Stream (Port 25)
+Environment=smtp.songketmail.internal_SERVER_TYPE=stream
+Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST={{ cluster_prefix }}-postfix:25
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT=25
+# Enforce PROXY protocol on SMTP connections to backend Postfix to preserve client IP
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# SMTP Submission Stream (Port 587)
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT_1=587
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST_1={{ cluster_prefix }}-postfix:587
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol_1=proxy_protocol on;
+# IMAP Stream (Port 143/993)
+Environment=imap.songketmail.internal_SERVER_TYPE=stream
+Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=imap.songketmail.internal_REVERSE_PROXY_HOST={{ cluster_prefix }}-dovecot:993
+Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
+Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# SSL/TLS Settings
+Environment=GENERATE_SELF_SIGNED_SSL=yes
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=proxy
 

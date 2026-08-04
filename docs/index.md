@@ -42,7 +42,7 @@ The deployment design strictly adheres to three architectural pillars:
 | **Runtime** | Podman 5.0+ (Rootless with UserNS=keep-id) |
 | **Standards** | Ansible FQCN, systemd Quadlet, UID/GID 2001 Mapping |
 | **Base Directory** | `/var/srv/songketmail` (13 customized subdirectories) |
-| **Mail Protocol Ingress** | Nginx Mail Auth HTTP, Client IP via PROXY protocol |
+| **Mail Protocol Ingress** | BunkerWeb WAF, Client IP via PROXY protocol |
 
 ---
 
@@ -55,7 +55,7 @@ Explore our interactive and interconnected deep research topics:
 3. [Postfix & Dovecot Integration Patterns](postfix-dovecot.md)
 4. [S3-Compatible Object Storage Options](s3-storage.md)
 5. [Open-Source Webmail Clients Comparison](webmail-clients.md)
-6. [Nginx Proxy and Mail Protocol Handling](nginx-proxy.md)
+6. [BunkerWeb Proxy and Mail Protocol Handling](bunkerweb-proxy.md)
 7. [Comprehensive Architectural Blueprint](architectural-blueprint.md)
 8. [AI-Assisted Development: Gemini + Jules](ai-dev.md)
 9a. [Creating a GitHub Pages Site with Jekyll](creating-a-github-pages-site-with-jekyll.md)

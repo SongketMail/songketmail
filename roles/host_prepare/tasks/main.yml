@@ -85,6 +85,11 @@
     group: "{{ songketmail_user }}"
     mode: '0700'
 
+- name: Ensure podman-docker package is installed for compatible docker commands with podman
+  ansible.builtin.package:
+    name: "podman-docker"
+    state: present
+
 - name: Verify installed Podman version meets minimum requirements
   ansible.builtin.command:
     cmd: "podman --version"

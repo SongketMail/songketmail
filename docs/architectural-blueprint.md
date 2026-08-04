@@ -71,7 +71,7 @@ The `podman-systemd-generator` parses the unprivileged `.container`, `.network`,
 
 | Container Service Name | Quadlet Key Definitions | Mapped Host Storage Paths | Network Ports & Exposure |
 |---|---|---|---|
-| **songketmail-proxy** | `Image=nginx:alpine`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/nginx/conf:/etc/nginx:Z`<br>`/var/srv/songketmail/certs:/etc/letsencrypt:ro` | Public: 80, 443, 25, 587, 993 |
+| **songketmail-proxy** | `Image=bunkerity/bunkerweb-all-in-one:1.6.13`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/bunkerweb/data:/data:Z` | Public: 80, 443, 25, 587, 993 |
 | **songketmail-postfix** | `Image=postfix:3.9.0`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/postfix/config:/etc/postfix:Z`<br>`/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z` | Internal Fabric: Port 25 |
 | **songketmail-dovecot** | `Image=dovecot:2.3.21.1`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/dovecot/config:/etc/dovecot:Z`<br>`/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z`<br>`/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z` | Internal Fabric: 24 (LMTP), 143 (IMAP), 4190 (Sieve) |
 | **songketmail-db** | `Image=postgres:16-alpine`<br>`Network=songketmail-net`<br>`UserNS=keep-id:uid=2001,gid=2001` | `/var/srv/songketmail/postgres/data:/var/lib/postgresql/data:Z` | Internal Fabric: Port 5432 |
@@ -115,7 +115,7 @@ CREATE TABLE virtual_aliases (
 
 ## 🏁 Summary Conclusion
 
-By binding unprivileged Quadlet designs, FQCN-compliant Ansible code, PostgreSQL virtualization, LMTP isolated traffic, MinIO S3 attachments, and Nginx proxying together, **SongketMail** guarantees high-availability email operations with robust host level protection.
+By binding unprivileged Quadlet designs, FQCN-compliant Ansible code, PostgreSQL virtualization, LMTP isolated traffic, MinIO S3 attachments, and BunkerWeb proxying together, **SongketMail** guarantees high-availability email operations with robust host level protection.
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*

@@ -108,12 +108,12 @@ systemctl --user status dockpod.service
 
 ---
 
-## 🌐 Session 3: Nginx SSL/TLS Ingress Configuration
+## 🌐 Session 3: BunkerWeb SSL/TLS Ingress Configuration
 
-The objective of this session is to routing external web requests and WebSocket streams securely to the DockPod local listener using Nginx.
+The objective of this session is to routing external web requests and WebSocket streams securely to the DockPod local listener using BunkerWeb.
 
-### Step 3.1: Create Site Configuration Block
-Modify the Nginx ingress configuration under `/var/srv/songketmail/nginx/conf/nginx.conf` or equivalent virtual hosting file:
+### Step 3.1: Configure BunkerWeb Service
+Configure BunkerWeb by adding environment variables to the proxy container or managing them in the BunkerWeb admin interface:
 ```nginx
 # Panel Proxy Route
 server {
@@ -157,9 +157,9 @@ server {
 }
 ```
 
-### Step 3.3: Restart Nginx Container
+### Step 3.3: Restart BunkerWeb Container
 ```bash
-systemctl --user restart songketmail_pod-pod
+systemctl --user restart songketmail-proxy
 ```
 
 ---
@@ -169,7 +169,7 @@ systemctl --user restart songketmail_pod-pod
 The objective of this session is to harden the network posture and generate secure API keys to link external AI clients.
 
 ### Step 4.1: Verify Firewall Rules
-Ensure public access to ports `8080` and `8090` is dropped at the host firewall level, routing all external traffic strictly over SSL/TLS port `443` through Nginx:
+Ensure public access to ports `8080` and `8090` is dropped at the host firewall level, routing all external traffic strictly over SSL/TLS port `443` through BunkerWeb:
 ```bash
 # UFW setup examples (run as root)
 ufw deny 8080/tcp

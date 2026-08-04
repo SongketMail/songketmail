@@ -18,7 +18,7 @@ Shorthand module names (such as `copy`, `sysctl`, or `systemd`) are replaced wit
 
 | Legacy Module Name | Mandatory FQCN Mapping | Primary Automation Context |
 |---|---|---|
-| **copy** | `ansible.builtin.copy` | Provisioning static configuration files for Nginx, Postfix, and Dovecot. |
+| **copy** | `ansible.builtin.copy` | Provisioning static configuration files for BunkerWeb, Postfix, and Dovecot. |
 | **template** | `ansible.builtin.template` | Generating dynamic Quadlet unit files and SQL initialization scripts. |
 | **file** | `ansible.builtin.file` | Provisioning host storage paths assigned to 2001:2001. |
 | **systemd** | `ansible.builtin.systemd_service` | Managing Quadlet systemd user services and reloads. |
@@ -40,7 +40,7 @@ The Ansible framework uses a modular role layout to isolate component configurat
 | **playbooks/02_storage_setup.yml** | Creates `/var/srv/songketmail/` directory trees assigned to UID/GID 2001:2001. |
 | **playbooks/03_database_init.yml** | Deploys PostgreSQL and initializes virtual domain, mailbox, and alias schemas. |
 | **playbooks/04_deploy_quadlets.yml** | Generates Quadlet files in `$HOME/.config/containers/systemd/` and starts services. |
-| **roles/nginx/** | Manages Nginx HTTP/mail proxy templates, TLS certificates, and proxy protocol settings. |
+| **roles/podman_quadlet/** | Manages rootless Quadlet configuration files including the BunkerWeb proxy container. |
 | **roles/dovecot/** | Manages Dovecot configuration, LMTP settings, and obox/s3 object storage integration. |
 | **roles/postfix/** | Configures Postfix MTA, PostgreSQL lookup tables, and Rspamd milter bindings. |
 | **roles/postgresql/** | Manages database user permissions, initialization scripts, and persistent storage. |
