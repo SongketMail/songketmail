@@ -109,18 +109,59 @@ Rather than requiring raw, open SSH access with complex terminal command executi
 
 ---
 
-## 6. Comparative Analysis: DockPod vs. Manual Quadlets
+## 6. Developer Feedback & BunkerWeb's Impact on Traefik
 
-| Feature | Manual Quadlets & Ansible | DockPod Management | Integration Recommendation |
+A core developer raised a critical concern regarding the default behavior of **DockPod**:
+> *"Ni mungkin tak jalan. Sebab DockPod release permulaan guna traefik setakat ni untuk wired manage db, crowdsec, ssl etc ke containers"*
+> *(This might not work. Because DockPod's initial release uses Traefik so far to manage db, crowdsec, ssl, etc., wired to containers)*
+
+This section assesses how DockPod's native Traefik integration impacts the security-hardened **SongketMail** environment, specifically looking at how **BunkerWeb** coexists with or overrides it.
+
+### ⚠️ Potential Architectural Conflicts
+1. **Port Contention (80 / 443)**: Both BunkerWeb and Traefik attempt to bind to ports 80 and 443 on the host, causing startup failures.
+2. **Client IP Loss (Double-Proxying)**: If BunkerWeb reverse proxies to Traefik, which then proxies to containers, the original client IP is lost. This breaks Postfix, Dovecot, and fail2ban rate-limiting unless complex PROXY protocol forwarding is chained.
+3. **SSL/TLS Cert Redundancy**: Both proxies try to solve Let's Encrypt SSL/TLS challenges simultaneously.
+4. **WAF Coverage**: BunkerWeb is a dedicated security-hardened WAF, whereas Traefik is a dynamic router. Double routing wastes resources and increases latencies.
+
+### 🔄 Strategic Coexistence Options
+To resolve these conflicts, we define three possible deployment modes:
+
+#### Option A: Pure Decoupled Mode (Disable Traefik - Recommended)
+Disable the embedded Traefik instance inside DockPod entirely. Since SongketMail's containers are already declared as unprivileged systemd Quadlet files, DockPod does not need to deploy any infrastructure. Instead:
+* DockPod connects strictly to `/run/user/2001/podman/podman.sock` for read-only metrics, log streaming, and container state inspections.
+* BunkerWeb directly routes all web and stream traffic to backend services, ensuring complete WAF protection and client IP preservation.
+
+#### Option B: Split-Horizon Ingress
+If Traefik must remain enabled to support specific backend containers managed independently of systemd Quadlets:
+* **BunkerWeb** binds to the host's public IP on ports `80`, `443`, `25`, `587`, and `993` to secure the public-facing mail server fabric.
+* **Traefik** binds to a private loopback interface (e.g., `127.0.0.1:8081` or inside an isolated network block) strictly to handle DockPod's internal database and CrowdSec helpers.
+
+#### Option C: Nested Proxying (BunkerWeb as Edge, Traefik as Backend)
+Configure BunkerWeb as the primary public-facing edge proxy, which terminates TLS and performs WAF inspection, then forwards requests to Traefik.
+* For this to work without losing client IPs, BunkerWeb must forward standard headers (`X-Real-IP`, `X-Forwarded-For`), and Traefik must be configured to trust BunkerWeb's internal IP address range:
+  ```yaml
+  # Traefik entryPoints configuration
+  entryPoints:
+    web:
+      forwardedHeaders:
+        trustedIPs:
+          - "10.89.0.0/16" # SongketMail Podman network bridge
+  ```
+
+---
+
+## 7. Comparative Analysis: DockPod vs. Manual Quadlets
+
+| Feature | Manual Quadlets & Ansible | DockPod Mode | Decision |
 |---|---|---|---|
 | **Orchestration Source** | Decoupled `.container` and `.pod` files under systemd Quadlet paths. | Ad-hoc docker-compose files and pasted configurations. | **Keep Quadlets as Source of Truth**. Use DockPod purely as a **Read-Only monitoring & troubleshooting plane** to protect the Persistence Trinity. |
 | **Agentic Access** | Complex bash executions over unprivileged SSH connections. | Highly structured, schema-validated MCP tool calls. | Enable DockPod's **MCP server** on port `8090` for secure AI agent diagnostics. |
 | **Service Control** | Managed natively via `systemctl --user restart <service>`. | Web-based live restart and cgroup memory limits adjustment. | Utilize DockPod's live adjustments for emergency scaling, but persist settings in Ansible. |
-| **Ingress Routing** | BunkerWeb reverse proxy with PROXY protocol headers. | Embedded Traefik reverse proxy with Let's Encrypt. | Disable DockPod's embedded Traefik proxy. Route all external HTTP traffic through SongketMail's central **BunkerWeb Proxy** to preserve client IP headers. |
+| **Ingress Routing** | BunkerWeb reverse proxy with PROXY protocol headers. | Embedded Traefik reverse proxy with Let's Encrypt. | **Disable Traefik** or use **Nested Proxying** behind BunkerWeb to preserve client IP and enforce WAF rules. |
 
 ---
 
-## 7. Security Implications & Hardening
+## 8. Security Implications & Hardening
 
 Exposing a container management panel introduces a high-value attack vector. To maintain SongketMail's secure posture, we must apply strict hardening:
 
@@ -139,7 +180,7 @@ Exposing a container management panel introduces a high-value attack vector. To 
 
 ---
 
-## 8. Conclusion and Strategic Recommendation
+## 9. Conclusion and Strategic Recommendation
 
 DockPod is an exceptionally well-suited companion to the **SongketMail** ecosystem. Its ultra-lightweight footprint aligns perfectly with our unprivileged rootless systemd design, and its Model Context Protocol (MCP) support opens advanced possibilities for AI-driven software operations.
 

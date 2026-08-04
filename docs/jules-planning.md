@@ -162,6 +162,24 @@ server {
 systemctl --user restart songketmail-proxy
 ```
 
+### Step 3.4: Configure Traefik Coexistence or Bypass
+Depending on the strategic choice made in the integration plan, implement the corresponding Traefik configuration:
+
+*   **For Option A (Pure Decoupled Mode - Recommended):**
+    Ensure Traefik is fully disabled or excluded from the deployment. If DockPod is initiated via Docker/Podman compose, remove the `traefik` service from the compose manifest and expose the DockPod web port `8080` only to localhost.
+*   **For Option C (Nested Proxying):**
+    If Traefik must co-exist, configure it to trust BunkerWeb's internal IP range to preserve the original client IP address. Update Traefik's entryPoints configuration in `traefik.yml` as follows:
+    ```yaml
+    # traefik.yml
+    entryPoints:
+      web:
+        address: "127.0.0.1:8081" # Bind to loopback on a non-conflicting port
+        forwardedHeaders:
+          trustedIPs:
+            - "127.0.0.1"
+            - "10.89.0.0/16" # SongketMail internal Podman bridge network
+    ```
+
 ---
 
 ## 🛡️ Session 4: Security Hardening & MCP Key Generation

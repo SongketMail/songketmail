@@ -73,5 +73,33 @@ PROXY TCP4 203.0.113.50 10.89.1.1 43212 25
 This preserves the client's public IP address (`203.0.113.50`) inside Postfix and Dovecot's logs, enabling fail2ban and audit routines natively on the backend, while keeping the security-hardened BunkerWeb front-end as the sole exposed gatekeeper.
 
 ---
+
+## 🔗 Coexistence with DockPod's Traefik Ingress
+
+In setups utilizing **DockPod** as a control plane, we must avoid port binding conflicts (ports `80`/`443`) and prevent the loss of client IP headers due to nested reverse-proxy configurations.
+
+BunkerWeb can coexist with Traefik using two recommended patterns:
+
+### 1. Pure Decoupled Direct Routing (Recommended)
+By disabling Traefik inside DockPod, BunkerWeb serves as the exclusive ingress point. It terminates SSL/TLS and handles web application firewall (WAF) checks before proxying requests directly to:
+- **DockPod Web Interface** on `http://127.0.0.1:8080`
+- **DockPod MCP Server** on `http://127.0.0.1:8090`
+
+This ensures maximum performance, zero port contention, and eliminates multi-layered proxying overhead.
+
+### 2. Nested Proxy Header Forwarding
+If Traefik must remain active to wire other services (e.g., databases, CrowdSec), BunkerWeb is positioned as the edge proxy and forwards requests to Traefik on a non-conflicting loopback port (e.g., `127.0.0.1:8081`).
+
+To preserve client IPs in this nested configuration, BunkerWeb must explicitly forward HTTP header metadata:
+```nginx
+# BunkerWeb configuration block for Traefik delegation
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+```
+Traefik must then be configured with `forwardedHeaders.trustedIPs` matching BunkerWeb's IP to trust these incoming headers.
+
+---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
