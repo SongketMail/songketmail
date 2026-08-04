@@ -167,6 +167,8 @@ Depending on the strategic choice made in the integration plan, implement the co
 
 *   **For Option A (Pure Decoupled Mode - Recommended):**
     Ensure Traefik is fully disabled or excluded from the deployment. If DockPod is initiated via Docker/Podman compose, remove the `traefik` service from the compose manifest and expose the DockPod web port `8080` only to localhost.
+*   **For Option B (Split-Horizon Ingress):**
+    If Traefik must remain active to support specific backend containers managed independently of systemd Quadlets, BunkerWeb binds to the host's public IP on ports `80`, `443`, `25`, `587`, and `993` to secure the public-facing mail server fabric, while Traefik binds to a private loopback interface (e.g., `127.0.0.1:8081`) strictly to handle DockPod's internal database and CrowdSec helpers.
 *   **For Option C (Nested Proxying):**
     If Traefik must co-exist, configure it to trust BunkerWeb's internal IP range to preserve the original client IP address. Update Traefik's entryPoints configuration in `traefik.yml` as follows:
     ```yaml

@@ -1,2 +1,2 @@
-127.0.0.1 - - [02/Aug/2026 13:05:01] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [02/Aug/2026 13:05:03] "GET /podman-rootless.html HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 05:48:25] "HEAD /docs/jules-planning.html HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 05:48:53] "GET /docs/jules-planning.html HTTP/1.1" 200 -
