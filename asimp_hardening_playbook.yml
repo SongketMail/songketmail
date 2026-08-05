@@ -1,59 +1,13 @@
 ---
-- name: Run local ASIMP Security Hardening and Compliance Audits
+- name: Import ASIMP Localhost Hardening Playbook
+  ansible.builtin.import_playbook: asimp/play-localhost.yml
+
+- name: Generate report and update sidebar
   hosts: localhost
   connection: local
   gather_facts: true
   become: true
-  vars:
-    security_enable_firewalld: false
-    security_rhel7_initialize_aide: false
-    security_rhel7_enable_auditd: false
-    security_rhel7_enable_chrony: false
-    security_contrib_enabled: true
-    security_rhel7_audit_failure_flag: 1
-    security_ntp_servers:
-      - ntp1.sirim.my
-      - ntp2.sirim.my
-    upgrade_ubuntu_check: false
-    dist_upgrade_ubuntu_check: false
-    debsums_ubuntu_check: true
-    lynis_use_packages: true
-    lynis_audit_system_linux: true
-    ssh_kex:
-      - curve25519-sha256
-      - curve25519-sha256@libssh.org
-      - diffie-hellman-group-exchange-sha256
-
   tasks:
-    - name: Run BEFORE Hardening Audits (OpenSCAP & Lynis)
-      ansible.builtin.include_role:
-        name: reporting-ASIMP
-      vars:
-        reporting_phase: before
-
-    - name: Apply Ubuntu Update Hardening
-      ansible.builtin.include_role:
-        name: update-ubuntu-ASIMP
-      when: ansible_distribution == 'Ubuntu' or ansible_os_family == 'Debian'
-
-    - name: Apply OpenStack System Hardening
-      ansible.builtin.include_role:
-        name: ansible-hardening
-
-    - name: Apply SSH Hardening
-      ansible.builtin.include_role:
-        name: dev-sec.ssh-hardening
-
-    - name: Apply Lynis Hardening Configuration
-      ansible.builtin.include_role:
-        name: lynis-ansible
-
-    - name: Run AFTER Hardening Audits (OpenSCAP & Lynis)
-      ansible.builtin.include_role:
-        name: reporting-ASIMP
-      vars:
-        reporting_phase: after
-
     - name: Read ASIMP Baseline Scores
       ansible.builtin.slurp:
         src: /var/log/asimp-baseline-scores.json

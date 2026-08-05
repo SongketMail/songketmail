@@ -16,3 +16,5 @@ exclude:
   - README.md
   - asimp_hardening_playbook.yml
   - templates/
+  - asimp/
+  - run_asimp.sh
