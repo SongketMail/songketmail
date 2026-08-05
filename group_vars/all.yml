@@ -1,9 +1,6 @@
 ---
 # Global configuration variables for SongketMail fabric deployment
 
-# Podman options
-podman_min_version: "5.0.0"
-
 # Fabric Isolation settings
 cluster_prefix: "songketmail"
 podman_network_name: "songketmail-net"

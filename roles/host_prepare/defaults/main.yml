@@ -1,0 +1,5 @@
+---
+# Defaults for host_prepare role
+
+# Minimum required Podman version for modern systemd Quadlets
+podman_min_version: "5.0.0"
