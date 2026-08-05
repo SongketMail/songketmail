@@ -6,6 +6,7 @@ name: jules-agent-protocol
 description: "Outlines operational guidelines, frontmatter validation, and the mandatory Deep State of Mind (DSOM) AI Protocol footer."
 resource: "file:///.agents/skills/jules-agent-protocol/SKILL.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [skills, jules, agent-protocol, compliance]
 ---
 
 # 🤖 Google Jules Operational Protocol Skill

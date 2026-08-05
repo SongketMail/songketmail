@@ -5,6 +5,7 @@ title: "Comprehensive Guide: Setting up GitHub Pages for SongketMail"
 description: "Step-by-step instructions on activating, configuring, and automating deployments to GitHub Pages."
 resource: "file:///docs/github-pages-setup.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [github-pages, jekyll, deployment, automation]
 ---
 # 🌐 Comprehensive Guide: Setting up GitHub Pages for SongketMail
 

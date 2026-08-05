@@ -5,6 +5,7 @@ title: "Open-Source Webmail Clients Comparison"
 description: "Evaluating containerized webmail clients (Roundcube, SnappyMail, RainLoop, Nextcloud) for persistence, security, and performance."
 resource: "file:///docs/webmail-clients.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [webmail, roundcube, snappymail, rainloop, nextcloud]
 ---
 # 📧 Open-Source Webmail Clients Comparison
 

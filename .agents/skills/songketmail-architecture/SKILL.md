@@ -6,6 +6,7 @@ name: songketmail-architecture
 description: "Teaches AI agents the architectural rules, the Persistence Trinity, and the keep-id mapping requirements for SongketMail."
 resource: "file:///.agents/skills/songketmail-architecture/SKILL.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [skills, architecture, songketmail, systemd]
 ---
 
 # 🏗️ SongketMail Architecture Skill

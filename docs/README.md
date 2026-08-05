@@ -5,6 +5,7 @@ title: "SongketMail Documentation Book"
 description: "Enterprise-grade, highly secure, and horizontally scalable email server baseline documentation."
 resource: "file:///docs/README.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [documentation, index, user-guide]
 ---
 # SongketMail Documentation Book
 

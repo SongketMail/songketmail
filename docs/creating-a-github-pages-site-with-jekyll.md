@@ -5,6 +5,7 @@ title: "Creating a GitHub Pages Site with Jekyll"
 description: "A comprehensive guide to creating, building, and configuring a GitHub Pages static site using Jekyll in a new or existing repository."
 resource: "file:///docs/creating-a-github-pages-site-with-jekyll.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [jekyll, static-site, github-pages, guide]
 ---
 # 🌐 Creating a GitHub Pages Site with Jekyll
 

@@ -6,6 +6,7 @@ name: songketmail-deployment
 description: "Guides AI agents through host preparation, Ansible FQCN compliance, rootless session variables, and Quadlet activation."
 resource: "file:///.agents/skills/songketmail-deployment/SKILL.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [skills, deployment, ansible, fqcn]
 ---
 
 # 🚀 SongketMail Deployment Skill

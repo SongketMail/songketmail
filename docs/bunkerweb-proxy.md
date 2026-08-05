@@ -5,6 +5,7 @@ title: "BunkerWeb Proxy and Mail Protocol Handling"
 description: "Terminating SSL/TLS certificates and reverse proxying HTTP webmail and TCP mail protocols with client IP preservation using BunkerWeb."
 resource: "file:///docs/bunkerweb-proxy.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [bunkerweb, proxy, waf, ssl, client-ip]
 ---
 # 🛡️ BunkerWeb Proxy and Mail Protocol Handling
 

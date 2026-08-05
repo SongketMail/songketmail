@@ -5,6 +5,7 @@ title: "DockPod Integration: Unprivileged Podman & Agentic Management"
 description: "A deep architectural analysis of integrating DockPod as a lightweight control plane and Model Context Protocol (MCP) server for the SongketMail email server fabric."
 resource: "file:///docs/dockpod-integration.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [dockpod, podman, mcp, control-plane, management]
 ---
 # 📊 DockPod Integration: Unprivileged Podman & Agentic Management
 

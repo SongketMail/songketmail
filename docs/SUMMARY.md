@@ -5,6 +5,7 @@ title: "SongketMail Documentation Summary"
 description: "Chronological index and navigation structure of the SongketMail documentation book."
 resource: "file:///docs/SUMMARY.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [summary, index, navigation]
 ---
 # Summary
 

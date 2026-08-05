@@ -5,6 +5,7 @@ title: "Google Jules Operational Plan: End-to-End SongketMail & DockPod Deployme
 description: "A highly-structured, multi-phase operational roadmap to bootstrap a minimal Linux server, deploy the full SongketMail email fabric via Ansible, and integrate DockPod for unprivileged management."
 resource: "file:///docs/jules-planning.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [jules, planning, deployment, roadmap]
 ---
 # 📋 Google Jules Operational Plan: End-to-End Deployment & Integration
 

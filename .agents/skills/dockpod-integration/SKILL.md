@@ -6,6 +6,7 @@ name: dockpod-integration
 description: "Instructs AI agents on unprivileged Podman socket activation, DockPod daemon configuration, and MCP SSE secure routing via BunkerWeb proxy."
 resource: "file:///.agents/skills/dockpod-integration/SKILL.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [skills, dockpod, integration, socket]
 ---
 
 # 📊 DockPod Integration Skill

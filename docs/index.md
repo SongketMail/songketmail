@@ -5,6 +5,7 @@ title: "SongketMail: Secure Email Server Fabric"
 description: "Welcome to SongketMail, an enterprise-grade, highly secure, and scalable email server baseline."
 resource: "file:///docs/index.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [songketmail, email, portal, documentation]
 ---
 # 🏠 SongketMail: Secure Email Server Fabric
 

@@ -5,6 +5,7 @@ title: "Project References and Compiled Resources"
 description: "A comprehensive compilation of all external resources, URLs, websites, Wikipedia entries, and documents used to build the SongketMail project."
 resource: "file:///docs/references.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [references, resources, documentation]
 ---
 # 📚 Project References and Compiled Resources
 
