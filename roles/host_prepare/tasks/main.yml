@@ -101,5 +101,16 @@
   ansible.builtin.debug:
     msg: "Installed podman version: {{ podman_version_raw.stdout | default('Not Installed') }}"
 
+- name: Assert installed Podman version meets minimum requirements
+  ansible.builtin.assert:
+    that:
+      - podman_version_raw.rc == 0
+      - (podman_version_raw.stdout | default('0.0.0') | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)')) is ansible.builtin.version(podman_min_version, '>=')
+    fail_msg: >
+      Podman version meets minimum requirements assertion failed.
+      Required minimum version: {{ podman_min_version }}
+      Installed version raw output: {{ podman_version_raw.stdout | default('Not Installed or Command Failed') }}
+    success_msg: "Podman version meets the minimum requirement of {{ podman_min_version }}."
+
 - name: Import ASIMP audit security task compilation
   ansible.builtin.import_tasks: audit.yml
