@@ -5,3 +5,7 @@ _site/
 .jekyll-cache/
 .jekyll-metadata
 asimp_run.log
+roles/ansible-hardening/
+roles/dev-sec.ssh-hardening/
+roles/linuxmalaysia.lynis_ansible/
+asimp/
