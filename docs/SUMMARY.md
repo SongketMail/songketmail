@@ -25,6 +25,7 @@ topics: [summary, index, navigation]
 * [Part 11: DockPod Integration](dockpod-integration.md)
 * [Part 12: Google Jules Operational Plan](jules-planning.md)
 * [Part 13: ASIMP OS Hardening and Compliance Report](asimp-hardening-report.md)
+* [Part 14: SOP: Knowledge-First Discovery & Context Preservation Protocol](SOP-KNOWLEDGE-FIRST-DISCOVERY.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
