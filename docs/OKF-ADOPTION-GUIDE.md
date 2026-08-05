@@ -5,6 +5,7 @@ title: "Open Knowledge Format (OKF) Adoption Guide"
 description: "OKF-compliant documentation for OKF-ADOPTION-GUIDE.md."
 resource: "file:///docs/OKF-ADOPTION-GUIDE.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [okf, compliance, metadata, knowledge-catalog]
 ---
 # Open Knowledge Format (OKF) Adoption Guide
 

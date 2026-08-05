@@ -6,6 +6,7 @@ name: jekyll-gh-pages
 description: "Instructs AI agents on Liquid escaping within Jekyll code blocks, OKF v0.1 adoption, and static site publication configurations."
 resource: "file:///.agents/skills/jekyll-gh-pages/SKILL.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [skills, jekyll, github-pages, liquid]
 ---
 
 # 📝 Jekyll & GitHub Pages Skill

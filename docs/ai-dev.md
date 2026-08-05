@@ -5,6 +5,7 @@ title: "AI-Assisted Development: Gemini + Jules"
 description: "Collaborative workflows, AI agent profiles, semantic discovery strategies, and frontmatter validation."
 resource: "file:///docs/ai-dev.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [ai, gemini, jules, workflow]
 ---
 # 🤖 AI-Assisted Development: Gemini + Jules
 

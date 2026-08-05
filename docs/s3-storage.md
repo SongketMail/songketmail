@@ -5,6 +5,7 @@ title: "S3-Compatible Object Storage Options"
 description: "Comparing MinIO, SeaweedFS, Garage, and Ceph, and integrating Dovecot MDA with S3 object storage."
 resource: "file:///docs/s3-storage.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [s3, minio, seaweedfs, garage, dovecot]
 ---
 # 🪣 S3-Compatible Object Storage Options
 

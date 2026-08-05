@@ -5,6 +5,7 @@ title: "Postfix & Dovecot Integration Patterns"
 description: "Inbound email routing, Local Mail Transport Protocol (LMTP) delivery patterns, and PostgreSQL virtual mailbox queries."
 resource: "file:///docs/postfix-dovecot.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [postfix, dovecot, email, lmtp, postgresql]
 ---
 # ✉️ Postfix & Dovecot Integration Patterns
 

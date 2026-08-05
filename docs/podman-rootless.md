@@ -5,6 +5,7 @@ title: "Rootless Podman 5+ & Quadlet Orchestration"
 description: "Advanced rootless capabilities using systemd Quadlets, keep-id namespace mapping, and enabling systemd lingering."
 resource: "file:///docs/podman-rootless.md"
 timestamp: 2026-07-04T09:40:04Z
+topics: [podman, rootless, quadlet, systemd, containers]
 ---
 # 🐳 Rootless Podman 5+ & Quadlet Orchestration
 

@@ -5,6 +5,7 @@ title: "SongketMail Agent & AI Workspace Reference Manual"
 description: "Operational manual, architectural specifications, and compliance rules for Google Jules and other autonomous AI agents."
 resource: "file:///AGENTS.md"
 timestamp: 2026-07-04T12:00:00Z
+topics: [agents, reference-manual, compliance, workspace]
 ---
 
 # 🤖 SongketMail Agent & AI Workspace Reference Manual
@@ -127,14 +128,16 @@ This repository hosts its static documentation site under the `docs/` directory,
 To prevent build issues and maintain semantic standards, all AI agents **must** adhere to the following:
 
 1.  **Open Knowledge Format (OKF) Compliance**:
-    - Every Markdown (`.md`) file in the repository must adopt the Google-inspired **Open Knowledge Format (OKF) v0.1** by including structured YAML frontmatter at the beginning of the file.
+    - Every Markdown (`.md`) file in the repository must adopt the Google-inspired **Open Knowledge Format (OKF) v0.1** by including structured YAML frontmatter at the beginning of the file, bridging human-readable and agent-consumable knowledge management.
     - Required fields:
-      - `okf_version: 0.1`
-      - `type`
-      - `title`
-      - `description`
-      - `resource`
-      - `timestamp`
+      - `okf_version: 0.1` (Specifies the OKF version targeted, e.g., "0.1")
+      - `type` (The concept type for classification/routing, e.g., "documentation", "agent_skill", "research", "planning")
+      - `title` (A clear, human-readable display name for the document)
+      - `timestamp` (An ISO 8601 representation of the generation or last modification time)
+      - `topics` (A list of tags or categorized words, e.g., `[email, architecture, security]`)
+    - Recommended/Optional fields:
+      - `description` (A single sentence summarizing the document's content)
+      - `resource` (A URI linking to the physical asset described, e.g., `file:///docs/index.md`)
 2.  **Jekyll Template Escaping**:
     - Jekyll builds require wrapping any code blocks containing Jinja2-style braces (such as `{ { ... } }` or `{ % ... % }` commonly used in Ansible templates) inside `{ % raw % }` and `{ % endraw % }` Liquid template tags. Failure to do so will cause Jekyll parsing exceptions on the `gh-pages` branch.
 3.  **GitHub Pages Setup**:
