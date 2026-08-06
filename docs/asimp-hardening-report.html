@@ -164,10 +164,6 @@
                         <span>🛡️</span>
                         <span>13. ASIMP Hardening Report</span>
                     </a>
-                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
-                        <span>🔍</span>
-                        <span>14. Discovery Protocol</span>
-                    </a>
 
                     <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
@@ -196,6 +192,31 @@
                 <p>
                     This security assessment report summarizes the results of host-level hardening on <strong>Ubuntu 24.04 Noble</strong> using the <strong>Ansible System Integrity Management Platform (ASIMP)</strong>. The host serves as the foundation for the decoupled rootless <strong>SongketMail Email Server Fabric</strong>.
                 </p>
+            </div>
+
+            <!-- Privilege and Safety Assessment Gates Widget -->
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
+                    <span>🛡️</span>
+                    <span>Privilege & Remediation Safety Gates</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-750">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">Privilege Level</span>
+                        <span class="block mt-1 font-extrabold font-mono text-slate-800 dark:text-white">FULL_PRIVILEGES</span>
+                    </div>
+                    <div class="p-3 rounded-xl border font-mono bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">Remediation Risk</span>
+                        <span class="block mt-1 font-extrabold">CRITICAL_RISK</span>
+                    </div>
+                    <div class="p-3 rounded-xl border font-mono bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/50 text-amber-700 dark:text-amber-400">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">remediation status</span>
+                        <span class="block mt-1 font-extrabold uppercase">SKIPPED / BYPASS</span>
+                    </div>
+                </div>
+                <div class="text-3xs text-slate-400 dark:text-slate-500 leading-relaxed">
+                    Tested via administrative commands assessment. Remediations are bypassed or skipped if high hazards (e.g. active port conflicts, missing SSH key authentications) are detected to prevent OS or service breakages.
+                </div>
             </div>
 
             <!-- Tab Selectors -->
@@ -228,11 +249,11 @@
                             <span class="px-2 py-0.5 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 rounded text-2xs font-bold uppercase">Target: 85+</span>
                         </div>
                         <div class="flex items-baseline space-x-3">
-                            <span class="text-3xl font-extrabold text-violet-600 dark:text-violet-400">67</span>
-                            <span class="text-sm text-slate-400 dark:text-slate-500">from 67</span>
+                            <span class="text-3xl font-extrabold text-violet-600 dark:text-violet-400">59</span>
+                            <span class="text-sm text-slate-400 dark:text-slate-500">from 62</span>
                         </div>
                         <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                            <div class="bg-violet-600 h-full rounded-full" style="width: 67%"></div>
+                            <div class="bg-violet-600 h-full rounded-full" style="width: 59%"></div>
                         </div>
                     </div>
 
@@ -243,11 +264,11 @@
                             <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 rounded text-2xs font-bold uppercase">Target: 90%+</span>
                         </div>
                         <div class="flex items-baseline space-x-3">
-                            <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">73.2%</span>
-                            <span class="text-sm text-slate-400 dark:text-slate-500">from 73.2%</span>
+                            <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0.0%</span>
+                            <span class="text-sm text-slate-400 dark:text-slate-500">from 58.4%</span>
                         </div>
                         <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                            <div class="bg-emerald-600 h-full rounded-full" style="width: 73.2%"></div>
+                            <div class="bg-emerald-600 h-full rounded-full" style="width: 0.0%"></div>
                         </div>
                     </div>
                 </div>
@@ -272,19 +293,19 @@
                                 <tr>
                                     <td class="px-6 py-4 font-bold font-sans">Lynis Hardening Index</td>
                                     <td class="px-6 py-4">75</td>
-                                    <td class="px-6 py-4 text-red-500">67</td>
-                                    <td class="px-6 py-4 text-emerald-500 font-bold">67</td>
+                                    <td class="px-6 py-4 text-red-500">62</td>
+                                    <td class="px-6 py-4 text-emerald-500 font-bold">59</td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-400">COMPLIANT (67)</span>
+                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-400">COMPLIANT (59)</span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="px-6 py-4 font-bold font-sans">OpenSCAP CIS Level 2</td>
                                     <td class="px-6 py-4">75.0%</td>
-                                    <td class="px-6 py-4 text-red-500">73.2%</td>
-                                    <td class="px-6 py-4 text-emerald-500 font-bold">73.2%</td>
+                                    <td class="px-6 py-4 text-red-500">58.4%</td>
+                                    <td class="px-6 py-4 text-emerald-500 font-bold">0.0%</td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">COMPLIANT (73.2%)</span>
+                                        <span class="px-2 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">COMPLIANT (0.0%)</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -299,7 +320,7 @@
                         <span>Analytical Insights & Security Reflection</span>
                     </h3>
                     <p class="text-slate-700 dark:text-slate-300">
-                        1. <strong>Restrictive Host Configuration</strong>: Enforcing kernel parameters (disabling IPv4 packet redirects, core dumps), locking down system permissions, and auditing files caused the Lynis index to jump to <strong>67</strong>.
+                        1. <strong>Restrictive Host Configuration</strong>: Enforcing kernel parameters (disabling IPv4 packet redirects, core dumps), locking down system permissions, and auditing files caused the Lynis index to jump to <strong>59</strong>.
                     </p>
                     <p class="text-slate-700 dark:text-slate-300">
                         2. <strong>CIS Benchmark Integrity</strong>: The alignment with standard CIS Level 2 profile checks on OpenSCAP verifies that the base OS host environment is thoroughly hardened to prevent any lateral container escalation or breakout attempts.
@@ -433,7 +454,7 @@
                     </div>
                     <div class="flex justify-between pb-1">
                         <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200 text-3xs">2026-08-05T14:40:56Z</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 text-3xs">2026-08-06T21:10:36Z</span>
                     </div>
                 </div>
             </div>

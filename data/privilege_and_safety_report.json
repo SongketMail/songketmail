@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-08-06T21:14:18Z",
+  "privileges": {
+    "uid": 1001,
+    "username": "jules",
+    "has_sudo": true,
+    "can_manage_systemctl": true,
+    "can_modify_sysctl": true,
+    "privilege_level": "FULL_PRIVILEGES"
+  },
+  "safety": {
+    "risk_level": "CRITICAL_RISK",
+    "issues": [
+      {
+        "vector": "PORT_25_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 25 (SMTP (Postfix)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_80_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 80 (HTTP (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_143_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 143 (IMAP (Dovecot)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_443_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_587_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 587 (Submission (Postfix SMTP-MSA)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_993_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 993 (IMAPS (Dovecot Secure)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PODMAN_MISSING",
+        "severity": "CRITICAL_RISK",
+        "description": "Podman is not installed on the system. Project cannot run container fabrics."
+      }
+    ],
+    "warnings": [],
+    "passed": [
+      {
+        "vector": "SSH_KEYS",
+        "description": "SSH authorized keys are present. SSH key-based login is safe."
+      },
+      {
+        "vector": "SSH_CONFIG_SYNTAX",
+        "description": "sshd configuration syntax is valid."
+      },
+      {
+        "vector": "SYSCTL_KEY_SUPPORTED",
+        "description": "Kernel key vm.max_map_count exists and is modifiable."
+      },
+      {
+        "vector": "SYSCTL_KEY_SUPPORTED",
+        "description": "Kernel key net.ipv4.ip_forward exists and is modifiable."
+      },
+      {
+        "vector": "PORT_8080_AVAILABLE",
+        "description": "Port 8080 (BunkerWeb Admin API / Port Conflict) is free and ready for binding."
+      },
+      {
+        "vector": "STORAGE_WRITE_SUCCESS",
+        "description": "Host persistent storage path '/var/srv/songketmail' is writable."
+      }
+    ]
+  }
+}

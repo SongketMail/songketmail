@@ -194,6 +194,31 @@
                 </p>
             </div>
 
+            <!-- Privilege and Safety Assessment Gates Widget -->
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
+                    <span>🛡️</span>
+                    <span>Privilege & Remediation Safety Gates</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-750">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">Privilege Level</span>
+                        <span class="block mt-1 font-extrabold font-mono text-slate-800 dark:text-white">{{ host_privilege_level }}</span>
+                    </div>
+                    <div class="p-3 rounded-xl border font-mono {{ 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400' if host_remediation_risk in ['CRITICAL_RISK', 'HIGH_RISK'] else 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400' }}">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">Remediation Risk</span>
+                        <span class="block mt-1 font-extrabold">{{ host_remediation_risk }}</span>
+                    </div>
+                    <div class="p-3 rounded-xl border font-mono {{ 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/50 text-amber-700 dark:text-amber-400' if remediation_skipped else 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400' }}">
+                        <span class="block text-slate-400 uppercase font-semibold text-3xs">remediation status</span>
+                        <span class="block mt-1 font-extrabold uppercase">{{ 'SKIPPED / BYPASS' if remediation_skipped else 'COMPLETED' }}</span>
+                    </div>
+                </div>
+                <div class="text-3xs text-slate-400 dark:text-slate-500 leading-relaxed">
+                    Tested via administrative commands assessment. Remediations are bypassed or skipped if high hazards (e.g. active port conflicts, missing SSH key authentications) are detected to prevent OS or service breakages.
+                </div>
+            </div>
+
             <!-- Tab Selectors -->
             <div class="flex border-b border-slate-200 dark:border-slate-700">
                 <button @click="currentTab = 'overview'"

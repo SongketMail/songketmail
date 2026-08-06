@@ -14,6 +14,18 @@ ASIMP implements a robust **"Measure, Harden, Re-Measure"** paradigm to provide 
 
 ---
 
+## 🔒 Host Privilege & Safety Assessment Gates
+
+Before executing the ASIMP security hardening playbooks, we test key administrative capabilities (e.g. `sudo -n id`, `id -u`, `systemctl`, `sysctl`) and check safety risk vectors to verify that applying remediations will not disrupt the operating system, remote ssh access, or project codes:
+
+- **Detected Privilege Mode**: `{{ host_privilege_level }}`
+- **Remediation Safety Risk**: `{{ host_remediation_risk }}`
+- **System Hardening Remediations**: `{{ "SKIPPED / BYPASSED (To prevent system breakage)" if remediation_skipped else "APPLIED ALL-OUT" }}`
+
+For full risk details and checked security vectors, please consult the complete [🕵️‍♂️ Privilege & Remediation Safety Report](privilege-safety-report.md).
+
+---
+
 ## 📊 Dual-Engine Security Scorecard
 
 Below is the side-by-side compliance improvement metric computed during the execution of the ASIMP hardening pipeline:
@@ -81,5 +93,5 @@ The hardening process executed the following distinct phases to achieve host-lev
 2. **OpenSCAP CIS % Boost**: The OpenSCAP Level 2 compliance increased to `{{ openscap_after_score }}%`. The alignment with the CIS benchmark confirms that our unprivileged Podman-based SongketMail server host has a robust, hardened posture, successfully preventing unauthorized lateral escalations.
 
 ---
-*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
