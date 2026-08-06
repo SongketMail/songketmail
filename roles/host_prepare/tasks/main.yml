@@ -1,6 +1,13 @@
 ---
 # Rootful Host-level Hardening and Preparation Tasks
 
+- name: Set facts for limited unprivileged sandbox environments
+  ansible.builtin.set_fact:
+    storage_base_path: "{{ ansible_env.HOME }}/var/srv/songketmail"
+    songketmail_home: "{{ ansible_env.HOME }}"
+    songketmail_user: "{{ ansible_user_id }}"
+  when: is_limited_environment | default(false) | bool
+
 - name: OS Kernel Tuning for ElasticSearch/Database containers
   ansible.posix.sysctl:
     name: vm.max_map_count
@@ -8,11 +15,13 @@
     state: present
     reload: yes
     sysctl_set: yes
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Ensure native bridge module (br_netfilter) is loaded
   community.general.modprobe:
     name: br_netfilter
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Persist bridge filter module load on boot
   ansible.builtin.copy:
@@ -21,6 +30,7 @@
     owner: root
     group: root
     mode: '0644'
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Set sysctl bridge configuration for IPv4 packet forwarding
   ansible.posix.sysctl:
@@ -29,12 +39,14 @@
     state: present
     reload: yes
     sysctl_set: yes
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Create non-privileged system group for SongketMail
   ansible.builtin.group:
     name: "{{ songketmail_user }}"
     gid: "{{ songketmail_gid }}"
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Create non-privileged system user for SongketMail
   ansible.builtin.user:
@@ -45,6 +57,7 @@
     shell: /bin/bash
     create_home: yes
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Configure subuid namespaces for rootless container execution
   ansible.builtin.lineinfile:
@@ -52,6 +65,7 @@
     regexp: "^{{ songketmail_user }}:"
     line: "{{ songketmail_user }}:100000:65536"
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Configure subgid namespaces for rootless container execution
   ansible.builtin.lineinfile:
@@ -59,13 +73,14 @@
     regexp: "^{{ songketmail_user }}:"
     line: "{{ songketmail_user }}:100000:65536"
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Create base storage and service directories for SongketMail
   ansible.builtin.file:
     path: "{{ storage_base_path }}/{{ item }}"
     state: directory
-    owner: "{{ songketmail_user }}"
-    group: "{{ songketmail_user }}"
+    owner: "{{ songketmail_user if not (is_limited_environment | default(false) | bool) else omit }}"
+    group: "{{ songketmail_user if not (is_limited_environment | default(false) | bool) else omit }}"
     mode: '0700'
     recurse: yes
   loop: "{{ songketmail_storage_dirs }}"
@@ -76,19 +91,21 @@
     creates: "/var/lib/systemd/linger/{{ songketmail_user }}"
   register: linger_result
   changed_when: false
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Ensure User Systemd generator directories exist
   ansible.builtin.file:
     path: "{{ songketmail_home }}/.config/containers/systemd"
     state: directory
-    owner: "{{ songketmail_user }}"
-    group: "{{ songketmail_user }}"
+    owner: "{{ songketmail_user if not (is_limited_environment | default(false) | bool) else omit }}"
+    group: "{{ songketmail_user if not (is_limited_environment | default(false) | bool) else omit }}"
     mode: '0700'
 
 - name: Ensure podman-docker package is installed for compatible docker commands with podman
   ansible.builtin.package:
     name: "podman-docker"
     state: present
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Verify installed Podman version meets minimum requirements
   ansible.builtin.command:
@@ -111,6 +128,8 @@
       Required minimum version: {{ podman_min_version }}
       Installed version raw output: {{ podman_version_raw.stdout | default('Not Installed or Command Failed') }}
     success_msg: "Podman version meets the minimum requirement of {{ podman_min_version }}."
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Import ASIMP audit security task compilation
   ansible.builtin.import_tasks: audit.yml
+  when: not (is_limited_environment | default(false) | bool)

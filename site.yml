@@ -1,7 +1,7 @@
 ---
 - name: Hardening, Host Preparation and Podman 5+ Email Server Deployment
   hosts: email_servers
-  become: yes
+  become: "{{ not (is_limited_environment | default(false) | bool) }}"
   tasks:
     - name: Run Host Preparation and Hardening
       ansible.builtin.import_role:
@@ -11,5 +11,5 @@
       ansible.builtin.import_role:
         name: podman_quadlet
       vars:
-        ansible_become: yes
+        ansible_become: "{{ not (is_limited_environment | default(false) | bool) }}"
         ansible_become_user: "{{ songketmail_user }}"
