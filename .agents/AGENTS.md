@@ -4,7 +4,7 @@ type: agent_guidelines
 title: "SongketMail Agent & AI Workspace Reference Manual"
 description: "Operational manual, architectural specifications, and compliance rules for Google Jules and other autonomous AI agents."
 resource: "file:///AGENTS.md"
-timestamp: 2026-07-04T12:00:00Z
+timestamp: 2026-07-25T12:00:00Z
 topics: [agents, reference-manual, compliance, workspace]
 ---
 

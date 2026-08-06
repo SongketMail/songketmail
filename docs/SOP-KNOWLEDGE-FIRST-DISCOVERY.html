@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ansible FQCN Best Practices — SongketMail :: LAB</title>
+    <title>SOP: Knowledge-First Discovery & Context Preservation Protocol — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 2: Ansible FQCN & Rootless Service Orchestration
+                    Deep Research // Topic 14: SOP: Knowledge-First Discovery & Context Preservation Protocol
                 </div>
             </div>
 
@@ -112,7 +112,7 @@
                         <span>🐳</span>
                         <span>1. Podman Rootless</span>
                     </a>
-                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🤖</span>
                         <span>2. Ansible Best Practices</span>
                     </a>
@@ -150,24 +150,24 @@
                         <span>10. References & Resources</span>
                     </a>
 
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
                     <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📋</span>
-                        <span>12. Jules Planning Document</span>
+                        <span>12. Jules Operational Plan</span>
                     </a>
                     <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🛡️</span>
                         <span>13. ASIMP Hardening Report</span>
                     </a>
-                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>🔍</span>
                         <span>14. Discovery Protocol</span>
                     </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -184,134 +184,96 @@
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>🤖</span>
-                    <span>Ansible Best Practices & Rootless Service Orchestration</span>
+                    <span>🔍</span>
+                    <span>Local Knowledge-First Discovery & Context Preservation Protocol</span>
                 </h1>
             </div>
 
             <!-- Introduction Section -->
             <div class="space-y-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    Fully Qualified Collection Names (FQCN)
+                    1. Executive Intent
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Modern Ansible mandates the use of **Fully Qualified Collection Names (FQCN)** (e.g., <code>ansible.builtin.copy</code> instead of <code>copy</code>). FQCN prevents naming collisions, guarantees predictability across versions, and is highly recommended by Ansible Galaxy and Red Hat enterprise standards. This guide presents production-ready Ansible blueprints for orchestrating unprivileged users, managing Quadlet deployments, and restarting services via systemd user-sockets.
+                    To prevent unnecessary exploratory terminal commands, token window exhaustion, and context loss during agentic sessions, AI agents must adhere to the **Local Knowledge-First Protocol**. All project facts, architectural specifications, inventory mappings, and operational rules are indexed via **OKF v0.1 YAML Frontmatter** in <code>.agents/brain/</code> and <code>docs/</code>.
                 </p>
             </div>
 
-            <!-- Privilege Escalation Philosophy -->
+            <!-- Standard Operating Procedure -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>🛡️</span>
-                    <span>Symmetric Privilege Strategy</span>
+                    <span>🔄</span>
+                    <span>2. The 5-Step Discovery Flow</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    Ansible playbooks must separate global host tuning (requiring superuser privileges) from the deployment of unprivileged container specifications.
+                    AI agents must navigate the following protocol sequentially to answer questions, debug issues, or execute changes.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="space-y-4 text-xs">
                     <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
-                        <strong class="text-red-500 font-bold">1. Rootful OS Hardening</strong>
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">Step 1: Local Frontmatter & Metadata Search</strong>
                         <p class="mt-1 text-slate-600 dark:text-slate-400">
-                            Executed with <code>become: yes</code> (sudo as root). Applies sysctl kernel overrides, creates users/groups, and installs Podman and Python packages.
+                            Search local OKF headers using keywords on <code>topics:</code> or <code>description:</code> across <code>docs/</code> and <code>.agents/brain/</code> BEFORE running system terminal commands.
                         </p>
                     </div>
                     <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
-                        <strong class="text-green-500 font-bold">2. Rootless Deployments</strong>
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">Step 2: Targeted File Viewing</strong>
                         <p class="mt-1 text-slate-600 dark:text-slate-400">
-                            Executed with <code>become: yes</code> + <code>become_user: songket</code>. Deploys Quadlet templates directly to user directory, reloads unprivileged daemon, and starts services.
+                            Read specific file segments or targeted markdown documents locally instead of executing full-file dumps or remote probes.
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">Step 3: Temporal Verification Gate</strong>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">
+                            Inspect the OKF timestamp. If the local document appears contextually outdated, research external standards and present a comparison to the human operator.
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">Step 4: Human Verification & Knowledge Update</strong>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">
+                            With human consensus, update the local OKF-compliant document to preserve spatial memory before executing infrastructure modifications.
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-750">
+                        <strong class="text-violet-600 dark:text-violet-400 font-bold">Step 5: Terminal Execution Gate</strong>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">
+                            Only execute remote terminal queries or run Ansible commands against the target inventory (such as <code>node1.songketmail.internal</code>) if applying planned updates or querying undocumented real-time state.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Pathing & Quadlet Directories -->
+            <!-- Mandatory Rules Reference -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Quadlet File Placement</h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Systemd Quadlets are evaluated from directories based on the execution context. For our rootless <code>songket</code> deployment, the designated destination is:
-                </p>
-                <div class="bg-violet-50 dark:bg-slate-900/60 p-3.5 rounded-lg border border-violet-100 dark:border-slate-755 text-xs font-mono">
-/home/songket/.config/containers/systemd/</div>
-                <p class="text-slate-600 dark:text-slate-400 text-xs">
-                    This directory is scanned automatically by the rootless systemd manager. Placing files here allows unprivileged units to be declared and generated without needing administrative intervention.
-                </p>
-            </div>
-
-            <!-- FQCN Ansible Playbook Example -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2">
-                    <span>📄</span>
-                    <span>FQCN Ansible Tasks Blueprint</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    Below is an explicit, production-grade Ansible task list utilizing proper FQCN syntax to template and deploy Quadlet configurations under the rootless environment. Notice how the environment variables <code>XDG_RUNTIME_DIR</code> and <code>DBUS_SESSION_BUS_ADDRESS</code> are passed explicitly to the user-level systemd service manager.
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
-# Deploys standard and custom Quadlets into the rootless systemd path
-- name: Create Quadlet configuration directory
-  ansible.builtin.file:
-    path: "/home/songket/.config/containers/systemd"
-    state: directory
-    owner: songket
-    group: songket
-    mode: '0755'
-  become: yes
-  become_user: songket
-
-- name: Deploy SongketMail Quadlet container templates
-  ansible.builtin.template:
-    src: "templates/{{ item }}.j2"
-    dest: "/home/songket/.config/containers/systemd/{{ item }}"
-    owner: songket
-    group: songket
-    mode: '0644'
-  loop:
-    - skm_network.network
-    - skm_pod.pod
-    - emailserver.container
-  become: yes
-  become_user: songket
-  register: quadlets_deployed
-
-- name: Reload user-level systemd daemon and restart services
-  ansible.builtin.systemd_service:
-    daemon_reload: yes
-    scope: user
-    name: skm_pod-pod.service
-    state: restarted
-    enabled: yes
-  become: yes
-  become_user: songket
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ songket_uid | default(2001) }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songket_uid | default(2001) }}/bus"
-  when: quadlets_deployed.changed</pre>
-            </div>
-
-            <!-- Interactive Troubleshooting Guide -->
-            <div class="bg-amber-50/20 dark:bg-amber-950/10 p-6 rounded-xl border border-amber-500/20 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-amber-800 dark:text-amber-400">Troubleshooting Rootless Ansible Executions</h3>
-                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white">3. Mandatory Rules Reference</h3>
+                <ul class="space-y-3 text-xs text-slate-700 dark:text-slate-300">
                     <li class="flex items-start">
-                        <span class="text-amber-500 mr-2">⚠️</span>
-                        <span><strong>Error: Failed to connect to bus</strong> - Double check that systemd lingering is enabled for the target user, and ensure both <code>XDG_RUNTIME_DIR</code> and <code>DBUS_SESSION_BUS_ADDRESS</code> are explicitly passed inside the Ansible task environment block.</span>
+                        <span class="text-violet-500 mr-2">📌</span>
+                        <span><strong>Rule 6 (OKF Topics)</strong>: All <code>.md</code> files must open on line 1 with <code>---</code> and contain <code>topics: [3-5 keywords]</code>.</span>
                     </li>
                     <li class="flex items-start">
-                        <span class="text-amber-500 mr-2">⚠️</span>
-                        <span><strong>Error: Permission denied /var/srv/songketmail/</strong> - Ensure the storage mount path permissions are configured recursively for the UID/GID 2001:2001 host user before initiating the unprivileged Podman deployment.</span>
+                        <span class="text-violet-500 mr-2">📌</span>
+                        <span><strong>Rule 12 (Metadata-First Discovery)</strong>: Always query <code>topics:</code> and <code>description:</code> metadata before reading full file bodies.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-violet-500 mr-2">📌</span>
+                        <span><strong>Rule 29 (Local Knowledge-First Mandate)</strong>: Search <code>.agents/brain/</code> and <code>docs/</code> locally before terminal/remote execution.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-violet-500 mr-2">📌</span>
+                        <span><strong>Rule 30 (Temporal Knowledge Verification Mandate)</strong>: Verify OKF timestamps and consult the human operator if the local knowledge is contextually outdated.</span>
                     </li>
                 </ul>
             </div>
 
             <!-- Back navigation / Action links -->
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="postfix-dovecot.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
-                    <span>✉️</span>
-                    <span>Next: Postfix & Dovecot Integration</span>
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏠</span>
+                    <span>Back to Home</span>
                 </a>
-                <a href="podman-rootless.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
-                    <span>🐳</span>
-                    <span>Back: Podman Rootless</span>
+                <a href="asimp-hardening-report.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>🛡️</span>
+                    <span>Back: ASIMP Hardening Report</span>
                 </a>
             </div>
 
@@ -322,23 +284,23 @@
 
             <!-- Specs Widget Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Ansible Standards</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Discovery Specs</h4>
                 <div class="text-xs space-y-2">
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Ansible Core</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">2.16+</span>
+                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Naming Rules</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Strict FQCN</span>
+                        <span class="text-slate-500 dark:text-slate-400">Context Search</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Local-First</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Target Path</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">~/.config/containers</span>
+                        <span class="text-slate-500 dark:text-slate-400">Spatial Directory</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">.agents/brain</span>
                     </div>
                     <div class="flex justify-between pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Privilege Model</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Become User</span>
+                        <span class="text-slate-500 dark:text-slate-400">Temporal Checks</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Timestamp Gate</span>
                     </div>
                 </div>
             </div>
@@ -371,9 +333,9 @@
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-            <span>[ TOPIC: 2 ]</span>
+            <span>[ TOPIC: 14 ]</span>
             <span>|</span>
-            <span>[ STD: ANSIBLE_FQCN ]</span>
+            <span>[ STD: OKF_DISCOVERY ]</span>
             <span>|</span>
             <span>[ ENV: DEBIAN_UBUNTU ]</span>
         </div>
