@@ -4,7 +4,7 @@ type: documentation
 title: "ASIMP OS Hardening and Compliance Report"
 description: "A comprehensive dual-engine security hardening report demonstrating compliance before and after running the Ansible System Integrity Management Platform (ASIMP)."
 resource: "file:///docs/asimp-hardening-report.md"
-timestamp: 2026-08-06T21:10:36Z
+timestamp: 2026-08-06T22:35:16Z
 ---
 # 🛡️ ASIMP OS Hardening and Compliance Report
 

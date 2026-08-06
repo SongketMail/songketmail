@@ -4,7 +4,7 @@ type: report
 title: "Privilege Detection and Remediation Safety Report"
 description: "Analysis of host privilege levels and potential safety hazards of running security hardening remediation."
 resource: "file:///docs/privilege-safety-report.md"
-timestamp: 2026-08-06T21:14:18Z
+timestamp: 2026-08-06T22:32:33Z
 topics: [privilege, safety, reporting, auditing, compliance]
 ---
 
@@ -16,8 +16,9 @@ This report presents a thorough audit of the active deployment user's privileges
 
 ## 📋 Execution Context Summary
 
-- **Host User**: `jules` (UID: `1001`)
+- **Host User**: `root` (UID: `0`)
 - **Detected Privilege Level**: `FULL_PRIVILEGES`
+- **ASIMP Privilege Level**: `full_privilege`
 - **Passwordless Sudo**: `Yes`
 - **Systemd Controller Connection**: `Yes`
 - **Sysctl Write Support**: `Yes`
@@ -31,18 +32,6 @@ Before running active remediation scripts (which may modify SSH configuration, n
 
 ### 🔴 Risk Issues Found
 
-- **[CRITICAL_RISK] PORT_25_OCCUPIED**
-  Port 25 (SMTP (Postfix)) is already in use by another active service. Remediation/Deployment will break.
-- **[CRITICAL_RISK] PORT_80_OCCUPIED**
-  Port 80 (HTTP (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break.
-- **[CRITICAL_RISK] PORT_143_OCCUPIED**
-  Port 143 (IMAP (Dovecot)) is already in use by another active service. Remediation/Deployment will break.
-- **[CRITICAL_RISK] PORT_443_OCCUPIED**
-  Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break.
-- **[CRITICAL_RISK] PORT_587_OCCUPIED**
-  Port 587 (Submission (Postfix SMTP-MSA)) is already in use by another active service. Remediation/Deployment will break.
-- **[CRITICAL_RISK] PORT_993_OCCUPIED**
-  Port 993 (IMAPS (Dovecot Secure)) is already in use by another active service. Remediation/Deployment will break.
 - **[CRITICAL_RISK] PODMAN_MISSING**
   Podman is not installed on the system. Project cannot run container fabrics.
 
@@ -58,6 +47,18 @@ No warnings detected.
   Kernel key vm.max_map_count exists and is modifiable.
 - **SYSCTL_KEY_SUPPORTED**
   Kernel key net.ipv4.ip_forward exists and is modifiable.
+- **PORT_25_AVAILABLE**
+  Port 25 (SMTP (Postfix)) is free and ready for binding.
+- **PORT_80_AVAILABLE**
+  Port 80 (HTTP (BunkerWeb Webmail Proxy)) is free and ready for binding.
+- **PORT_143_AVAILABLE**
+  Port 143 (IMAP (Dovecot)) is free and ready for binding.
+- **PORT_443_AVAILABLE**
+  Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is free and ready for binding.
+- **PORT_587_AVAILABLE**
+  Port 587 (Submission (Postfix SMTP-MSA)) is free and ready for binding.
+- **PORT_993_AVAILABLE**
+  Port 993 (IMAPS (Dovecot Secure)) is free and ready for binding.
 - **PORT_8080_AVAILABLE**
   Port 8080 (BunkerWeb Admin API / Port Conflict) is free and ready for binding.
 - **STORAGE_WRITE_SUCCESS**

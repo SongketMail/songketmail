@@ -48,8 +48,10 @@ def check_privileges():
     # Determine privilege mode
     if uid == 0 or has_sudo:
         privilege_level = "FULL_PRIVILEGES"
+        asimp_privilege_level = "full_privilege"
     else:
         privilege_level = "UNPRIVILEGED_SANDBOX"
+        asimp_privilege_level = "limited_sandbox"
 
     return {
         "uid": uid,
@@ -57,7 +59,8 @@ def check_privileges():
         "has_sudo": has_sudo,
         "can_manage_systemctl": can_manage_systemctl,
         "can_modify_sysctl": can_modify_sysctl,
-        "privilege_level": privilege_level
+        "privilege_level": privilege_level,
+        "asimp_privilege_level": asimp_privilege_level
     }
 
 def check_safety(priv_info):
@@ -305,7 +308,7 @@ def print_text_report(priv, safety):
     print("=" * 80)
     print(f"Timestamp:       {datetime.now(timezone.utc).isoformat()}")
     print(f"Current User:    {priv['username']} (UID: {priv['uid']})")
-    print(f"Privilege Mode:  {priv['privilege_level']}")
+    print(f"Privilege Mode:  {priv['privilege_level']} (asimp_privilege_level: {priv['asimp_privilege_level']})")
     print(f"Passwordless Sudo: {'YES' if priv['has_sudo'] else 'NO'}")
     print(f"Remediation Risk: {safety['risk_level']}")
     print("-" * 80)
@@ -366,6 +369,7 @@ This report presents a thorough audit of the active deployment user's privileges
 
 - **Host User**: `{priv['username']}` (UID: `{priv['uid']}`)
 - **Detected Privilege Level**: `{priv['privilege_level']}`
+- **ASIMP Privilege Level**: `{priv['asimp_privilege_level']}`
 - **Passwordless Sudo**: `{"Yes" if priv['has_sudo'] else "No"}`
 - **Systemd Controller Connection**: `{"Yes" if priv['can_manage_systemctl'] else "No"}`
 - **Sysctl Write Support**: `{"Yes" if priv['can_modify_sysctl'] else "No"}`
@@ -406,7 +410,7 @@ Before running active remediation scripts (which may modify SSH configuration, n
 
 """
 
-    if priv["privilege_level"] == "UNPRIVILEGED_SANDBOX":
+    if priv["asimp_privilege_level"] == "limited_sandbox":
         content += """
 > ℹ️ **Ordinary/Sandbox User Detected**
 >

@@ -1,46 +1,17 @@
 {
-  "timestamp": "2026-08-06T21:14:18Z",
+  "timestamp": "2026-08-06T22:32:33Z",
   "privileges": {
-    "uid": 1001,
-    "username": "jules",
+    "uid": 0,
+    "username": "root",
     "has_sudo": true,
     "can_manage_systemctl": true,
     "can_modify_sysctl": true,
-    "privilege_level": "FULL_PRIVILEGES"
+    "privilege_level": "FULL_PRIVILEGES",
+    "asimp_privilege_level": "full_privilege"
   },
   "safety": {
     "risk_level": "CRITICAL_RISK",
     "issues": [
-      {
-        "vector": "PORT_25_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 25 (SMTP (Postfix)) is already in use by another active service. Remediation/Deployment will break."
-      },
-      {
-        "vector": "PORT_80_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 80 (HTTP (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
-      },
-      {
-        "vector": "PORT_143_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 143 (IMAP (Dovecot)) is already in use by another active service. Remediation/Deployment will break."
-      },
-      {
-        "vector": "PORT_443_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
-      },
-      {
-        "vector": "PORT_587_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 587 (Submission (Postfix SMTP-MSA)) is already in use by another active service. Remediation/Deployment will break."
-      },
-      {
-        "vector": "PORT_993_OCCUPIED",
-        "severity": "CRITICAL_RISK",
-        "description": "Port 993 (IMAPS (Dovecot Secure)) is already in use by another active service. Remediation/Deployment will break."
-      },
       {
         "vector": "PODMAN_MISSING",
         "severity": "CRITICAL_RISK",
@@ -64,6 +35,30 @@
       {
         "vector": "SYSCTL_KEY_SUPPORTED",
         "description": "Kernel key net.ipv4.ip_forward exists and is modifiable."
+      },
+      {
+        "vector": "PORT_25_AVAILABLE",
+        "description": "Port 25 (SMTP (Postfix)) is free and ready for binding."
+      },
+      {
+        "vector": "PORT_80_AVAILABLE",
+        "description": "Port 80 (HTTP (BunkerWeb Webmail Proxy)) is free and ready for binding."
+      },
+      {
+        "vector": "PORT_143_AVAILABLE",
+        "description": "Port 143 (IMAP (Dovecot)) is free and ready for binding."
+      },
+      {
+        "vector": "PORT_443_AVAILABLE",
+        "description": "Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is free and ready for binding."
+      },
+      {
+        "vector": "PORT_587_AVAILABLE",
+        "description": "Port 587 (Submission (Postfix SMTP-MSA)) is free and ready for binding."
+      },
+      {
+        "vector": "PORT_993_AVAILABLE",
+        "description": "Port 993 (IMAPS (Dovecot Secure)) is free and ready for binding."
       },
       {
         "vector": "PORT_8080_AVAILABLE",
