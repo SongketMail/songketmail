@@ -1,29 +1,62 @@
 ---
 - name: Import ASIMP Localhost Hardening Playbook
   ansible.builtin.import_playbook: asimp/play-localhost.yml
+  when: not (is_limited_environment | default(false) | bool)
 
 - name: Generate report and update sidebar
   hosts: localhost
   connection: local
   gather_facts: true
-  become: true
+  become: "{{ not (is_limited_environment | default(false) | bool) }}"
   tasks:
+    - name: Set log and report directory facts
+      ansible.builtin.set_fact:
+        asimp_log_dir: "{{ '/var/log' if not (is_limited_environment | default(false) | bool) else playbook_dir + '/data/asimp_mock/var/log' }}"
+        asimp_openscap_results: "{{ '/var/log/openscap-after-results.xml' if not (is_limited_environment | default(false) | bool) else playbook_dir + '/data/asimp_mock/var/log/openscap-after-results.xml' }}"
+
     - name: Read ASIMP Baseline Scores
       ansible.builtin.slurp:
-        src: /var/log/asimp-baseline-scores.json
+        src: "{{ asimp_log_dir }}/asimp-baseline-scores.json"
       register: baseline_scores_raw
 
     - name: Parse ASIMP Baseline Scores Fact
       ansible.builtin.set_fact:
         baseline_scores: "{{ baseline_scores_raw.content | b64decode | from_json }}"
 
+    - name: Read Privilege and Safety Assessment Report
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/data/privilege_and_safety_report.json"
+      register: priv_safety_raw
+      failed_when: false
+
+    - name: Parse Privilege and Safety Report Fact
+      ansible.builtin.set_fact:
+        priv_safety: "{{ priv_safety_raw.content | b64decode | from_json if priv_safety_raw.content is defined else {} }}"
+
     - name: Parse Lynis AFTER hardening index
-      ansible.builtin.shell: grep -E "^hardening_index=" /var/log/lynis-report.dat | cut -d'=' -f2
+      ansible.builtin.shell: "grep -E '^hardening_index=' {{ asimp_log_dir }}/lynis-report.dat | cut -d'=' -f2"
       register: raw_lynis_after
       changed_when: false
+      failed_when: false
 
-    - name: Parse OpenSCAP AFTER compliance score
-      ansible.builtin.shell: python3 /usr/local/bin/parse_openscap_score.py /var/log/openscap-after-results.xml
+    - name: Parse OpenSCAP AFTER compliance score using inline python
+      ansible.builtin.shell: |
+        python3 -c "
+        import xml.etree.ElementTree as ET, sys
+        try:
+            tree = ET.parse('{{ asimp_openscap_results }}')
+            root = tree.getroot()
+            ns = {'x12': 'http://checklists.nist.gov/xccdf/1.2', 'x11': 'http://checklists.nist.gov/xccdf/1.1'}
+            elem = root.find('.//x12:score', ns) or root.find('.//x11:score', ns)
+            if elem is not None:
+                print(round(float(elem.text), 2))
+            else:
+                res = [e.text for e in root.findall('.//x12:result', ns) or root.findall('.//x11:result', ns)]
+                total = res.count('pass') + res.count('fail')
+                print(round(res.count('pass')/total*100, 2) if total > 0 else '0.0')
+        except Exception:
+            print('0.0')
+        "
       register: raw_openscap_after
       changed_when: false
       failed_when: false
@@ -31,24 +64,27 @@
     - name: Establish Score Facts for Templates
       ansible.builtin.set_fact:
         lynis_before_score: "{{ baseline_scores.lynis_before | default('0') | trim }}"
-        lynis_after_score: "{{ raw_lynis_after.stdout | default('0') | trim }}"
+        lynis_after_score: "{{ raw_lynis_after.stdout | default(baseline_scores.lynis_after | default('0')) | trim }}"
         openscap_before_score: "{{ baseline_scores.openscap_before | default('0.0') | trim }}"
-        openscap_after_score: "{{ raw_openscap_after.stdout | default('0.0') | trim }}"
+        openscap_after_score: "{{ raw_openscap_after.stdout | default(baseline_scores.openscap_after | default('0.0')) | trim }}"
+        host_privilege_level: "{{ priv_safety.privileges.privilege_level | default('UNKNOWN') }}"
+        host_remediation_risk: "{{ priv_safety.safety.risk_level | default('UNKNOWN') }}"
+        remediation_skipped: "{{ skip_remediation | default(is_limited_environment | default(false)) | bool }}"
 
     - name: Generate OKF v0.1-Compliant Hardening Markdown Report
       ansible.builtin.template:
         src: templates/asimp_report.md.j2
         dest: docs/asimp-hardening-report.md
-        owner: root
-        group: root
+        owner: "{{ 'root' if not (is_limited_environment | default(false) | bool) else omit }}"
+        group: "{{ 'root' if not (is_limited_environment | default(false) | bool) else omit }}"
         mode: '0644'
 
     - name: Generate OKF v0.1-Compliant Hardening HTML Report
       ansible.builtin.template:
         src: templates/asimp_report.html.j2
         dest: docs/asimp-hardening-report.html
-        owner: root
-        group: root
+        owner: "{{ 'root' if not (is_limited_environment | default(false) | bool) else omit }}"
+        group: "{{ 'root' if not (is_limited_environment | default(false) | bool) else omit }}"
         mode: '0644'
 
     - name: Update Sidebar Navigation inside Existing HTML files
