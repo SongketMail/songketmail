@@ -26,31 +26,27 @@
     mode: '0644'
   loop: "{{ songketmail_services }}"
 
-- name: Force systemd daemon-reload for rootless user session
-  ansible.builtin.systemd_service:
-    daemon_reload: yes
-    scope: user
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+- name: Manage rootless systemd services with user session environment
+  block:
+    - name: Force systemd daemon-reload for rootless user session
+      ansible.builtin.systemd_service:
+        daemon_reload: yes
+        scope: user
 
-- name: Ensure Pod systemd service is enabled and running
-  ansible.builtin.systemd_service:
-    name: "{{ cluster_prefix }}_pod-pod"
-    state: started
-    enabled: yes
-    scope: user
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+    - name: Ensure Pod systemd service is enabled and running
+      ansible.builtin.systemd_service:
+        name: "{{ cluster_prefix }}_pod-pod"
+        state: started
+        enabled: yes
+        scope: user
 
-- name: Ensure Container systemd services are enabled and running
-  ansible.builtin.systemd_service:
-    name: "{{ cluster_prefix }}_{{ item }}"
-    state: started
-    enabled: yes
-    scope: user
-  loop: "{{ songketmail_services }}"
+    - name: Ensure Container systemd services are enabled and running
+      ansible.builtin.systemd_service:
+        name: "{{ cluster_prefix }}_{{ item }}"
+        state: started
+        enabled: yes
+        scope: user
+      loop: "{{ songketmail_services }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
