@@ -200,16 +200,16 @@ echo "=== [5/6] Executing Privilege and Remediation Safety Gate checks ==="
 python3 scripts/privilege_and_safety_test.py
 
 # Extract values from report JSON
-PRIV_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['privileges']['privilege_level'])")
+ASIMP_PRIV_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['privileges']['asimp_privilege_level'])")
 RISK_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['safety']['risk_level'])")
 
-echo "Detected Privilege Level: ${PRIV_LEVEL}"
+echo "Detected ASIMP Privilege Level: ${ASIMP_PRIV_LEVEL}"
 echo "Detected Safety Risk: ${RISK_LEVEL}"
 
 
 echo "=== [6/6] Branching Execution Based on Privilege and Safety Status ==="
 
-if [ "${PRIV_LEVEL}" = "UNPRIVILEGED_SANDBOX" ]; then
+if [ "${ASIMP_PRIV_LEVEL}" = "limited_sandbox" ]; then
     echo "=============================================================================="
     echo "🚨 MODE: UNPRIVILEGED SANDBOX DETECTED"
     echo "   Running in 'Test & Info' mode with Real Auditing and Scoring."
@@ -302,9 +302,9 @@ except Exception:
 EOF
 
     echo "Running ASIMP reporting playbook in unprivileged limited environment..."
-    ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "is_limited_environment=true is_sandbox_jules=true"
+    ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "is_limited_environment=true is_sandbox_jules=true asimp_privilege_level=limited_sandbox"
 
-elif [ "${PRIV_LEVEL}" = "FULL_PRIVILEGES" ]; then
+elif [ "${ASIMP_PRIV_LEVEL}" = "full_privilege" ]; then
 
     if [ "${RISK_LEVEL}" = "CRITICAL_RISK" ] || [ "${RISK_LEVEL}" = "HIGH_RISK" ]; then
         echo "=============================================================================="
@@ -315,7 +315,7 @@ elif [ "${PRIV_LEVEL}" = "FULL_PRIVILEGES" ]; then
         echo "=============================================================================="
 
         # Run playbook with skip_remediation=true to perform auditing and score recording safely without making modifications
-        ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "skip_remediation=true is_limited_environment=false is_sandbox_jules=true"
+        ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "skip_remediation=true is_limited_environment=false is_sandbox_jules=true asimp_privilege_level=full_privilege"
     else
         echo "=============================================================================="
         echo "✅ REMEDIATION SAFETY GATES PASSED"
@@ -324,7 +324,7 @@ elif [ "${PRIV_LEVEL}" = "FULL_PRIVILEGES" ]; then
         echo "=============================================================================="
 
         # Run full ASIMP playbook without limited environment bypass
-        ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "is_limited_environment=false is_sandbox_jules=true"
+        ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "is_limited_environment=false is_sandbox_jules=true asimp_privilege_level=full_privilege"
     fi
 fi
 

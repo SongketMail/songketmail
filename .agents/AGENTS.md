@@ -194,6 +194,16 @@ All Ansible codebases and deployment scripts must implement the **`is_limited_en
 
 All newly-authored or edited Ansible playbooks, roles, and tasks must strictly query `not (is_limited_environment | default(false) | bool)` before running any privileged/system-level operations.
 
+### 3. Dynamic Privilege Level Detection (`asimp_privilege_level`)
+To ensure complete robustness across diverse systems, the setup utilizes dynamic privilege level detection:
+- **`limited_sandbox`**: Used for limited sandbox/ordinary user environments. In this mode, system-altering remediation tasks are bypassed. Instead, the pipeline runs real-time audits and scans using OpenSCAP and Lynis where available (or falling back to baseline simulation scores if completely restricted).
+- **`full_privilege`**: Used for full-privilege bare-metal or VM systems. On these environments, a mandatory **Pre-Remediation Safety Check & Break-Prevention Verification** block is executed BEFORE applying any modifications to ensure no active conflicts or lockouts occur.
+
+### 4. ASIMP Security Hardening & Project Compatibility
+The Ansible System Integrity Management Platform (ASIMP) serves as the **major player** for security hardening within the SongketMail deployment flow.
+- **Architectural Harmony**: ASIMP measures, hardens, and re-measures host security. SongketMail coordinates its decentralized, rootless container deployment directly on top of the hardened host fabric.
+- **Compatibility Patcher**: Because modern Ansible core (2.16+) and unprivileged container sandboxes introduce syntax and operational constraints (e.g. service/systemd modules require systemd as PID 1, and failed_when on block elements is deprecated), our pipeline applies dynamic compatibility patchers on the fly. This ensures ASIMP remains the primary authority for host security enforcement, keeping the project codes and flow fully compatible, without disrupting rootless container networking, storage sovereignty, or remote SSH access controls.
+
 ---
 
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
