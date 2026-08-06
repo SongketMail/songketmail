@@ -168,5 +168,33 @@ AI agents must verify the freshness of local knowledge:
 
 ---
 
+## 🧪 Unprivileged Sandbox & Google Jules Environment Limitations (Rule 31)
+
+To ensure that the **SongketMail** deployment fabric remains highly adaptable across unprivileged developer sandboxes (like Google Jules or other container-isolated testing environments) and production-grade bare-metal/VM instances, all automation code must respect the boundaries of restricted environments.
+
+### 1. Google Jules / Sandbox Constraints
+AI agents operating inside secure, unprivileged sandboxes encounter the following severe system constraints:
+- **No Privilege Escalation**: No root/sudo access. Any task requesting `become: yes` without fallback parameters will immediately crash or fail.
+- **Immutable Host Configurations**: Restricting `/proc/`, `/sys/`, `/etc/`, and system-wide configurations. Modifying kernel parameters via `sysctl` or loading kernel modules via `modprobe` is prohibited.
+- **Disabled Package Managers**: Incapable of installing host OS packages (e.g. `apt`, `yum`) because package operations require root privileges.
+- **Inaccessible Host Service Controllers**: Modifying host systemd services, restarting systemd managers, or enabling persistent systemd lingering (`loginctl enable-linger`) is restricted.
+
+### 2. Dual-Environment Engineering Options
+All Ansible codebases and deployment scripts must implement the **`is_limited_environment`** variable (defined in `group_vars/all.yml` and defaulting to `false`):
+
+- **Option A: Real OS Deployment (`is_limited_environment: false`)**
+  - Runs with zero limitations.
+  - Full root privilege escalation is allowed (`become: yes`).
+  - Executes host-level hardening, package installations, kernel tuning, subuid mapping, and full ASIMP compliance auditing.
+- **Option B: Limited Sandbox Deployment (`is_limited_environment: true`)**
+  - Fully unprivileged execution (disables privilege escalation dynamically).
+  - Skips kernel adjustments, modprobes, system user/group creations, subuid/subgid line edits, and packages installations.
+  - Safely overrides and redirects persistent storage directories to writable locations inside the unprivileged user's home directory (e.g. `~/var/srv/songketmail`).
+  - Bypasses systemd user session manager actions (as systemd is generally absent or restricted in unprivileged sandboxes).
+
+All newly-authored or edited Ansible playbooks, roles, and tasks must strictly query `not (is_limited_environment | default(false) | bool)` before running any privileged/system-level operations.
+
+---
+
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

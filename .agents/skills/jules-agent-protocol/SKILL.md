@@ -40,6 +40,9 @@ To be a good AI citizen in this workspace, follow these strict rules:
     *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
     *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
     ```
+6.  **Unprivileged Sandbox and Google Jules Constraints (Rule 31)**:
+    - AI agents operate in unprivileged environments where escalation/root access is completely unavailable.
+    - All code changes or tasks MUST implement or support the `is_limited_environment` toggle (defined in `group_vars/all.yml`) to gracefully bypass restricted tasks (kernel tuning, system modifications, system package installations, service manager reloading) and target unprivileged user paths instead.
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*

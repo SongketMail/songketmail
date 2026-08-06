@@ -50,3 +50,4 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ songketmail_uid }}"
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songketmail_uid }}/bus"
+  when: not (is_limited_environment | default(false) | bool)
