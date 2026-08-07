@@ -10,7 +10,7 @@ topics: [wsl, ubuntu-26-04, testing, feedback-loop, development, jules-cli]
 
 # 💻 WSL Ubuntu 26.04 Development & Jules CLI Feedback Integration
 
-This document outlines the architecture, operating instructions, and execution details of the development-only testing harness designed for Windows Subsystem for Linux (WSL) running **Ubuntu 26.04 (Noble/Plucky)**. This environment runs real OS workloads outside of the Google Jules unprivileged container sandbox, enabling deep multi-environment testing and automated integration reporting back to Google Jules and active GitHub Pull Requests.
+This document outlines the architecture, operating instructions, and execution details of the development-only testing harness designed for Windows Subsystem for Linux (WSL) running **Ubuntu 26.04 (Resolute Raccoon)**. This environment runs real OS workloads outside of the Google Jules unprivileged container sandbox, enabling deep multi-environment testing and automated integration reporting back to Google Jules and active GitHub Pull Requests.
 
 ---
 
@@ -69,7 +69,17 @@ sudo apt update
 sudo apt install -y podman podman-docker jq curl git ansible python3-pip
 ```
 
-### 3. Configure Rootless SubUID/SubGID Mappings
+### 3. Install Version-Pinned Ansible Collection
+To run tasks involving containers.podman cleanly, install the requirements collection first:
+```bash
+# Verify the playbooks/requirements.yml configuration
+cat playbooks/requirements.yml
+
+# Execute the installation command
+ansible-galaxy collection install -r playbooks/requirements.yml
+```
+
+### 4. Configure Rootless SubUID/SubGID Mappings
 Create the target development user mapping (e.g., for the user `songketmail` or your developer account with UID 2001):
 ```bash
 sudo groupadd -g 2001 songketmail || true
@@ -97,8 +107,8 @@ The telemetry-driven engineering cycle coordinates local execution and cloud ses
                              v
 +-----------------------------------------------------------+
 | 3. Human executes Ansible matrix runner locally:          |
-|    ansible-playbook playbooks/matrix_test.yml \            |
-|                     -e "execution_mode=dev"               |
+|    EXECUTION_MODE=dev ansible-playbook \                  |
+|          playbooks/matrix_test.yml                        |
 +-----------------------------------------------------------+
                              |
                              v
@@ -123,7 +133,8 @@ The telemetry-driven engineering cycle coordinates local execution and cloud ses
 
 1.  **Command Execution**: Run the testing playbook:
     ```bash
-    ansible-playbook playbooks/matrix_test.yml -e "execution_mode=dev"
+    # Enforces development environment execution mode triggering the telemetry block
+    EXECUTION_MODE=dev ansible-playbook playbooks/matrix_test.yml
     ```
 2.  **Dispatching Telemetry**:
     ```bash

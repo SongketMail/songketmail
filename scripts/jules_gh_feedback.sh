@@ -21,11 +21,11 @@ log_error() {
 
 # Define cleanup trap to ensure transient files are handled safely
 cleanup() {
-    local exit_code=$?
     log_info "Cleaning up session..."
-    exit "${exit_code}"
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 log_info "Starting Jules CLI & GitHub PR Feedback Dispatcher"
 
@@ -109,6 +109,7 @@ elif [ -n "${JULES_API_URL}" ] && [ -n "${JULES_API_TOKEN}" ] && [ -n "${JULES_T
     curl -s -X POST \
         -H "Authorization: Bearer ${JULES_API_TOKEN}" \
         -H "Content-Type: application/json" \
+        --connect-timeout 10 --max-time 30 \
         -d "${JSON_BODY}" \
         "${JULES_API_URL}/tasks/${JULES_TASK_ID}/feedback" || log_warn "Jules API endpoint call failed."
 else
@@ -134,6 +135,7 @@ elif [ -n "${GITHUB_TOKEN}" ] && [ -n "${GITHUB_PR_NUMBER}" ] && [ -n "${GITHUB_
         -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Content-Type: application/json" \
+        --connect-timeout 10 --max-time 30 \
         -d "${JSON_BODY}" \
         "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PR_NUMBER}/comments" > /dev/null || log_warn "GitHub REST API call failed."
 else
