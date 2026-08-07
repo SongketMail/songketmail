@@ -1,0 +1,58 @@
+---
+# ==============================================================================
+# Playbook: Podman 5+ Multi-OS Matrix Orchestration
+# Strictly gates developer feedback/telemetry routines from user/production.
+# ==============================================================================
+
+- name: Podman 5+ Multi-OS Matrix Execution
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    # Strict mode separation gate variable
+    execution_mode: "user"
+    distros:
+      - name: "Ubuntu 24.04"
+        image: "docker.io/library/ubuntu:24.04"
+        test_command: "echo 'Ubuntu 24.04 verified'"
+      - name: "Ubuntu 26.04"
+        image: "docker.io/library/ubuntu:plucky"  # Plucky is the Ubuntu 26.04/Noble next target
+        test_command: "echo 'Ubuntu 26.04 verified'"
+      - name: "AlmaLinux 9"
+        image: "docker.io/library/almalinux:9"
+        test_command: "echo 'AlmaLinux 9 verified'"
+      - name: "Debian 12"
+        image: "docker.io/library/debian:12"
+        test_command: "echo 'Debian 12 verified'"
+
+  tasks:
+    - name: Safety Gate Check - Verify Mode Separation
+      ansible.builtin.debug:
+        msg: "Checking execution mode. Current mode: {{ execution_mode }}"
+
+    - name: Run Test Matrix and Feedback Collection in Developer Mode
+      block:
+        - name: Initialize results list
+          ansible.builtin.set_fact:
+            distro_results: []
+
+        - name: Run multi-distro Podman matrix
+          ansible.builtin.include_tasks:
+            file: playbooks/tasks/run_distro.yml
+          loop: "{{ distros }}"
+          loop_control:
+            loop_var: distro
+
+        - name: Run feedback collector role to compile reports
+          ansible.builtin.import_role:
+            name: feedback_collector
+
+      when: execution_mode | default('user') == 'dev'
+
+    - name: Execute Standard User/Production Logic
+      block:
+        - name: Production run warning
+          ansible.builtin.debug:
+            msg: "🟢 Executing in standard User/Production Mode. Zero telemetry and no telemetry feedback active."
+      when: execution_mode | default('user') != 'dev'

@@ -8,6 +8,8 @@ exclude:
   - vendor/
   - .github/
   - roles/
+  - playbooks/
+  - scripts/
   - group_vars/
   - inventory/
   - site.yml
@@ -15,6 +17,7 @@ exclude:
   - LICENSE
   - README.md
   - asimp_hardening_playbook.yml
+  - wsl_feedback_playbook.yml
   - templates/
   - asimp/
   - run_asimp.sh

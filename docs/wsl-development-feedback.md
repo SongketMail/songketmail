@@ -14,7 +14,7 @@ This document outlines the architecture, operating instructions, and execution d
 
 ---
 
-## 🎯 Architectural Intent & Boundary
+## 🎨 Architectural Intent & Boundary
 
 To preserve stability and ease of deployment for end-users, this feedback and testing framework is **strictly limited to development sessions**.
 
@@ -22,17 +22,17 @@ To preserve stability and ease of deployment for end-users, this feedback and te
 ┌─────────────────────────────────────────────────────────┐
 │               Local WSL 2 (Ubuntu 26.04)                │
 │  - Real OS host kernel                                  │
-│  - Systemd user session manager running                  │
+│  - Systemd user session manager running                 │
 │  - Podman 5+ installed                                  │
 └────────────────────────────┬────────────────────────────┘
                              │
-                             ▼  [scripts/wsl_test_feedback.sh]
+                             ▼  [scripts/jules_gh_feedback.sh]
 ┌─────────────────────────────────────────────────────────┐
-│              wsl_feedback_playbook.yml                  │
+│              playbooks/matrix_test.yml                  │
 │  - Verifies WSL 2 systemd socket and Quadlet engine     │
-│  - Executes decoupled 7-service mail fabric smoke tests │
-│  - Queries Jules CLI + API for task instructions        │
-│  - Posts runtime logs/debug diagnostics back to Jules  │
+│  - Executes parallel multi-distro container matrix test  │
+│  - Captures failure logs, exit codes, and diff analysis │
+│  - Serializes report to /tmp/jules_telemetry.json       │
 └────────────────────────────┬────────────────────────────┘
                              │
                              ├──────────────────────────────┐
@@ -45,8 +45,8 @@ To preserve stability and ease of deployment for end-users, this feedback and te
 
 ### 🚫 Restricted Mode Gate (Development Only)
 These scripts, configurations, and playbooks are **explicitly bypassed** for regular users deploying in production or "use-only mode". This separation is enforced using two layers of safety guards:
-1.  **Environment Variable Gate**: The bash runner `scripts/wsl_test_feedback.sh` terminates immediately unless `WSL_DEVELOPMENT_MODE` is explicitly set to `true`.
-2.  **Ansible Playbook Gate**: The playbook `wsl_feedback_playbook.yml` performs a strict check against the `wsl_development_mode` variable (which defaults to `false` in normal runs) and gracefully exits if disabled.
+1.  **Environment Variable Gate**: The bash runner `scripts/jules_gh_feedback.sh` terminates immediately unless `EXECUTION_MODE` is explicitly set to `dev`.
+2.  **Ansible Playbook Gate**: The playbook `playbooks/matrix_test.yml` performs a strict check against the `execution_mode` variable (which defaults to `user` in normal runs) and gracefully skips testing if disabled.
 
 ---
 
@@ -80,6 +80,59 @@ echo "songketmail:100000:65536" | sudo tee -a /etc/subgid
 
 ---
 
+## 🔄 Human-in-the-Loop Developer Workflow
+
+The telemetry-driven engineering cycle coordinates local execution and cloud sessions:
+
+```
++-----------------------------------------------------------+
+| 1. Human asks Jules to fix an issue / generate code      |
++-----------------------------------------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+| 2. Jules pushes branch and submits a GitHub Pull Request   |
++-----------------------------------------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+| 3. Human executes Ansible matrix runner locally:          |
+|    ansible-playbook playbooks/matrix_test.yml \            |
+|                     -e "execution_mode=dev"               |
++-----------------------------------------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+| 4. Multi-OS test matrix runs inside rootless Podman;      |
+|    extracts exit status, logs, & outputs diagnostics JSON|
++-----------------------------------------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+| 5. Runner script dispatches feedback:                     |
+|    - Appends Markdown tables to active GitHub PR comment  |
+|    - Streams diagnostics back to Google Jules CLI / API   |
++-----------------------------------------------------------+
+                             |
+                             v
++-----------------------------------------------------------+
+| 6. Human reviews test telemetry inside Jules CLI, then    |
+|    directs Jules on the subsequent refactoring steps      |
++-----------------------------------------------------------+
+```
+
+1.  **Command Execution**: Run the testing playbook:
+    ```bash
+    ansible-playbook playbooks/matrix_test.yml -e "execution_mode=dev"
+    ```
+2.  **Dispatching Telemetry**:
+    ```bash
+    export EXECUTION_MODE=dev JULES_TASK_ID="task-123" GITHUB_TOKEN="ghp_***" GITHUB_PR_NUMBER="1" GITHUB_REPOSITORY="SongketMail/songketmail"
+    ./scripts/jules_gh_feedback.sh
+    ```
+
+---
+
 ## 🔄 The Feedback Loop Mechanics
 
 When testing locally inside WSL, the development harness automates communications with **Google Jules CLI** and **GitHub Pull Request APIs**.
@@ -87,7 +140,7 @@ When testing locally inside WSL, the development harness automates communication
 ### 1. Querying Jules CLI / API
 The integration uses standard environmental triggers and commands:
 - **Environment Variables**: `JULES_API_URL`, `JULES_TASK_ID`, and `GITHUB_TOKEN` are passed to the WSL workspace.
-- **Jules CLI**: The tool invoking `jules task` or `jules comment` is wrapped inside local query loops to pull updated task targets or prompt updates.
+- **Jules CLI**: The tool invoking `jules chat` is wrapped inside local query loops to pull updated task targets or prompt updates.
 - **API Fetching**: If direct CLI binaries are restricted, the script falls back to an HTTP API request:
   ```bash
   curl -s -H "Authorization: Bearer $JULES_API_TOKEN" \
@@ -109,26 +162,6 @@ Detailed reports, test outcomes, error traces, and debugging information are col
   ```bash
   jules feedback --task-id "$JULES_TASK_ID" --status "completed" --log-file "./data/wsl_run.log"
   ```
-
----
-
-## 🛠️ The Core Development Suite
-
-The suite consists of two newly-introduced assets in the workspace:
-
-### 1. The Bash Script (`scripts/wsl_test_feedback.sh`)
-Serves as the outer execution wrapper. It is responsible for:
-- Confirming that the environment is indeed WSL (checking `/proc/sys/fs/binfmt_misc/WSL` or `/proc/version`).
-- Confirming the OS version is Ubuntu 26.04.
-- Checking that `WSL_DEVELOPMENT_MODE=true` is set.
-- Bootstrapping dependencies, loading necessary WSL kernel variables (such as enabling unprivileged port binding), and calling the Ansible playbook.
-
-### 2. The Ansible Playbook (`wsl_feedback_playbook.yml`)
-The playbook coordinates:
-- Validating rootless Podman 5+ compatibility.
-- Deploying the mock or real SongketMail fabric inside the unprivileged user session.
-- Simulating a mock client-IP mail session using BunkerWeb and Postfix.
-- Pulling state updates and writing/posting the formatted markdown results to the GitHub PR and Jules.
 
 ---
 
