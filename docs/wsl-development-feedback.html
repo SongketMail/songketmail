@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S3-Compatible Object Storage — SongketMail :: LAB</title>
+    <title>WSL Ubuntu 26.04 Development & Jules CLI Feedback — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 4: S3-Compatible Object Storage Options
+                    Deep Research // Topic 15: WSL Ubuntu 26.04 Development & Jules Feedback Integration
                 </div>
             </div>
 
@@ -120,7 +120,7 @@
                         <span>✉️</span>
                         <span>3. Postfix & Dovecot</span>
                     </a>
-                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🪣</span>
                         <span>4. S3 Object Storage</span>
                     </a>
@@ -150,13 +150,13 @@
                         <span>10. References & Resources</span>
                     </a>
 
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
                     <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📋</span>
-                        <span>12. Jules Planning Document</span>
+                        <span>12. Jules Operational Plan</span>
                     </a>
                     <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🛡️</span>
@@ -166,12 +166,12 @@
                         <span>🔍</span>
                         <span>14. Discovery Protocol</span>
                     </a>
-                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>💻</span>
                         <span>15. WSL Feedback Loop</span>
                     </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -188,128 +188,84 @@
             <!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>🪣</span>
-                    <span>S3-Compatible Object Storage Options</span>
+                    <span>💻</span>
+                    <span>WSL Ubuntu 26.04 Development & Jules Feedback Loop</span>
                 </h1>
             </div>
 
-            <!-- Introduction Section -->
+            <!-- Executive Summary -->
             <div class="space-y-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    Why Move Email Storage to Object Storage?
+                    1. Executive Summary & Intent
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Email files historically reside in local maildirs on high-performance SAN or NAS structures. As email body and attachment sizes grow, local hardware limits scalability. Storing mail bodies and attachments in an **S3-compatible object storage cluster** allows IMAP and SMTP servers to remain largely stateless, shifting heavy storage lifting to distributed, highly-redundant storage fabrics.
+                    To expand testing beyond the unprivileged Google Jules container sandbox, developers can run full local test environments on Windows Subsystem for Linux (WSL) running **Ubuntu 26.04 (Noble/Plucky)**. This framework enables testing the entire 7-service decoupled email fabric with Podman 5+ under a real systemd service environment, automatically fetching tasks from Jules, and piping debugging output back to both Jules and the active GitHub PR.
                 </p>
-            </div>
-
-            <!-- Comparative Analysis Table -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Comparing Open-Source S3 Store Solutions</h3>
-
-                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Software</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">License</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Pros</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Cons</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <tr>
-                                <td class="px-3 py-3 font-bold">MinIO</td>
-                                <td class="px-3 py-3 font-mono">AGPL-3.0</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Extremely popular, rich UI, highly optimized S3 API compatibility.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">AGPL license is highly restrictive; heavy memory footprint on multiple buckets.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">SeaweedFS</td>
-                                <td class="px-3 py-3 font-mono">Apache-2.0</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Blazing fast small-file storage (via Haystack-like model), low metadata overhead.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Relatively less known; UI dashboard is minimal.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Garage S3</td>
-                                <td class="px-3 py-3 font-mono">AGPL-3.0</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Written in Rust, incredibly lightweight, designed for multi-region mesh replication.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Not suitable for multi-petabyte datasets.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Ceph RADOS</td>
-                                <td class="px-3 py-3 font-mono">LGPL-2.1</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Enterprise standard, massive scalability, robust high-availability structure.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Huge administrative overhead; requires dedicated disks and intense resource tuning.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="p-3 bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 text-red-900 dark:text-red-300 text-xs rounded">
+                    <strong>⚠️ Development Only Warning:</strong> This harness is strictly intended for local testing and developer feedback loops. It is bypassed automatically for regular users to prevent any unauthorized API calls or environment conflicts.
                 </div>
             </div>
 
-            <!-- Our Deployed S3 Store: MinIO -->
+            <!-- System Setup -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>💡</span>
-                    <span>Our Deployed S3 Engine: MinIO</span>
+                    <span>⚙️</span>
+                    <span>2. WSL & Podman 5+ Configuration</span>
                 </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    For this SongketMail fabric baseline, we deploy <strong>MinIO</strong> as our primary S3-compatible object storage server. This provides a highly standardized, performant, and reliable storage backend with a complete administrative Console interface.
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    Follow these simple steps on your local WSL instance to prepare it for development testing:
                 </p>
-                <div class="bg-violet-50 dark:bg-slate-900/60 p-4 rounded-lg border border-violet-100 dark:border-slate-755 text-xs">
-                    <p class="font-semibold text-violet-750 dark:text-violet-350">🛠️ MinIO Storage Sovereignty</p>
-                    <p class="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
-                        By utilizing unprivileged namespaces mapped to UID/GID 2001:2001, MinIO accesses host directories directly under <code>/var/srv/songketmail/minio/data</code> securely without dynamic permission shifts or root privileges.
-                    </p>
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-750">
+                        <strong>Step 1: Enable Systemd in WSL</strong>
+                        <p class="mt-1 text-slate-500 font-mono">
+                            # In /etc/wsl.conf:<br>
+                            [boot]<br>
+                            systemd=true
+                        </p>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-750">
+                        <strong>Step 2: Install Podman 5+</strong>
+                        <p class="mt-1 text-slate-500 font-mono">
+                            sudo apt update && sudo apt install -y podman podman-docker jq curl git ansible
+                        </p>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-750">
+                        <strong>Step 3: Setup SubUID/GID Namespace Mapping</strong>
+                        <p class="mt-1 text-slate-500 font-mono">
+                            sudo useradd -u 2001 -g 2001 -m -s /bin/bash songketmail || true<br>
+                            echo "songketmail:100000:65536" | sudo tee -a /etc/subuid<br>
+                            echo "songketmail:100000:65536" | sudo tee -a /etc/subgid
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Deployment Blueprint: MinIO Quadlet -->
+            <!-- Feedback Loops -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">MinIO Declarative Container Quadlet</h3>
-                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By launching a standard MinIO server inside our unprivileged container fabric, we instantly gain a high-performance S3 endpoint.
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
-ContainerName=songketmail-s3
-Network=songketmail-net
-Image=minio/minio:RELEASE.2024-07-04T14-25-45Z
-Volume=/var/srv/songketmail/minio/data:/data:Z
-Exec=server /data --console-address ":9001"
-UserNS=keep-id:uid=2001,gid=2001
-
-[Service]
-Restart=always</pre>
-            </div>
-
-            <!-- Dovecot MDA to MinIO S3 Object Storage Architecture -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>🏗️</span>
-                    <span>Dovecot MDA to MinIO S3 Object Storage Architecture</span>
+                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>🔄</span>
+                    <span>3. The Jules CLI and GitHub API Loop</span>
                 </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Dovecot separates indexing metadata from message payloads. Structural index files (<code>dovecot.index</code>) are stored on high-speed host NVMe volumes mounted at <code>/var/srv/songketmail/dovecot/indexes</code>. Message bodies are transmitted to MinIO S3 object storage via Dovecot's <strong>obox / s3</strong> plugin drivers.
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    The integrated loop fetches task definitions and pipes the result directly back to our active integration nodes.
                 </p>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    This storage pipeline integrates three primary performance mechanisms:
-                </p>
-                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
-                    <li><strong>Local Filesystem Caching (fscache):</strong> A local ring-buffer cache (e.g., 512MB) configured on NVMe host storage at <code>/var/srv/songketmail/dovecot/cache</code> retains recently accessed message bodies. This reduces S3 API read requests during active IMAP client synchronization.</li>
-                    <li><strong>Data Compression (compress:zstd:3):</strong> Message bodies are compressed using Zstandard (level 3) before storage in MinIO, reducing network transfer overhead and storage utilization.</li>
-                    <li><strong>Dispersion Prefix Hashing (%8Mu/%u):</strong> An MD5 hash of the recipient's username is calculated, and the first 8 characters are prepended to the S3 object key path. This dispersion prefix prevents object key grouping, enabling MinIO to distribute object listings and I/O operations evenly across storage disks.</li>
+                <ul class="list-disc pl-5 text-xs text-slate-700 dark:text-slate-300 space-y-2">
+                    <li><strong>Jules CLI Integration:</strong> The runner queries task details using <code>jules task show</code> or via the Jules REST endpoints.</li>
+                    <li><strong>Error Logging:</strong> Output dumps and detailed container logs are captured on failures and packed into structured formats.</li>
+                    <li><strong>GitHub PR Feedback:</strong> The playbook uses <code>curl</code> to POST comments directly to the active issue/PR timeline under the developer's credentials.</li>
                 </ul>
             </div>
 
-            <!-- Back navigation / Action links -->
+            <!-- Navigation Actions -->
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="webmail-clients.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
-                    <span>📧</span>
-                    <span>Next: Webmail Clients Comparison</span>
+                <a href="index.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
+                    <span>🏠</span>
+                    <span>Back to Home</span>
                 </a>
-                <a href="postfix-dovecot.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
-                    <span>✉️</span>
-                    <span>Back: Postfix & Dovecot</span>
+                <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
+                    <span>🔍</span>
+                    <span>Back: Discovery SOP</span>
                 </a>
             </div>
 
@@ -318,30 +274,30 @@ Restart=always</pre>
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-            <!-- Specs Widget Card -->
+            <!-- Specs Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Storage Stats</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
                 <div class="text-xs space-y-2">
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">MinIO License</span>
-                        <span class="font-bold text-red-500">AGPLv3</span>
+                        <span class="text-slate-500 dark:text-slate-400">Target Host</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Ubuntu 26.04</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Seaweed License</span>
-                        <span class="font-bold text-green-500">Apache 2</span>
+                        <span class="text-slate-500 dark:text-slate-400">Environment</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">WSL 2 Systemd</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Ideal for Mail</span>
-                        <span class="font-bold text-violet-600">SeaweedFS</span>
+                        <span class="text-slate-500 dark:text-slate-400">Podman Version</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">5.0+</span>
                     </div>
                     <div class="flex justify-between pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">S3 Port</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">8333</span>
+                        <span class="text-slate-500 dark:text-slate-400">Mode Gate</span>
+                        <span class="font-bold text-red-500">DEV_ONLY</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Meta Links & Community Widget Card -->
+            <!-- Meta Links / Community Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <div>
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
@@ -369,11 +325,11 @@ Restart=always</pre>
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-            <span>[ TOPIC: 4 ]</span>
+            <span>[ TOPIC: 15 ]</span>
             <span>|</span>
-            <span>[ TYPE: S3 OBJECT ]</span>
+            <span>[ STD: OKF_WSL_FEEDBACK ]</span>
             <span>|</span>
-            <span>[ RECOMMEND: SEAWEEDFS ]</span>
+            <span>[ ENV: DEBIAN_UBUNTU ]</span>
         </div>
     </footer>
 
