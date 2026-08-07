@@ -203,6 +203,12 @@ python3 scripts/privilege_and_safety_test.py
 ASIMP_PRIV_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['privileges']['asimp_privilege_level'])")
 RISK_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['safety']['risk_level'])")
 
+# If is_limited_environment is set to true in group_vars/all.yml, force limited_sandbox mode
+if grep -q "is_limited_environment: true" group_vars/all.yml; then
+    echo "Forcing limited_sandbox mode because is_limited_environment is set to true in group_vars/all.yml"
+    ASIMP_PRIV_LEVEL="limited_sandbox"
+fi
+
 echo "Detected ASIMP Privilege Level: ${ASIMP_PRIV_LEVEL}"
 echo "Detected Safety Risk: ${RISK_LEVEL}"
 

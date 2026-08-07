@@ -9,3 +9,4 @@ roles/ansible-hardening/
 roles/dev-sec.ssh-hardening/
 roles/linuxmalaysia.lynis_ansible/
 asimp/
+tools/

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-06T22:32:33Z",
+  "timestamp": "2026-08-07T14:49:12Z",
   "privileges": {
     "uid": 0,
     "username": "root",
@@ -10,15 +10,14 @@
     "asimp_privilege_level": "full_privilege"
   },
   "safety": {
-    "risk_level": "CRITICAL_RISK",
-    "issues": [
+    "risk_level": "LOW_RISK",
+    "issues": [],
+    "warnings": [
       {
-        "vector": "PODMAN_MISSING",
-        "severity": "CRITICAL_RISK",
-        "description": "Podman is not installed on the system. Project cannot run container fabrics."
+        "vector": "PODMAN_VERSION_SUBOPTIMAL",
+        "description": "Podman version (4.9.3) is below the recommended Podman 5.0.0+ standard. Quadlet features may be limited."
       }
     ],
-    "warnings": [],
     "passed": [
       {
         "vector": "SSH_KEYS",

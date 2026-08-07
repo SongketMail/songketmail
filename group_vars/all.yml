@@ -4,7 +4,7 @@
 # Environment constraints toggle
 # Set to true when running inside unprivileged environments/sandboxes (like Google Jules)
 # to bypass OS kernel tuning, system user/group creation, and other privileged tasks.
-is_limited_environment: false
+is_limited_environment: true
 
 # Fabric Isolation settings
 cluster_prefix: "songketmail"
