@@ -21,6 +21,8 @@ This active manifest maps the spatial memory and current cognitive state of the 
   - [x] Add Part 14 to `docs/SUMMARY.md` and `docs/index.md`.
   - [x] Run a Python automation script to inject Part 14 link into all interactive `.html` sidebars across the `docs/` library.
   - [x] Codify Rule 29 and Rule 30 in `AGENTS.md` and `.agents/AGENTS.md`.
+  - [x] Create detail design documentation `docs/wsl-development-feedback.md` and HTML version `docs/wsl-development-feedback.html` for WSL Ubuntu 26.04 testing and feedback integration loop.
+  - [x] Implement dedicated Ansible playbook `wsl_feedback_playbook.yml` and bash script `scripts/wsl_test_feedback.sh` with strict development session safety gating.
 - **Active Milestones**:
   - [x] Establish spatial memory context by creating `.agents/brain/active_context_manifest.md`.
   - [ ] Perform comprehensive validations (Jekyll syntax checking, file checks).
@@ -37,6 +39,7 @@ This repository uses standard OKF metadata mapping. The following table identifi
 | `AGENTS.md` | Root Agent Guidelines & Gateway | `[agents, reference-manual, compliance]` |
 | `.agents/AGENTS.md` | Sovereign Constitutional Rulebook | `[agents, reference-manual, compliance]` |
 | `docs/SOP-KNOWLEDGE-FIRST-DISCOVERY.md` | Local-First SOP Protocol details | `[okf, discovery, context-management, brain, SOP]` |
+| `docs/wsl-development-feedback.md` | WSL Ubuntu 26.04 development & feedback specs | `[wsl, ubuntu-26-04, testing, feedback-loop, jules]` |
 | `docs/ansible-fqcn.md` | Ansible FQCN & Deployment Rules | `[ansible, fqcn, automation, compliance]` |
 | `docs/podman-rootless.md` | Podman 5 rootless configuration details | `[podman, rootless, user-namespace, quadlet]` |
 | `docs/index.md` | Main Documentation portal homepage | `[songketmail, email, portal, documentation]` |

@@ -66,6 +66,7 @@ Explore our interactive and interconnected deep research topics:
 12. [Google Jules End-to-End Operational Plan](jules-planning.md)
 13. [ASIMP OS Hardening and Compliance Report](asimp-hardening-report.md)
 14. [SOP: Knowledge-First Discovery & Context Preservation Protocol](SOP-KNOWLEDGE-FIRST-DISCOVERY.md)
+15. [WSL Ubuntu 26.04 Development & Jules CLI Feedback](wsl-development-feedback.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
