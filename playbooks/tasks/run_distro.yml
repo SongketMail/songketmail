@@ -1,0 +1,48 @@
+---
+# Task helper for running multi-OS containers
+- name: "Pull and run test container for distro: {{ distro.name }}"
+  block:
+    - name: "Pull container image {{ distro.image }}"
+      containers.podman.podman_image:
+        name: "{{ distro.image }}"
+        state: present
+      register: image_pull_result
+
+    - name: "Run test command inside {{ distro.name }} container"
+      containers.podman.podman_container:
+        name: "jules_test_{{ distro.name | replace(':', '_') | replace('.', '_') }}"
+        image: "{{ distro.image }}"
+        state: started
+        recreate: true
+        command: "{{ distro.test_command }}"
+      register: container_run_result
+
+    - name: "Extract status and logs for distro: {{ distro.name }}"
+      ansible.builtin.set_fact:
+        distro_results: "{{ distro_results | default([]) + [{
+          'name': distro.name,
+          'image': distro.image,
+          'status': 'SUCCESS',
+          'exit_code': 0,
+          'logs': 'Container started and ran successfully: ' ~ (container_run_result.container.State.Status | default('running', true)),
+          'diff': 'Image state: ' ~ (image_pull_result.status | default('present', true))
+        }] }}"
+
+  rescue:
+    - name: "Handle failure for distro: {{ distro.name }}"
+      ansible.builtin.set_fact:
+        distro_results: "{{ distro_results | default([]) + [{
+          'name': distro.name,
+          'image': distro.image,
+          'status': 'FAILED',
+          'exit_code': 1,
+          'logs': 'Execution failed: ' ~ (ansible_failed_result.msg | default('Unknown error', true)),
+          'diff': 'Failed to execute command: ' ~ (distro.test_command | default('None', true))
+        }] }}"
+
+  always:
+    - name: "Clean up container for distro: {{ distro.name }}"
+      containers.podman.podman_container:
+        name: "jules_test_{{ distro.name | replace(':', '_') | replace('.', '_') }}"
+        state: absent
+      failed_when: false

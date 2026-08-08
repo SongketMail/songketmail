@@ -1,0 +1,34 @@
+---
+# Tasks for the feedback collector role
+# Gathers details of all executed test runs, merges them with host telemetry, and writes them to a JSON file.
+
+- name: Retrieve host kernel platform details
+  ansible.builtin.shell:
+    cmd: "uname -a"
+  register: collector_host_uname
+  changed_when: false
+  when: execution_mode | default('user') == 'dev'
+
+- name: Retrieve host OS platform distribution
+  ansible.builtin.shell:
+    cmd: "cat /etc/os-release"
+  register: collector_host_os_release
+  changed_when: false
+  when: execution_mode | default('user') == 'dev'
+
+- name: Set up feedback telemetry JSON structure
+  ansible.builtin.copy:
+    content: >
+      {{
+        {
+          'timestamp': lookup('pipe', 'date -u +"%Y-%m-%dT%H:%M:%SZ"'),
+          'host_info': {
+            'kernel': collector_host_uname.stdout | default('Unknown Kernel', true),
+            'os_release': collector_host_os_release.stdout | default('Unknown OS', true)
+          },
+          'results': distro_results | default([], true)
+        } | to_nice_json
+      }}
+    dest: "{{ telemetry_file_path | default(playbook_dir ~ '/../data/jules_telemetry.json', true) }}"
+    mode: "0600"
+  when: execution_mode | default('user') == 'dev'
