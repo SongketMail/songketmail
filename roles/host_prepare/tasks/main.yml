@@ -41,6 +41,15 @@
     sysctl_set: yes
   when: not (is_limited_environment | default(false) | bool)
 
+- name: Set sysctl low-port binding for unprivileged users
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "25"
+    state: present
+    reload: yes
+    sysctl_set: yes
+  when: not (is_limited_environment | default(false) | bool)
+
 - name: Create non-privileged system group for SongketMail
   ansible.builtin.group:
     name: "{{ songketmail_user }}"
@@ -108,9 +117,14 @@
     group: "{{ songketmail_user if not (is_limited_environment | default(false) | bool) else omit }}"
     mode: '0700'
 
-- name: Ensure podman-docker package is installed for compatible docker commands with podman
+- name: Ensure required base packages are installed
   ansible.builtin.package:
-    name: "podman-docker"
+    name:
+      - python3
+      - python3-pip
+      - ansible
+      - podman
+      - podman-docker
     state: present
   when: not (is_limited_environment | default(false) | bool)
 
