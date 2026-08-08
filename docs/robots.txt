@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://songketmail.github.io/songketmail/sitemap.xml
