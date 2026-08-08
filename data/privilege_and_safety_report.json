@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-07T14:49:12Z",
+  "timestamp": "2026-08-08T09:18:37Z",
   "privileges": {
-    "uid": 0,
-    "username": "root",
+    "uid": 1001,
+    "username": "jules",
     "has_sudo": true,
     "can_manage_systemctl": true,
     "can_modify_sysctl": true,
@@ -10,14 +10,40 @@
     "asimp_privilege_level": "full_privilege"
   },
   "safety": {
-    "risk_level": "LOW_RISK",
-    "issues": [],
-    "warnings": [
+    "risk_level": "CRITICAL_RISK",
+    "issues": [
       {
-        "vector": "PODMAN_VERSION_SUBOPTIMAL",
-        "description": "Podman version (4.9.3) is below the recommended Podman 5.0.0+ standard. Quadlet features may be limited."
+        "vector": "PORT_25_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 25 (SMTP (Postfix)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_80_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 80 (HTTP (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_443_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_587_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 587 (Submission (Postfix SMTP-MSA)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PORT_993_OCCUPIED",
+        "severity": "CRITICAL_RISK",
+        "description": "Port 993 (IMAPS (Dovecot Secure)) is already in use by another active service. Remediation/Deployment will break."
+      },
+      {
+        "vector": "PODMAN_MISSING",
+        "severity": "CRITICAL_RISK",
+        "description": "Podman is not installed on the system. Project cannot run container fabrics."
       }
     ],
+    "warnings": [],
     "passed": [
       {
         "vector": "SSH_KEYS",
@@ -34,30 +60,6 @@
       {
         "vector": "SYSCTL_KEY_SUPPORTED",
         "description": "Kernel key net.ipv4.ip_forward exists and is modifiable."
-      },
-      {
-        "vector": "PORT_25_AVAILABLE",
-        "description": "Port 25 (SMTP (Postfix)) is free and ready for binding."
-      },
-      {
-        "vector": "PORT_80_AVAILABLE",
-        "description": "Port 80 (HTTP (BunkerWeb Webmail Proxy)) is free and ready for binding."
-      },
-      {
-        "vector": "PORT_143_AVAILABLE",
-        "description": "Port 143 (IMAP (Dovecot)) is free and ready for binding."
-      },
-      {
-        "vector": "PORT_443_AVAILABLE",
-        "description": "Port 443 (HTTPS (BunkerWeb Webmail Proxy)) is free and ready for binding."
-      },
-      {
-        "vector": "PORT_587_AVAILABLE",
-        "description": "Port 587 (Submission (Postfix SMTP-MSA)) is free and ready for binding."
-      },
-      {
-        "vector": "PORT_993_AVAILABLE",
-        "description": "Port 993 (IMAPS (Dovecot Secure)) is free and ready for binding."
       },
       {
         "vector": "PORT_8080_AVAILABLE",

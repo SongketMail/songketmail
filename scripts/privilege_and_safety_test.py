@@ -155,7 +155,6 @@ def _check_port_availability(priv_info, issues, warnings, passed):
     critical_ports = {
         25: "SMTP (Postfix)",
         80: "HTTP (BunkerWeb Webmail Proxy)",
-        143: "IMAP (Dovecot)",
         443: "HTTPS (BunkerWeb Webmail Proxy)",
         587: "Submission (Postfix SMTP-MSA)",
         993: "IMAPS (Dovecot Secure)",

@@ -68,6 +68,7 @@ Explore our interactive and interconnected deep research topics:
 14. [SOP: Knowledge-First Discovery & Context Preservation Protocol](SOP-KNOWLEDGE-FIRST-DISCOVERY.md)
 15. [WSL Ubuntu 26.04 Development & Jules CLI Feedback](wsl-development-feedback.md)
 16. [Ansible Configuration Review and Adoption Assessment](ANSIBLE-ADOPTION-REVIEW.md)
+17. [Mail Web Application Ingress Verification](mail-web-app-verification.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
