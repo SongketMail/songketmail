@@ -12,6 +12,7 @@ import socket
 import subprocess
 from datetime import datetime, timezone
 
+
 def check_privileges():
     """Detects what level of privileges we have by testing administrative capabilities."""
     uid = os.getuid()
@@ -63,21 +64,13 @@ def check_privileges():
         "asimp_privilege_level": asimp_privilege_level
     }
 
-def check_safety(priv_info):
-    """
-    Performs critical safety checks to ensure that ASIMP or SSH/sysctl remediations
-    do not break the operating system, existing system configurations, or project codes.
-    """
-    issues = []
-    warnings = []
-    passed = []
 
-    # 1. SSH Breakage Check
-    # Disabling password authentication is a common remediation. If no authorized keys are present,
-    # the user will be completely locked out.
+def _check_ssh_safety(priv_info, issues, warnings, passed):
+    """Verifies OpenSSH safety gates to prevent system lockouts during hardening."""
     ssh_dir = os.path.expanduser("~/.ssh")
     auth_keys_path = os.path.join(ssh_dir, "authorized_keys")
     has_keys = False
+
     if os.path.exists(auth_keys_path):
         try:
             with open(auth_keys_path, "r") as f:
@@ -131,8 +124,9 @@ def check_safety(priv_info):
             "description": "OpenSSH server daemon (sshd) not found on host. SSH remediation will be skipped or may fail."
         })
 
-    # 2. Kernel / Sysctl Safety Check
-    # Verify if we can read and write virtualized/containerized kernel parameters
+
+def _check_kernel_sysctl_safety(priv_info, issues, warnings, passed):
+    """Validates virtualized or host kernel sysctl modification safety."""
     sysctl_keys = ["vm.max_map_count", "net.ipv4.ip_forward"]
     for key in sysctl_keys:
         proc_path = f"/proc/sys/{key.replace('.', '/')}"
@@ -155,8 +149,9 @@ def check_safety(priv_info):
                     "description": f"Kernel key {key} exists and is modifiable."
                 })
 
-    # 3. Port Conflict / Service Check
-    # Critical ports utilized by SongketMail reverse proxy and email services
+
+def _check_port_availability(priv_info, issues, warnings, passed):
+    """Audits critical network service ports used by the SongketMail fabric."""
     critical_ports = {
         25: "SMTP (Postfix)",
         80: "HTTP (BunkerWeb Webmail Proxy)",
@@ -207,7 +202,9 @@ def check_safety(priv_info):
         finally:
             s.close()
 
-    # 4. Storage Directory Ownership / Permission Check
+
+def _check_storage_safety(priv_info, issues, warnings, passed):
+    """Ensures base storage and configuration paths have sufficient write capabilities."""
     storage_base = "/var/srv/songketmail"
     if priv_info["privilege_level"] == "UNPRIVILEGED_SANDBOX":
         # Check if the unprivileged user has write access to the host-level storage_base or its home alternative
@@ -249,7 +246,9 @@ def check_safety(priv_info):
                 "description": f"Host persistent storage base path '{storage_base}' is not writable. Check permissions or mount options."
             })
 
-    # 5. Podman Runtime version check
+
+def _check_podman_safety(priv_info, issues, warnings, passed):
+    """Inspects the system's Podman installation and runtime version compatibility."""
     try:
         res = subprocess.run(["podman", "--version"], capture_output=True, text=True, timeout=5)
         if res.returncode == 0:
@@ -285,6 +284,23 @@ def check_safety(priv_info):
             "description": "Podman is not installed on the system. Project cannot run container fabrics."
         })
 
+
+def check_safety(priv_info):
+    """
+    Performs critical safety checks to ensure that ASIMP or SSH/sysctl remediations
+    do not break the operating system, existing system configurations, or project codes.
+    """
+    issues = []
+    warnings = []
+    passed = []
+
+    # Delegate checks to individual modular verification helpers
+    _check_ssh_safety(priv_info, issues, warnings, passed)
+    _check_kernel_sysctl_safety(priv_info, issues, warnings, passed)
+    _check_port_availability(priv_info, issues, warnings, passed)
+    _check_storage_safety(priv_info, issues, warnings, passed)
+    _check_podman_safety(priv_info, issues, warnings, passed)
+
     # Summarize Risk Status
     risk_level = "LOW_RISK"
     if any(i["severity"] == "CRITICAL_RISK" for i in issues):
@@ -300,6 +316,7 @@ def check_safety(priv_info):
         "warnings": warnings,
         "passed": passed
     }
+
 
 def print_text_report(priv, safety):
     """Prints a beautifully styled text report to the terminal console."""
@@ -334,6 +351,7 @@ def print_text_report(priv, safety):
         print("⚠️  WARNING: Full privileges are available, but critical safety checks FAILED.")
         print("    Remediation actions may result in OS, system-access, or project code breakage!")
         print("=" * 80)
+
 
 def generate_markdown_report(priv, safety):
     """Generates an OKF v0.1 compliant Markdown report file inside docs/."""
@@ -447,6 +465,7 @@ Before running active remediation scripts (which may modify SSH configuration, n
         f.write(content)
     print(f"Generated Markdown report at: {report_path}")
 
+
 def generate_json_report(priv, safety):
     """Generates a structured JSON file at data/privilege_and_safety_report.json."""
     os.makedirs("data", exist_ok=True)
@@ -462,6 +481,7 @@ def generate_json_report(priv, safety):
         json.dump(report_data, f, indent=2)
     print(f"Generated JSON report at: {report_path}")
 
+
 def main():
     print("Running privilege detection and safety checks...")
     priv = check_privileges()
@@ -473,6 +493,7 @@ def main():
     # If unprivileged sandbox or if safety check fails, return code can indicate status
     # We exit 0 so that the pipeline continues to its appropriate branched mode gracefully
     sys.exit(0)
+
 
 if __name__ == '__main__':
     main()

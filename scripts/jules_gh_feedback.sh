@@ -33,6 +33,37 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+# Helper function to invoke GitHub API with deduplicated parameters
+github_api_request() {
+    local method="$1"
+    local path_or_url="$2"
+    local data_payload="${3:-}"
+
+    # Determine absolute URL
+    local url="${path_or_url}"
+    if [[ ! "${url}" =~ ^https?:// ]]; then
+        url="https://api.github.com/${url}"
+    fi
+
+    local -a curl_opts=(
+        "-s"
+        "-X" "${method}"
+        "-H" "Authorization: token ${GITHUB_TOKEN}"
+        "-H" "Accept: application/vnd.github.v3+json"
+        "--connect-timeout" "10"
+        "--max-time" "30"
+    )
+
+    if [[ -n "${data_payload}" ]]; then
+        curl_opts+=(
+            "-H" "Content-Type: application/json"
+            "-d" "${data_payload}"
+        )
+    fi
+
+    curl "${curl_opts[@]}" "${url}"
+}
+
 log_info "Starting Jules CLI & GitHub PR Feedback Dispatcher"
 
 # 1. Strict Mode Separation Gate
@@ -160,31 +191,19 @@ if command -v gh &>/dev/null && [[ -n "${GITHUB_TOKEN}" ]] && [[ -n "${GITHUB_PR
     fi
 elif [[ -n "${GITHUB_TOKEN}" ]] && [[ -n "${GITHUB_PR_NUMBER}" ]] && [[ -n "${GITHUB_REPOSITORY}" ]]; then
     log_info "gh CLI missing, falling back to direct GitHub REST API endpoint..."
-    EXISTING_COMMENT_ID=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-        -H "Accept: application/vnd.github.v3+json" \
-        --connect-timeout 10 --max-time 30 \
-        "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PR_NUMBER}/comments" | jq -r ".[] | select(.body | contains(\"<!-- songketmail-telemetry-marker -->\")) | .id" | head -n 1)
+
+    # Query existing comments using helper function
+    EXISTING_COMMENT_ID=$(github_api_request "GET" "repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PR_NUMBER}/comments" \
+        | jq -r ".[] | select(.body | contains(\"<!-- songketmail-telemetry-marker -->\")) | .id" | head -n 1)
 
     if [[ -n "${EXISTING_COMMENT_ID}" && "${EXISTING_COMMENT_ID}" != "null" ]]; then
         log_info "Updating existing comment ID ${EXISTING_COMMENT_ID} via REST..."
         JSON_BODY=$(jq -n --arg body "$(cat "${PAYLOAD_FILE}")" '{body: $body}')
-        curl -s -X PATCH \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            --connect-timeout 10 --max-time 30 \
-            -d "${JSON_BODY}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" > /dev/null || log_warn "GitHub REST API patch failed."
+        github_api_request "PATCH" "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" "${JSON_BODY}" > /dev/null || log_warn "GitHub REST API patch failed."
     else
         log_info "Creating new comment via REST..."
         JSON_BODY=$(jq -n --arg body "$(cat "${PAYLOAD_FILE}")" '{body: $body}')
-        curl -s -X POST \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            --connect-timeout 10 --max-time 30 \
-            -d "${JSON_BODY}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PR_NUMBER}/comments" > /dev/null || log_warn "GitHub REST API post failed."
+        github_api_request "POST" "repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PR_NUMBER}/comments" "${JSON_BODY}" > /dev/null || log_warn "GitHub REST API post failed."
     fi
 else
     log_warn "GitHub credentials (GITHUB_TOKEN, GITHUB_PR_NUMBER, GITHUB_REPOSITORY) are unavailable. Skipping PR update."
