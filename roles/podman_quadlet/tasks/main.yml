@@ -35,14 +35,14 @@
 
     - name: Ensure Pod systemd service is enabled and running
       ansible.builtin.systemd_service:
-        name: "{{ cluster_prefix }}_pod-pod"
+        name: "{{ cluster_prefix }}_pod-pod.service"
         state: started
         enabled: yes
         scope: user
 
     - name: Ensure Container systemd services are enabled and running
       ansible.builtin.systemd_service:
-        name: "{{ cluster_prefix }}_{{ item }}"
+        name: "{{ cluster_prefix }}_{{ item }}.service"
         state: started
         enabled: yes
         scope: user
