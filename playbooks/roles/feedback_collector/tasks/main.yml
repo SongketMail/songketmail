@@ -7,12 +7,14 @@
     cmd: "uname -a"
   register: collector_host_uname
   changed_when: false
+  when: execution_mode | default('user') == 'dev'
 
 - name: Retrieve host OS platform distribution
   ansible.builtin.shell:
     cmd: "cat /etc/os-release"
   register: collector_host_os_release
   changed_when: false
+  when: execution_mode | default('user') == 'dev'
 
 - name: Set up feedback telemetry JSON structure
   ansible.builtin.copy:
@@ -27,5 +29,6 @@
           'results': distro_results | default([], true)
         } | to_nice_json
       }}
-    dest: "/tmp/jules_telemetry.json"
+    dest: "{{ telemetry_file_path | default(playbook_dir ~ '/../data/jules_telemetry.json', true) }}"
     mode: "0600"
+  when: execution_mode | default('user') == 'dev'

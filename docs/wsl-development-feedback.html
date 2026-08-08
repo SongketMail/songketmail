@@ -147,7 +147,7 @@
             <section class="mb-12 bg-indigo-50/50 dark:bg-slate-800/50 border border-indigo-100 dark:border-slate-700 rounded-2xl p-6">
                 <h2 class="text-lg font-bold text-slate-950 dark:text-white mb-3">🎯 Operational Objective</h2>
                 <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-0">
-                    This automated pipeline facilitates parallel OS-compatibility validation (Ubuntu, AlmaLinux, Debian, etc.) using rootless Podman containers in local WSL environments. Results are gathered into structured telemetry artifacts and posted directly to GitHub PR and Google Jules session sockets.
+                    This automated pipeline facilitates sequential OS-compatibility validation (Ubuntu, AlmaLinux, Debian, etc.) using rootless Podman containers in local WSL environments. Results are gathered into structured telemetry artifacts and posted directly to GitHub PR and Google Jules session sockets.
                 </p>
             </section>
 
@@ -160,7 +160,7 @@
                 <div class="bg-slate-900 text-slate-100 rounded-xl p-5 mb-4 overflow-x-auto text-sm">
                     <pre><code class="language-bash"># Environment mode separation variable check inside bash wrapper
 EXECUTION_MODE="${EXECUTION_MODE:-user}"
-if [ "${EXECUTION_MODE}" != "dev" ]; then
+if [[ "${EXECUTION_MODE}" != "dev" ]]; then
     echo "[WARN] EXECUTION_MODE not set to 'dev'. Bypassing telemetry."
     exit 0
 fi</code></pre>
@@ -189,11 +189,11 @@ fi</code></pre>
             <section class="mb-12">
                 <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">3. Bidirectional Jules CLI & GitHub Bridge</h2>
                 <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
-                    The POSIX-compliant Bash utility parses the telemetry payload `/tmp/jules_telemetry.json` and automatically formats a neat Markdown diagnostic report. It dispatches it via local command sockets or direct API requests:
+                    The POSIX-compliant Bash utility parses the telemetry payload `data/jules_telemetry.json` and automatically formats a neat Markdown diagnostic report. It dispatches it via local command sockets or direct API requests:
                 </p>
                 <ul class="list-disc pl-6 mb-6 text-slate-600 dark:text-slate-400 space-y-2">
-                    <li><strong>Google Jules Session:</strong> Feeds data directly to active terminal listeners using <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400">jules chat --message-stdin</code>.</li>
-                    <li><strong>GitHub Pull Requests:</strong> Posts diagnostics directly to the active PR conversation using <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400">gh pr comment &lt;PR_NUMBER&gt; --body-file -</code>.</li>
+                    <li><strong>Google Jules Session:</strong> Feeds data directly to active terminal listeners using <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400">jules remote new --task-id "$JULES_TASK_ID" --report-file "$PAYLOAD_FILE"</code>.</li>
+                    <li><strong>GitHub Pull Requests:</strong> Posts diagnostics directly to the active PR conversation idempotently (updating the prior pipeline comment instead of making duplicates).</li>
                 </ul>
             </section>
 
@@ -206,8 +206,8 @@ fi</code></pre>
                 <ol class="list-decimal pl-6 text-slate-600 dark:text-slate-400 space-y-3">
                     <li>Developer initializes refactoring context via <strong>Google Jules CLI</strong>.</li>
                     <li>Jules pushes the updated code branch to the repository and issues a <strong>GitHub PR</strong>.</li>
-                    <li>Developer executes the parallel multi-OS Podman runner in local WSL:
-                        <code class="block bg-slate-900 text-slate-100 p-3 rounded-lg mt-1">ansible-playbook playbooks/matrix_test.yml -e "execution_mode=dev"</code>
+                    <li>Developer executes the sequential multi-OS Podman runner in local WSL:
+                        <code class="block bg-slate-900 text-slate-100 p-3 rounded-lg mt-1">EXECUTION_MODE=dev ansible-playbook playbooks/matrix_test.yml</code>
                     </li>
                     <li>The telemetry scripts merge run outputs and stream the Markdown reports back to active PR pages and Google Jules context loops.</li>
                     <li>Developer adjusts subsequent instructions in Google Jules based on clear multi-OS container test telemetry.</li>

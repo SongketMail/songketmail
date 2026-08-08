@@ -10,8 +10,10 @@
   gather_facts: yes
 
   vars:
-    # Strict mode separation gate variable checking the environment first
-    execution_mode: "{{ lookup('ansible.builtin.env', 'EXECUTION_MODE') | default('user', true) }}"
+    # Strict mode separation gate variable defaulting to inventory, environment, or 'user'
+    execution_mode: "{{ lookup('ansible.builtin.env', 'EXECUTION_MODE') | default(execution_mode_inventory | default('user'), true) }}"
+    # Local unique telemetry folder output scoped to repository instead of /tmp
+    telemetry_file_path: "{{ lookup('ansible.builtin.env', 'TELEMETRY_FILE_PATH') | default(playbook_dir ~ '/../data/jules_telemetry.json', true) }}"
     distros:
       - name: "Ubuntu 24.04"
         image: "docker.io/library/ubuntu:26.04"
@@ -53,13 +55,14 @@
             cmd: "{{ playbook_dir }}/../scripts/jules_gh_feedback.sh"
           environment:
             EXECUTION_MODE: "dev"
+            TELEMETRY_FILE_PATH: "{{ telemetry_file_path }}"
             JULES_TASK_ID: "{{ lookup('ansible.builtin.env', 'JULES_TASK_ID') | default('', true) }}"
             JULES_API_URL: "{{ lookup('ansible.builtin.env', 'JULES_API_URL') | default('', true) }}"
             JULES_API_TOKEN: "{{ lookup('ansible.builtin.env', 'JULES_API_TOKEN') | default('', true) }}"
             GITHUB_TOKEN: "{{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') | default('', true) }}"
             GITHUB_PR_NUMBER: "{{ lookup('ansible.builtin.env', 'GITHUB_PR_NUMBER') | default('', true) }}"
             GITHUB_REPOSITORY: "{{ lookup('ansible.builtin.env', 'GITHUB_REPOSITORY') | default('', true) }}"
-          changed_when: true
+          changed_when: false
 
       when: execution_mode | default('user') == 'dev'
 
