@@ -10,3 +10,5 @@ roles/dev-sec.ssh-hardening/
 roles/linuxmalaysia.lynis_ansible/
 asimp/
 tools/
+__pycache__/
+*.pyc
