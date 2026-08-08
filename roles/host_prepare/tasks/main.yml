@@ -3,9 +3,9 @@
 
 - name: Set facts for limited unprivileged sandbox environments
   ansible.builtin.set_fact:
-    storage_base_path: "{{ ansible_env.HOME }}/var/srv/songketmail"
-    songketmail_home: "{{ ansible_env.HOME }}"
-    songketmail_user: "{{ ansible_user_id }}"
+    storage_base_path: "{{ ansible_facts['env']['HOME'] }}/var/srv/songketmail"
+    songketmail_home: "{{ ansible_facts['env']['HOME'] }}"
+    songketmail_user: "{{ ansible_facts['user_id'] }}"
   when: is_limited_environment | default(false) | bool
 
 - name: OS Kernel Tuning for ElasticSearch/Database containers
