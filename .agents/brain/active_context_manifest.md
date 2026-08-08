@@ -23,8 +23,10 @@ This active manifest maps the spatial memory and current cognitive state of the 
   - [x] Codify Rule 29 and Rule 30 in `AGENTS.md` and `.agents/AGENTS.md`.
   - [x] Create detail design documentation `docs/wsl-development-feedback.md` and HTML version `docs/wsl-development-feedback.html` for WSL Ubuntu 26.04 testing and feedback integration loop.
   - [x] Implement dedicated Ansible playbook `wsl_feedback_playbook.yml` and bash script `scripts/wsl_test_feedback.sh` with strict development session safety gating.
+  - [x] Author comprehensive review and adoption assessment of DSOM Ansible Configuration Guide in `docs/ANSIBLE-ADOPTION-REVIEW.md` and enable SSH pipelining in `ansible.cfg`.
 - **Active Milestones**:
   - [x] Establish spatial memory context by creating `.agents/brain/active_context_manifest.md`.
+  - [x] Integrate Part 16 documentation inside `docs/SUMMARY.md` and `docs/index.md`.
   - [ ] Perform comprehensive validations (Jekyll syntax checking, file checks).
   - [ ] Complete pre-commit checklist.
 
