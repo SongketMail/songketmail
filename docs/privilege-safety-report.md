@@ -4,7 +4,7 @@ type: report
 title: "Privilege Detection and Remediation Safety Report"
 description: "Analysis of host privilege levels and potential safety hazards of running security hardening remediation."
 resource: "file:///docs/privilege-safety-report.md"
-timestamp: 2026-08-08T09:18:37Z
+timestamp: 2026-08-09T01:27:35Z
 topics: [privilege, safety, reporting, auditing, compliance]
 ---
 
