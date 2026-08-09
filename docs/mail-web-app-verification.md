@@ -4,7 +4,7 @@ type: report
 title: "Mail Web Application Ingress Verification Report"
 description: "Programmatic audit and validation of core email services and BunkerWeb reverse-proxy bindings."
 resource: "file:///docs/mail-web-app-verification.md"
-timestamp: 2026-08-08T11:48:13Z
+timestamp: 2026-08-09T01:26:35Z
 topics: [ingress, webmail, port-binding, verification, compliance]
 ---
 
@@ -19,7 +19,7 @@ This automated validation ensures that our decoupled, unprivileged service mesh 
 - **Verification Mode**: `SANDBOX_VERIFIED` (🧪 Sandbox Configuration Check)
 - **Is Limited/Sandbox Environment**: `Yes`
 - **Overall Operational Status**: 🟢 PASS
-- **Timestamp**: `2026-08-08T11:48:13Z`
+- **Timestamp**: `2026-08-09T01:26:35Z`
 
 ---
 

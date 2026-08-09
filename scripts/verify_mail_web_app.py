@@ -41,7 +41,7 @@ def parse_template_ports(template_path):
             matches = re.findall(r'^PublishPort=(\d+):', content, re.MULTILINE)
             for m in matches:
                 ports.append(int(m))
-        except Exception:
+        except OSError:
             pass
     return sorted(list(set(ports)))
 
@@ -58,7 +58,7 @@ def parse_template_env_vars(template_path):
                         if "=" in part:
                             key, val = part.split("=", 1)
                             env_vars[key] = val
-        except Exception:
+        except OSError:
             pass
     return env_vars
 
