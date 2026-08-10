@@ -212,7 +212,7 @@
 
             <!-- Privilege and Safety Assessment Gates Widget -->
             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
+                <h3 id="privilege-remediation-safety-gates" class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
                     <span>🛡️</span>
                     <span>Privilege & Remediation Safety Gates</span>
                 </h3>
@@ -292,7 +292,7 @@
                 <!-- Main Comparative Table -->
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Side-by-Side Dual-Engine Scorecard</h3>
+                        <h3 id="side-by-side-dual-engine-scorecard" class="text-sm font-bold text-slate-900 dark:text-white">Side-by-Side Dual-Engine Scorecard</h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-xs">
@@ -331,7 +331,7 @@
 
                 <!-- Analytical Summary -->
                 <div class="bg-violet-50 dark:bg-violet-950/20 p-5 rounded-2xl border border-violet-100 dark:border-violet-900/50 space-y-3 text-xs leading-relaxed">
-                    <h3 class="text-sm font-bold text-violet-800 dark:text-violet-400 flex items-center space-x-1.5">
+                    <h3 id="analytical-insights-security-reflection" class="text-sm font-bold text-violet-800 dark:text-violet-400 flex items-center space-x-1.5">
                         <span>📈</span>
                         <span>Analytical Insights & Security Reflection</span>
                     </h3>
@@ -347,7 +347,7 @@
             <!-- TAB CONTENT: DETAILS -->
             <div x-show="currentTab === 'details'" class="space-y-6" x-cloak>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">The ASIMP Hardening Workflow</h3>
+                    <h3 id="the-asimp-hardening-workflow" class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">The ASIMP Hardening Workflow</h3>
                     <div class="space-y-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         <div class="flex items-start space-x-3">
                             <div class="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300 rounded-full w-5 h-5 flex items-center justify-center font-bold font-mono">1</div>
@@ -387,7 +387,7 @@
             <!-- TAB CONTENT: PROBLEMS -->
             <div x-show="currentTab === 'problems'" class="space-y-6" x-cloak>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">🚨 Vulnerability, Technical Problems & Solutions Log</h3>
+                    <h3 id="vulnerability-technical-problems-solutions-log" class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">🚨 Vulnerability, Technical Problems & Solutions Log</h3>
 
                     <div class="space-y-4 text-xs leading-relaxed">
                         <!-- Problem 1 -->
@@ -451,47 +451,36 @@
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-
-            <!-- Technical Specs Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
-                <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Documentation</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-08-07T14:49:14Z</span>
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#privilege-remediation-safety-gates" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🛡️ Privilege & Remediation Safety Gates
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#side-by-side-dual-engine-scorecard" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Side-by-Side Dual-Engine Scorecard
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#analytical-insights-security-reflection" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            📈 Analytical Insights & Security Reflection
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#the-asimp-hardening-workflow" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            The ASIMP Hardening Workflow
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#vulnerability-technical-problems-solutions-log" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🚨 Vulnerability, Technical Problems & Solutions Log
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </aside>

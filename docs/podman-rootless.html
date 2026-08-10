@@ -205,7 +205,7 @@
 
             <!-- Introduction Section -->
             <div class="space-y-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 id="why-rootless-podman-5-quadlets" class="text-xl font-bold text-slate-900 dark:text-white">
                     Why Rootless Podman 5+ & Quadlets?
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
@@ -217,7 +217,7 @@
 
             <!-- Deep Dive on Key Environment Variables -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="mandatory-environment-variables" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>⚙️</span>
                     <span>Mandatory Environment Variables</span>
                 </h3>
@@ -242,7 +242,7 @@
 
             <!-- The Rootless User namespace problem and keep-id -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="the-keep-id-namespace-mapping-solution" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>🔒</span>
                     <span>The keep-id Namespace Mapping Solution</span>
                 </h3>
@@ -260,7 +260,7 @@
 
             <!-- Declarative Quadlet Examples -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Declarative Quadlet Specifications</h3>
+                <h3 id="declarative-quadlet-specifications" class="text-lg font-bold text-slate-950 dark:text-white">Declarative Quadlet Specifications</h3>
 
                 <div class="space-y-4 text-xs font-mono">
                     <!-- Pod definition -->
@@ -305,7 +305,7 @@ Restart=always</pre>
 
             <!-- Ansible Lingering Setup -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Enabling Systemd Lingering for Rootless Users</h3>
+                <h3 id="enabling-systemd-lingering-for-rootless-users" class="text-lg font-bold text-slate-950 dark:text-white">Enabling Systemd Lingering for Rootless Users</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
                     By default, user-level systemd processes are killed when the user logs out. To allow background mail services to run persistently on system startup and survive logouts, systemd lingering must be enabled for the service account via loginctl enable-linger songket (UID 2001).
                 </p>
@@ -333,52 +333,36 @@ Restart=always</pre>
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-
-            <!-- Technical Specs Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
-                <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Documentation</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-07-04T09:40:04Z</span>
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">podman</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">rootless</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">quadlet</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">systemd</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">containers</span>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#why-rootless-podman-5-quadlets" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            Why Rootless Podman 5+ & Quadlets?
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#mandatory-environment-variables" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            ⚙️ Mandatory Environment Variables
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#the-keep-id-namespace-mapping-solution" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🔒 The keep-id Namespace Mapping Solution
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#declarative-quadlet-specifications" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Declarative Quadlet Specifications
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#enabling-systemd-lingering-for-rootless-users" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Enabling Systemd Lingering for Rootless Users
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </aside>

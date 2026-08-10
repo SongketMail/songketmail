@@ -95,44 +95,94 @@ def parse_frontmatter(md_path):
             metadata[key] = val
     return metadata
 
-def make_specs_card(fm):
-    okf_ver = fm.get("okf_version", "0.1")
-    doc_type = fm.get("type", "documentation").capitalize()
-    timestamp = fm.get("timestamp", "2026-07-25T13:00:00Z")
-    topics = fm.get("topics", [])
-    if isinstance(topics, str):
-        topics = [t.strip() for t in topics.split(",") if t.strip()]
+def strip_html_tags(text):
+    return re.sub(r'<[^>]+>', '', text)
 
-    topics_pills = ""
-    for topic in topics:
-        topics_pills += f'<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">{topic}</span>\n'
+def generate_slug(text):
+    text = strip_html_tags(text).lower()
+    text = re.sub(r'[^a-z0-9\s-]', '', text)
+    text = re.sub(r'[\s_]+', '-', text)
+    text = re.sub(r'-+', '-', text)
+    return text.strip('-')
+
+def inject_ids_and_collect_toc(content):
+    headings = []
+    slugs_seen = set()
+
+    # Pattern to match h2 and h3 tags
+    pattern = re.compile(r'<(h2|h3)\b([^>]*)>(.*?)</\1>', re.IGNORECASE | re.DOTALL)
+
+    def repl(match):
+        tag = match.group(1).lower()
+        attrs = match.group(2)
+        inner_content = match.group(3)
+
+        plain_text = strip_html_tags(inner_content)
+        plain_text = re.sub(r'\s+', ' ', plain_text).strip()
+        if not plain_text:
+            return match.group(0)
+
+        slug = generate_slug(plain_text)
+        if not slug:
+            slug = f"section-{len(slugs_seen)}"
+
+        base_slug = slug
+        counter = 1
+        while slug in slugs_seen:
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        slugs_seen.add(slug)
+
+        headings.append({
+            "tag": tag,
+            "text": plain_text,
+            "slug": slug
+        })
+
+        if 'id=' in attrs:
+            new_attrs = re.sub(r'id=["\'][^"\']*["\']', f'id="{slug}"', attrs)
+        else:
+            new_attrs = f' id="{slug}"' + attrs
+
+        return f'<{tag}{new_attrs}>{inner_content}</{tag}>'
+
+    new_content = pattern.sub(repl, content)
+    return new_content, headings
+
+def make_toc_card(headings):
+    if not headings:
+        return ""
+
+    toc_items = []
+    for h in headings:
+        tag = h["tag"]
+        text = h["text"]
+        slug = h["slug"]
+
+        if tag == "h2":
+            toc_items.append(f"""                    <li class="pl-0">
+                        <a href="#{slug}" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            {text}
+                        </a>
+                    </li>""")
+        elif tag == "h3":
+            toc_items.append(f"""                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#{slug}" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            {text}
+                        </a>
+                    </li>""")
+
+    toc_list_html = "\n".join(toc_items)
 
     return f"""
-            <!-- Technical Specs Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
-                <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v{okf_ver}</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">{doc_type}</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">{timestamp}</span>
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            {topics_pills}
-                        </div>
-                    </div>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+{toc_list_html}
+                </ul>
             </div>
-    """
+"""
 
 def get_html_title(filename, fm):
     if filename == "index.html":
@@ -307,7 +357,6 @@ def build_unified_html(filename, fm, center_content, right_sidebar_inner):
 </html>"""
 
 def clean_content(content):
-    # Strip any occurrences of CMSForNerd branding, replace with SongketMail
     content = re.sub(r'CMSForNerd(\s*::\s*LAB)?', 'SongketMail :: LAB', content, flags=re.IGNORECASE)
     content = re.sub(r'CMSForNerd2', 'SongketMail', content, flags=re.IGNORECASE)
     content = re.sub(r'CmsForNerd Infrastructure', 'SongketMail Infrastructure', content, flags=re.IGNORECASE)
@@ -328,15 +377,12 @@ def main():
 
         fm = parse_frontmatter(md_path)
 
-        # 1. Extract content
         center_content = ""
-        right_sidebar_inner = ""
 
         col2_marker = "<!-- Column 2: Center Main Content Area (span 6) -->"
         col3_marker = "<!-- Column 3: Right Sidebar (span 3) -->"
 
         if col2_marker in html_content and col3_marker in html_content:
-            # Conforming pages:
             parts = html_content.split(col2_marker)
             content_part = parts[1].split(col3_marker)[0].strip()
 
@@ -347,118 +393,16 @@ def main():
             else:
                 center_content = content_part
 
-            # For right sidebar:
-            # Conforming pages have a specs widget, and potentially a community widget.
-            # But let's build the right sidebar standard widgets dynamically!
-            # For home page (index.html):
-            if filename == "index.html":
-                right_sidebar_inner = f"""
-            <!-- Google Search Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 text-center">
-                <div class="flex justify-center py-2">
-                    <span class="text-2xl font-bold tracking-tight font-serif select-none">
-                        <span class="text-blue-500">G</span><span class="text-red-500">o</span><span class="text-yellow-500">o</span><span class="text-blue-500">g</span><span class="text-green-500">l</span><span class="text-red-500">e</span>
-                    </span>
-                </div>
-
-                <form action="https://www.google.com/search" method="get" target="_blank" class="space-y-2">
-                    <input type="text" name="q" placeholder="Search..." class="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-violet-500">
-                    <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-600 transition">
-                        Search
-                    </button>
-                </form>
-            </div>
-
-            <!-- Tidy Validator Validation Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <a href="https://github.com/htacg/tidy-html5" target="_blank" class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-violet-600">
-                    <span class="text-emerald-500">✓</span>
-                    <span>Validated by HTML Validator (based on Tidy)</span>
-                </a>
-                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg flex justify-center border border-slate-100 dark:border-slate-800">
-                    <div class="flex items-center space-x-1 text-xs font-bold tracking-wider text-emerald-600">
-                        <span>[</span>
-                        <span class="text-slate-700 dark:text-slate-300">TIDY</span>
-                        <span class="text-emerald-500">✓</span>
-                        <span>]</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
-            </div>
-"""
-            else:
-                # Other conforming page: build specs from frontmatter
-                specs_card = make_specs_card(fm)
-                right_sidebar_inner = f"""
-{specs_card}
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
-            </div>
-"""
-
         elif "<article" in html_content:
-            # Non-conforming 2-column pages (ANSIBLE-ADOPTION-REVIEW.html, ansible-playbook-map.html, wsl-development-feedback.html)
             parts = html_content.split("<article")
             article_part = parts[1].split("</article>")[0]
             start_idx = article_part.find(">")
             center_content = article_part[start_idx+1:].strip()
 
-            # Clean up the custom footer if present
             if "<footer" in center_content:
                 center_content = center_content.split("<footer")[0].strip()
 
-            # Build standard right sidebar using frontmatter
-            specs_card = make_specs_card(fm)
-            right_sidebar_inner = f"""
-{specs_card}
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
-            </div>
-"""
-
         elif "<main" in html_content:
-            # github-pages-setup.html
             parts = html_content.split("<main")
             main_part = parts[1].split("</main>")[0]
             start_idx = main_part.find(">")
@@ -466,33 +410,18 @@ def main():
 
             if "<footer" in center_content:
                 center_content = center_content.split("<footer")[0].strip()
-
-            specs_card = make_specs_card(fm)
-            right_sidebar_inner = f"""
-{specs_card}
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
-            </div>
-"""
         else:
             print(f"WARNING: Unknown structure in {filename}, skipping content extraction")
             continue
 
         # Clean up any residual CMSForNerd branding from the center content
         center_content = clean_content(center_content)
+
+        # Inject unique IDs into heading tags and extract TOC list
+        center_content, headings = inject_ids_and_collect_toc(center_content)
+
+        # Build dynamic Table of Contents Card
+        right_sidebar_inner = make_toc_card(headings)
 
         # Build unified HTML content
         new_html = build_unified_html(filename, fm, center_content, right_sidebar_inner)

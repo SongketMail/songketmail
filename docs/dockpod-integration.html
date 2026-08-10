@@ -218,7 +218,7 @@
 
             <!-- Overview Section -->
             <div class="space-y-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 id="1-executive-summary" class="text-xl font-bold text-slate-900 dark:text-white">
                     1. Executive Summary
                 </h2>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
@@ -231,7 +231,7 @@
 
             <!-- DockPod Capabilities Card -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="2-dockpod-overview-core-capabilities" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>⚡</span>
                     <span>2. DockPod Overview & Core Capabilities</span>
                 </h3>
@@ -256,7 +256,7 @@
 
             <!-- Persistence Trinity & Socket Architecture -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="3-architectural-alignment-with-the-persistence-trinity" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>🏗️</span>
                     <span>3. Architectural Alignment with the Persistence Trinity</span>
                 </h3>
@@ -273,7 +273,7 @@
 
             <!-- Rootless Socket Setup Code Block -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">4. Rootless Podman Socket Activation</h3>
+                <h3 id="4-rootless-podman-socket-activation" class="text-lg font-bold text-slate-950 dark:text-white">4. Rootless Podman Socket Activation</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
                     By default, Podman's rootless API socket is inactive. It must be enabled under the target user's systemd context:
                 </p>
@@ -290,7 +290,7 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
 
             <!-- Agentic Control Section -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">5. Agentic Control via Model Context Protocol (MCP)</h3>
+                <h3 id="5-agentic-control-via-model-context-protocol-mcp" class="text-lg font-bold text-slate-950 dark:text-white">5. Agentic Control via Model Context Protocol (MCP)</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
                     For AI agents like <strong>Google Jules</strong>, the Model Context Protocol (MCP) server acts as a structured API gateway. Instead of running fragile shell scripts to extract log lines or diagnose failures, Jules can fetch real-time container metrics, list active networks, or trigger service updates through standardized JSON-RPC schemas.
                 </p>
@@ -316,7 +316,7 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
 
             <!-- Developer Feedback & BunkerWeb's Impact on Traefik -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="6-developer-feedback-bunkerwebs-impact-on-traefik" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>⚠️</span>
                     <span>6. Developer Feedback & BunkerWeb's Impact on Traefik</span>
                 </h3>
@@ -355,7 +355,7 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
 
             <!-- Comparative Analysis table -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">7. Operational Boundaries & Recommendations</h3>
+                <h3 id="7-operational-boundaries-recommendations" class="text-lg font-bold text-slate-950 dark:text-white">7. Operational Boundaries & Recommendations</h3>
                 <div class="overflow-hidden border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
                     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                         <thead class="bg-slate-100 dark:bg-slate-900">
@@ -392,7 +392,7 @@ export DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"</pre>
 
             <!-- Security Implications & Hardening -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="8-security-implications-hardening" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>🛡️</span>
                     <span>8. Security Implications & Hardening</span>
                 </h3>
@@ -421,7 +421,7 @@ ProtectHome=true</pre>
 
             <!-- Conclusion and Strategic Recommendation -->
             <div class="bg-violet-50 dark:bg-slate-800/80 p-6 rounded-xl border border-violet-100 dark:border-slate-700 space-y-3">
-                <h3 class="text-base font-bold text-violet-900 dark:text-violet-300 flex items-center space-x-2">
+                <h3 id="strategic-integration-recommendation" class="text-base font-bold text-violet-900 dark:text-violet-300 flex items-center space-x-2">
                     <span>💡</span>
                     <span>Strategic Integration Recommendation</span>
                 </h3>
@@ -458,52 +458,56 @@ ProtectHome=true</pre>
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-
-            <!-- Technical Specs Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
-                <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Research</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-07-04T12:00:00Z</span>
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">dockpod</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">podman</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">mcp</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">control-plane</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">management</span>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#1-executive-summary" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            1. Executive Summary
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-dockpod-overview-core-capabilities" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            ⚡ 2. DockPod Overview & Core Capabilities
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#3-architectural-alignment-with-the-persistence-trinity" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🏗️ 3. Architectural Alignment with the Persistence Trinity
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#4-rootless-podman-socket-activation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            4. Rootless Podman Socket Activation
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#5-agentic-control-via-model-context-protocol-mcp" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            5. Agentic Control via Model Context Protocol (MCP)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#6-developer-feedback-bunkerwebs-impact-on-traefik" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            ⚠️ 6. Developer Feedback & BunkerWeb's Impact on Traefik
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#7-operational-boundaries-recommendations" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            7. Operational Boundaries & Recommendations
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#8-security-implications-hardening" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🛡️ 8. Security Implications & Hardening
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#strategic-integration-recommendation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            💡 Strategic Integration Recommendation
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </aside>
