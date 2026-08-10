@@ -9,7 +9,6 @@ import os
 import re
 import sys
 import socket
-import subprocess
 import pytest
 from unittest.mock import MagicMock, patch
 
