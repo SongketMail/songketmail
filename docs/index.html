@@ -249,7 +249,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Card: Storage & Security Engineering -->
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3 mb-4">
+                    <h3 id="security-namespace-mapping" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3 mb-4">
                         <span>🛡️</span>
                         <span>Security & Namespace Mapping</span>
                     </h3>
@@ -271,7 +271,7 @@
 
                 <!-- Card: Orchestration Standards -->
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3 mb-4">
+                    <h3 id="orchestration-standards" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3 mb-4">
                         <span>🚀</span>
                         <span>Orchestration Standards</span>
                     </h3>
@@ -294,7 +294,7 @@
 
             <!-- Stack Guide Card -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">The "SongketMail" Persistence Trinity</h3>
+                <h3 id="the-songketmail-persistence-trinity" class="text-lg font-bold text-slate-950 dark:text-white">The "SongketMail" Persistence Trinity</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="border-l-2 border-violet-500 pl-3">
                         <div class="text-xs font-bold text-violet-500 uppercase">Trinity 1</div>
@@ -316,7 +316,7 @@
 
             <!-- Table Card -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-slate-950 dark:text-white">Optimized Deployment Stack</h3>
+                <h3 id="optimized-deployment-stack" class="text-lg font-bold text-slate-950 dark:text-white">Optimized Deployment Stack</h3>
                 <div class="overflow-hidden border border-slate-200 dark:border-slate-700 rounded-lg">
                     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
@@ -367,52 +367,31 @@
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-            <!-- Google Search Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 text-center">
-                <div class="flex justify-center py-2">
-                    <span class="text-2xl font-bold tracking-tight font-serif select-none">
-                        <span class="text-blue-500">G</span><span class="text-red-500">o</span><span class="text-yellow-500">o</span><span class="text-blue-500">g</span><span class="text-green-500">l</span><span class="text-red-500">e</span>
-                    </span>
-                </div>
-
-                <form action="https://www.google.com/search" method="get" target="_blank" class="space-y-2">
-                    <input type="text" name="q" placeholder="Search..." class="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-violet-500">
-                    <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-600 transition">
-                        Search
-                    </button>
-                </form>
-            </div>
-
-            <!-- Tidy Validator Validation Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <a href="https://github.com/htacg/tidy-html5" target="_blank" class="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-violet-600">
-                    <span class="text-emerald-500">✓</span>
-                    <span>Validated by HTML Validator (based on Tidy)</span>
-                </a>
-                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg flex justify-center border border-slate-100 dark:border-slate-800">
-                    <div class="flex items-center space-x-1 text-xs font-bold tracking-wider text-emerald-600">
-                        <span>[</span>
-                        <span class="text-slate-700 dark:text-slate-300">TIDY</span>
-                        <span class="text-emerald-500">✓</span>
-                        <span>]</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#security-namespace-mapping" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🛡️ Security & Namespace Mapping
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#orchestration-standards" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🚀 Orchestration Standards
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#the-songketmail-persistence-trinity" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            The "SongketMail" Persistence Trinity
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#optimized-deployment-stack" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Optimized Deployment Stack
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </aside>

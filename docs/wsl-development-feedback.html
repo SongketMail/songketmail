@@ -209,7 +209,7 @@
             </header>
 
             <section class="mb-12 bg-indigo-50/50 dark:bg-slate-800/50 border border-indigo-100 dark:border-slate-700 rounded-2xl p-6">
-                <h2 class="text-lg font-bold text-slate-950 dark:text-white mb-3">🎯 Operational Objective</h2>
+                <h2 id="operational-objective" class="text-lg font-bold text-slate-950 dark:text-white mb-3">🎯 Operational Objective</h2>
                 <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-0">
                     This automated pipeline facilitates sequential OS-compatibility validation (Ubuntu, AlmaLinux, Debian, etc.) using rootless Podman containers in local WSL environments. Results are gathered into structured telemetry artifacts and posted directly to GitHub PR and Google Jules session sockets.
                 </p>
@@ -217,7 +217,7 @@
 
             <!-- Section 1 -->
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">1. Mode Separation & Gated Execution</h2>
+                <h2 id="1-mode-separation-gated-execution" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">1. Mode Separation & Gated Execution</h2>
                 <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     A strict separation protocol prevents diagnostic hooks, API callbacks, and external testing frameworks from altering standard user/production systems.
                 </p>
@@ -233,7 +233,7 @@ fi</code></pre>
 
             <!-- Section 2 -->
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">2. Podman Multi-OS Matrix Orchestration</h2>
+                <h2 id="2-podman-multi-os-matrix-orchestration" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">2. Podman Multi-OS Matrix Orchestration</h2>
                 <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     The Ansible matrix engine pulls stable target platform images, initiates isolated validation commands, and collects exit metrics. It runs in an isolated user namespace keep-id mapping block to preserve permission sovereignty.
                 </p>
@@ -251,7 +251,7 @@ fi</code></pre>
 
             <!-- Section 3 -->
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">3. Bidirectional Jules CLI & GitHub Bridge</h2>
+                <h2 id="3-bidirectional-jules-cli-github-bridge" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">3. Bidirectional Jules CLI & GitHub Bridge</h2>
                 <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     The POSIX-compliant Bash utility parses the telemetry payload `data/jules_telemetry.json` and automatically formats a neat Markdown diagnostic report. It dispatches it via local command sockets or direct API requests:
                 </p>
@@ -263,7 +263,7 @@ fi</code></pre>
 
             <!-- Section 4 -->
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">4. Human-in-the-Loop Workflow</h2>
+                <h2 id="4-human-in-the-loop-workflow" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">4. Human-in-the-Loop Workflow</h2>
                 <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     This creates a cohesive engineering cycle:
                 </p>
@@ -284,53 +284,36 @@ fi</code></pre>
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-
-            <!-- Technical Specs Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
-                <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Documentation</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
-                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
-                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-08-07T12:00:00Z</span>
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">wsl</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">ubuntu-26-04</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">testing</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">feedback-loop</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">development</span>
-<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">jules-cli</span>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Meta Links & Community Widget Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
-                </div>
-                <hr class="border-slate-100 dark:border-slate-700">
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
-                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        Visit Group
-                    </a>
-                </div>
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#operational-objective" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🎯 Operational Objective
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#1-mode-separation-gated-execution" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            1. Mode Separation & Gated Execution
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-podman-multi-os-matrix-orchestration" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            2. Podman Multi-OS Matrix Orchestration
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-bidirectional-jules-cli-github-bridge" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            3. Bidirectional Jules CLI & GitHub Bridge
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-human-in-the-loop-workflow" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            4. Human-in-the-Loop Workflow
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </aside>
