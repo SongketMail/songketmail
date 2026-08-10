@@ -69,7 +69,8 @@ Explore our interactive and interconnected deep research topics:
 15. [WSL Ubuntu 26.04 Development & Jules CLI Feedback](wsl-development-feedback.md)
 16. [Ansible Configuration Review and Adoption Assessment](ANSIBLE-ADOPTION-REVIEW.md)
 17. [Mail Web Application Ingress Verification](mail-web-app-verification.md)
+18. [Ansible Playbook and Related Documents Map](ansible-playbook-map.md)
 
 ---
-*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
