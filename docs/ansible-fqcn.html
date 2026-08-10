@@ -6,15 +6,15 @@
         localStorage.setItem('theme', val);
     },
     isDark() {
-        if (theme === 'dark') return true;
-        if (theme === 'light') return false;
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 }" :class="{ 'dark': isDark() }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ansible FQCN Best Practices — SongketMail :: LAB</title>
+    <title>Automation Framework and FQCN Compliance Standards — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 2: Ansible FQCN & Rootless Service Orchestration
+                    Deep Research // Topic 2: Ansible Best Practices & FQCN
                 </div>
             </div>
 
@@ -144,13 +144,11 @@
                         <span>⚙️</span>
                         <span>9b. GH Pages Automation</span>
                     </a>
-
                     <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📚</span>
                         <span>10. References & Resources</span>
                     </a>
-
-                                        <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📊</span>
                         <span>11. DockPod Integration</span>
                     </a>
@@ -170,8 +168,21 @@
                         <span>💻</span>
                         <span>15. WSL Feedback Loop</span>
                     </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
 
-<div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Laboratory Modules
                     </div>
                     <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
@@ -184,8 +195,7 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-
-            <!-- Hero Header -->
+<!-- Hero Header -->
             <div class="border-b-2 border-violet-600 pb-4">
                 <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
                     <span>🤖</span>
@@ -318,34 +328,41 @@
                     <span>Back: Podman Rootless</span>
                 </a>
             </div>
-
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
         <aside class="lg:col-span-3 space-y-6">
 
-            <!-- Specs Widget Card -->
+
+            <!-- Technical Specs Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Ansible Standards</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
                 <div class="text-xs space-y-2">
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Ansible Core</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">2.16+</span>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
                     </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Naming Rules</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Strict FQCN</span>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Documentation</span>
                     </div>
-                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Target Path</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">~/.config/containers</span>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-07-04T09:40:04Z</span>
                     </div>
-                    <div class="flex justify-between pb-1">
-                        <span class="text-slate-500 dark:text-slate-400">Privilege Model</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Become User</span>
+                    <div class="space-y-1">
+                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">ansible</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">fqcn</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">automation</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">compliance</span>
+
+                        </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- Meta Links & Community Widget Card -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
@@ -375,11 +392,11 @@
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-            <span>[ TOPIC: 2 ]</span>
+<span>[ TOPIC: 2 ]</span>
             <span>|</span>
             <span>[ STD: ANSIBLE_FQCN ]</span>
             <span>|</span>
-            <span>[ ENV: DEBIAN_UBUNTU ]</span>
+            <span>[ MODE: IDEMPOTENT ]</span>
         </div>
     </footer>
 

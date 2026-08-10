@@ -6,15 +6,15 @@
         localStorage.setItem('theme', val);
     },
     isDark() {
-        if (theme === 'dark') return true;
-        if (theme === 'light') return false;
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 }" :class="{ 'dark': isDark() }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mail Web Application Ingress Verification — SongketMail :: LAB</title>
+    <title>Mail Web Application Ingress Verification Report — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -61,80 +61,141 @@
                 </div>
             </div>
 
-            <!-- Action Controls / Theme Toggle -->
-            <div class="flex items-center space-x-4 mt-4 md:mt-0">
-                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 text-xs">
-                    <button @click="setTheme('light')" :class="{ 'bg-white dark:bg-slate-700 shadow-sm font-bold': theme === 'light' }" class="px-2.5 py-1.5 rounded-md transition text-slate-600 dark:text-slate-300">Light</button>
-                    <button @click="setTheme('dark')" :class="{ 'bg-white dark:bg-slate-700 shadow-sm font-bold': theme === 'dark' }" class="px-2.5 py-1.5 rounded-md transition text-slate-600 dark:text-slate-300">Dark</button>
-                    <button @click="setTheme('auto')" :class="{ 'bg-white dark:bg-slate-700 shadow-sm font-bold': theme === 'auto' }" class="px-2.5 py-1.5 rounded-md transition text-slate-600 dark:text-slate-300">Auto</button>
-                </div>
-                <a href="index.html" class="px-4 py-2 text-xs font-semibold bg-violet-600 text-white hover:bg-violet-700 rounded-lg shadow-sm transition">Home Portal</a>
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Navigation Sidebar -->
-            <aside class="lg:col-span-1 space-y-6">
-                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Deep Research Library</h2>
-                    <nav class="space-y-1">
-                        <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>📦</span>
-                            <span>1. Podman Rootless</span>
-                        </a>
-                        <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>⚙️</span>
-                            <span>2. Ansible FQCN Best Practices</span>
-                        </a>
-                        <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>📬</span>
-                            <span>3. Postfix & Dovecot Patterns</span>
-                        </a>
-                        <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>☁️</span>
-                            <span>4. S3 Object Storage Options</span>
-                        </a>
-                        <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>📧</span>
-                            <span>5. Webmail Clients Comparison</span>
-                        </a>
-                        <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>🛡️</span>
-                            <span>6. BunkerWeb reverse proxy</span>
-                        </a>
-                        <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition">
-                            <span>📐</span>
-                            <span>7. Architectural Blueprint</span>
-                        </a>
-                        <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
-                            <span>📋</span>
-                            <span>12. Google Jules operational plan</span>
-                        </a>
-                        <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
-                            <span>🛡️</span>
-                            <span>13. ASIMP Hardening Report</span>
-                        </a>
-                        <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
-                            <span>💡</span>
-                            <span>14. SOP: Knowledge-First Discovery</span>
-                        </a>
-                        <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
-                            <span>🧪</span>
-                            <span>15. WSL Feedback Loop</span>
-                        </a>
-                        <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
-                            <span>📧</span>
-                            <span>17. Mail Web App Ingress Verification</span>
-                        </a>
-                    </nav>
-                </div>
-            </aside>
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            <!-- Main Content Area -->
-            <main class="lg:col-span-3 space-y-8">
-                <!-- Cover Card -->
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<!-- Cover Card -->
                 <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-2xl p-6 md:p-8 text-white shadow-md relative overflow-hidden">
                     <div class="relative z-10 space-y-4 max-w-2xl">
                         <span class="px-2 py-1 bg-violet-600 text-white rounded text-2xs font-bold uppercase">🧪 Sandbox Check</span>
@@ -252,13 +313,78 @@
                         Because this verification executes within a restricted container/sandbox environment, it performs programmatic validation of the deployment parameters. All required 5 public ports are successfully configured, verified, and ready for unprivileged systemd Quadlet binding on host nodes. Webmail access is shielded behind BunkerWeb proxying, fully satisfying Step 1.5.
                     </div>
                 </section>
+        </section>
 
-                <footer class="text-center text-xs text-slate-400 dark:text-slate-500 pt-8 border-t border-slate-200 dark:border-slate-800">
-                    <p>Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25</p>
-                    <p class="mt-1">Standard: UK English | Piawai Bahasa Melayu Malaysia | GNU General Public License v3.0</p>
-                </footer>
-            </main>
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+
+            <!-- Technical Specs Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Technical Specs</h4>
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Format Standard</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">OKF v0.1</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Doc Type</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Report</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 dark:border-slate-750 pb-1.5">
+                        <span class="text-slate-500 dark:text-slate-400">Timestamp</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300 font-semibold">2026-08-10T04:00:36Z</span>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-slate-500 dark:text-slate-400 block">Topics</span>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">ingress</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">webmail</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">port-binding</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">verification</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-[10px] font-semibold">compliance</span>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Meta Links & Community Widget Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">E-Mail</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">contact@linuxmalaysia.com</p>
+                </div>
+                <hr class="border-slate-100 dark:border-slate-700">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Community</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">Join the cmsfornerd discussion group.</p>
+                    <a href="https://groups.google.com/group/cmsfornerd" target="_blank" class="inline-block bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        Visit Group
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
         </div>
-    </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 17 ]</span>
+            <span>|</span>
+            <span>[ AUDIT: MAIL_INGRESS ]</span>
+            <span>|</span>
+            <span>[ PORTS: 25_80_443_587_993 ]</span>
+        </div>
+    </footer>
+
 </body>
 </html>
