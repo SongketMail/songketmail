@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ansible Configuration Review and Adoption Assessment — SongketMail :: LAB</title>
+    <title>Legal Notice: Privacy & Assumptions — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 16: Ansible Configuration Review and Adoption Assessment
+                    Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability
                 </div>
             </div>
 
@@ -168,7 +168,7 @@
                         <span>💻</span>
                         <span>15. WSL Feedback Loop</span>
                     </a>
-                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>⚙️</span>
                         <span>16. Ansible Adoption Review</span>
                     </a>
@@ -194,7 +194,7 @@
                     <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
                         Legal & Terms
                     </div>
-                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>⚖️</span>
                         <span>Legal Notice & Disclaimer</span>
                     </a>
@@ -204,58 +204,31 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-<header class="mb-12">
-                <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-semibold text-xs uppercase tracking-wider mb-2">
-                    <span>⚙️</span>
-                    <span>Ansible Configuration Review</span>
-                </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-                    Ansible Configuration Review and Adoption Assessment
-                </h1>
-                <p class="text-xl text-slate-600 dark:text-slate-400 mt-4 font-light">
-                    Review and adoption assessment of the DSOM Ansible Configuration Guide (v3.6.2) for the SongketMail email server fabric.
-                </p>
-            </header>
+<h2 id="1-educational-and-training-purpose">1. Educational and Training Purpose</h2>
+    <p>This project, including its architectural designs, playbooks, scripts, configuration templates, and associated documentation, is created strictly for <strong>training, educational, and planning proposal purposes only</strong>. It serves as an open learning reference and laboratory simulation for modern rootless deployment patterns.</p>
 
-            <!-- Section 1 -->
-            <section class="mb-12">
-                <h2 id="summary-of-architectural-alignment" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">📊 Summary of Architectural Alignment</h2>
-                <div class="overflow-x-auto my-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 p-2">
-                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm text-slate-600 dark:text-slate-300">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
-                            <tr>
-                                <th class="px-4 py-3 text-left">DSOM Guide v3.6.2 Concept</th>
-                                <th class="px-4 py-3 text-left">Adoption Status in SongketMail</th>
-                                <th class="px-4 py-3 text-left">Actionable Step / Implementation Path</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">SSH Pipelining</td>
-                                <td class="px-4 py-4">🟢 Adopted</td>
-                                <td class="px-4 py-4">Enabled in <code>ansible.cfg</code> under <code>[ssh_connection]</code> to minimize SSH round-trip overhead.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">YAML Callback</td>
-                                <td class="px-4 py-4">🟢 Adopted</td>
-                                <td class="px-4 py-4">Active via <code>stdout_callback = yaml</code> in root <code>ansible.cfg</code>.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">Rootful OS Hardening</td>
-                                <td class="px-4 py-4">🟢 Adopted</td>
-                                <td class="px-4 py-4">Separated via <code>is_limited_environment</code> flag to support full OS tuning or sandboxed simulation.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">Rootless Application</td>
-                                <td class="px-4 py-4">🟢 Adopted</td>
-                                <td class="px-4 py-4">Services run in a rootless systemd user Pod under user <code>songketmail</code> (UID 2001).</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    <h2 id="2-reliance-on-critical-assumptions">2. Reliance on Critical Assumptions</h2>
+    <p>Please note that this project does not represent a live, production-grade deployment mandate for any specific enterprise environment without significant adaptation. In particular:</p>
+    <ul>
+        <li><strong>Infrastructure Design</strong>: All designs, node placements, and configuration specifications are completely base on hypothetical architectural assumptions.</li>
+        <li><strong>Cost Estimations</strong>: Any and all financial calculations, resource costs, licensing designs, and hardware budgets are base on assumptions and standard baseline estimations.</li>
+        <li><strong>System Capacity &amp; Units</strong>: The designated amount of units, specific subdirectories, hardware footprints, and simulated network scenarios are illustrative models intended for educational exercises.</li>
+    </ul>
 
-            <!-- DSOM AI Protocol Footer -->
+    <h2 id="3-privacy-statement-amp-data-protection">3. Privacy Statement &amp; Data Protection</h2>
+    <p>We are deeply committed to privacy and data protection. We have done our best to protect anyone and organisation referenced, simulated, or involved in the design and execution of this baseline.</p>
+    <ul>
+        <li><strong>Anonymised Metadata</strong>: All IP addresses, domains, names, and contact details used within the configurations, tests, and documentation are either strictly fictional, non-routable, or reserved documentation blocks (such as <code>.internal</code> or <code>.example</code>).</li>
+        <li><strong>Zero Real-World Storage</strong>: This repository does not harvest, process, or store any actual personal identifying information (PII) of third parties.</li>
+    </ul>
+
+    <h2 id="4-assumption-of-risk-amp-liability-disclaimer">4. Assumption of Risk &amp; Liability Disclaimer</h2>
+    <p><strong>Use of this project, its code, and its documents is at your own risk.</strong></p>
+    <ul>
+        <li><strong>As-Is Basis</strong>: All files, playbooks, scripts, and documentation are provided "as-is" without warranty of any kind, express or implied.</li>
+        <li><strong>Disclaimer</strong>: We are not going to be responsible or liable for any service interruptions, system crashes, security incidents, loss of data, or any other damages arising from the implementation or adaptation of these materials.</li>
+        <li><strong>User Responsibility</strong>: Users assume full responsibility for validating and securing their own infrastructure and configurations before applying any patterns demonstrated in this repository.</li>
+    </ul>
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
@@ -266,8 +239,23 @@
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
                 <ul class="space-y-2 text-sm">
                     <li class="pl-0">
-                        <a href="#summary-of-architectural-alignment" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            📊 Summary of Architectural Alignment
+                        <a href="#1-educational-and-training-purpose" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            1. Educational and Training Purpose
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-reliance-on-critical-assumptions" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            2. Reliance on Critical Assumptions
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-privacy-statement-amp-data-protection" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            3. Privacy Statement &amp; Data Protection
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-assumption-of-risk-amp-liability-disclaimer" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            4. Assumption of Risk &amp; Liability Disclaimer
                         </a>
                     </li>
                 </ul>
@@ -287,11 +275,11 @@
             <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-<span>[ TOPIC: 16 ]</span>
+<span>[ REGULATION: DISCLAIMER ]</span>
             <span>|</span>
-            <span>[ CONCEPTS: PIPELINING_CALLBACK ]</span>
+            <span>[ PURPOSE: TRAINING ]</span>
             <span>|</span>
-            <span>[ AUDIT: COMPLIANCE ]</span>
+            <span>[ RISK: ASSUMED ]</span>
         </div>
     </footer>
 
