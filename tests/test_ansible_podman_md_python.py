@@ -9,7 +9,6 @@ and Python utility helper functions inside scripts/.
 import os
 import re
 import sys
-import pytest
 from unittest.mock import MagicMock, patch, mock_open
 
 # Add the project root to sys.path so that 'scripts' module can be imported cleanly
