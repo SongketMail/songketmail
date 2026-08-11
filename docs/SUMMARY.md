@@ -30,6 +30,7 @@ topics: [summary, index, navigation]
 * [Part 16: Ansible Configuration Review and Adoption Assessment](ANSIBLE-ADOPTION-REVIEW.md)
 * [Part 17: Mail Web Application Ingress Verification](mail-web-app-verification.md)
 * [Part 18: Ansible Playbook and Related Documents Map](ansible-playbook-map.md)
+* [Part 19: Legal Notice & Disclaimer](legal-notice.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*

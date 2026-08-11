@@ -24,7 +24,9 @@ SIDEBAR_ITEMS = [
     { "href": "mail-web-app-verification.html", "icon": "📧", "label": "17. Mail Web Ingress Verification", "section": "research" },
     { "href": "ansible-playbook-map.html", "icon": "🤖", "label": "18. Ansible Playbook Map", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
-    { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" }
+    { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
+    { "header": "Legal & Terms", "section": "legal" },
+    { "href": "legal-notice.html", "icon": "⚖️", "label": "Legal Notice & Disclaimer", "section": "legal" }
 ]
 
 TOPIC_MAP = {
@@ -47,7 +49,8 @@ TOPIC_MAP = {
     "ANSIBLE-ADOPTION-REVIEW.html": ("[ TOPIC: 16 ]", "[ CONCEPTS: PIPELINING_CALLBACK ]", "[ AUDIT: COMPLIANCE ]"),
     "mail-web-app-verification.html": ("[ TOPIC: 17 ]", "[ AUDIT: MAIL_INGRESS ]", "[ PORTS: 25_80_443_587_993 ]"),
     "ansible-playbook-map.html": ("[ TOPIC: 18 ]", "[ MAP: PLAYBOOK_TO_DOC ]", "[ ENGINE: ANSIBLE_DRIVEN ]"),
-    "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]")
+    "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
+    "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
 
 SUBTITLE_MAP = {
@@ -70,7 +73,8 @@ SUBTITLE_MAP = {
     "ANSIBLE-ADOPTION-REVIEW.html": "Deep Research // Topic 16: Ansible Configuration Review and Adoption Assessment",
     "mail-web-app-verification.html": "Deep Research // Topic 17: Mail Web Application Ingress Verification",
     "ansible-playbook-map.html": "Deep Research // Topic 18: Ansible Playbook and Related Documents Map",
-    "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop"
+    "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
+    "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
 
 def parse_frontmatter(md_path):
@@ -347,6 +351,8 @@ def build_unified_html(filename, fm, center_content, right_sidebar_inner):
             <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
             <span>•</span>
             <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
 {meta_pills_html}
