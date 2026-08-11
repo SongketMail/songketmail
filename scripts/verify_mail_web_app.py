@@ -14,7 +14,15 @@ from datetime import datetime, timezone
 
 
 def check_port(port):
-    """Checks if a port is listening on localhost."""
+    """
+    Checks if a port is listening on localhost.
+
+    Args:
+        port (int): Port number to check.
+
+    Returns:
+        tuple: (is_listening (bool), description_string (str))
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(0.5)
     try:
@@ -31,7 +39,15 @@ def check_port(port):
 
 
 def parse_template_ports(template_path):
-    """Extracts Published Ports from Quadlet proxy.container template."""
+    """
+    Extracts Published Ports from Quadlet proxy.container template.
+
+    Args:
+        template_path (str): The filesystem path to the proxy.container template.
+
+    Returns:
+        list: A sorted list of unique port integers found.
+    """
     ports = []
     if os.path.exists(template_path):
         try:
@@ -47,7 +63,15 @@ def parse_template_ports(template_path):
 
 
 def parse_template_env_vars(template_path):
-    """Extracts configured virtual hosts and reverse proxies from proxy template."""
+    """
+    Extracts configured virtual hosts and reverse proxies from proxy template.
+
+    Args:
+        template_path (str): The filesystem path to the proxy template.
+
+    Returns:
+        dict: A dictionary containing key-value environment pairs.
+    """
     env_vars = {}
     if os.path.exists(template_path):
         try:
@@ -64,7 +88,12 @@ def parse_template_env_vars(template_path):
 
 
 def get_podman_container_status():
-    """Queries rootless systemd/podman container execution status."""
+    """
+    Queries rootless systemd/podman container execution status.
+
+    Returns:
+        dict: A dictionary of container names mapped to status strings.
+    """
     status = {}
     try:
         res = subprocess.run(["podman", "ps", "--format", "{{.Names}}:{{.Status}}"], capture_output=True, text=True, timeout=5)
@@ -79,6 +108,12 @@ def get_podman_container_status():
 
 
 def verify_all():
+    """
+    Performs host-level verification checks on ports, environment configuration, and containers.
+
+    Returns:
+        dict: A dictionary of compiled status report data.
+    """
     # Targets for step 1.5
     verified_ports = [25, 80, 443, 587, 993]
     port_results = {}
@@ -124,6 +159,12 @@ def verify_all():
 
 
 def write_markdown_report(data):
+    """
+    Writes verification report details to docs/mail-web-app-verification.md.
+
+    Args:
+        data (dict): Verification status report data.
+    """
     md_path = "docs/mail-web-app-verification.md"
 
     # Assess overall status
@@ -220,6 +261,12 @@ The email web application is verified as **fully ready for deployment** on real 
 
 
 def write_html_report(data):
+    """
+    Writes verification report details to docs/mail-web-app-verification.html.
+
+    Args:
+        data (dict): Verification status report data.
+    """
     html_path = "docs/mail-web-app-verification.html"
 
     overall_pass = True
@@ -501,6 +548,7 @@ def write_html_report(data):
 
 
 def main():
+    """Main execution entry point to perform checks and output reports."""
     print("Initiating Programmatic Mail Web Application Verification (Step 1.5)...")
     results = verify_all()
     write_markdown_report(results)

@@ -14,8 +14,17 @@ docs_dir = "docs"
 html_href_pattern = re.compile(r'href=["\']([^"\']+)["\']')
 markdown_link_pattern = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 
+
 def is_external_or_special(link):
-    """Returns True if the link is external, mailto, anchor-only, or system link."""
+    """
+    Returns True if the link is external, mailto, anchor-only, or system link.
+
+    Args:
+        link (str): The raw link text from HTML/Markdown file.
+
+    Returns:
+        bool: True if external or special, False otherwise.
+    """
     link_lower = link.strip().lower()
     if not link_lower:
         return True
@@ -29,7 +38,14 @@ def is_external_or_special(link):
         return True
     return False
 
+
 def check_all_links():
+    """
+    Scans the docs/ folder and verifies all local references resolve successfully on the filesystem.
+
+    Returns:
+        bool: True if no broken links are found, False if any broken links exist.
+    """
     broken_links = []
     total_checked = 0
 
@@ -82,6 +98,7 @@ def check_all_links():
     else:
         print("✅ No broken links found!")
         return True
+
 
 if __name__ == "__main__":
     success = check_all_links()
