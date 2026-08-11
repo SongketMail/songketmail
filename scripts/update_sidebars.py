@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+update_sidebars.py - Update all generated HTML files under docs/ to include the ASIMP Hardening Report link in sidebars.
+Iterates through docs/ and inserts the link below the Google Jules operational planning document link.
+"""
+
 import os
 import re
 
@@ -13,23 +18,34 @@ pattern = re.compile(
     r'(<a\s+href="jules-planning\.html"\s+class="[^"]+">[\s\S]*?<\/a>)'
 )
 
-for filename in os.listdir(html_dir):
-    if filename.endswith(".html") and filename != "asimp-hardening-report.html":
-        filepath = os.path.join(html_dir, filename)
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
 
-        # Check if ASIMP link is already added to prevent duplicate insertion
-        if 'asimp-hardening-report.html' in content:
-            continue
+def update_html_sidebars():
+    """
+    Scans the HTML documentation directory and adds the ASIMP report link in the sidebar menu
+    of each HTML file immediately below the Jules operational planning document link.
+    """
+    for filename in os.listdir(html_dir):
+        if filename.endswith(".html") and filename != "asimp-hardening-report.html":
+            filepath = os.path.join(html_dir, filename)
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
 
-        def replacer(match):
-            matched_link = match.group(1)
-            return matched_link + "\n" + regular_asimp_link
+            # Check if ASIMP link is already added to prevent duplicate insertion
+            if 'asimp-hardening-report.html' in content:
+                continue
 
-        new_content = pattern.sub(replacer, content)
+            def replacer(match):
+                """Callback function to append ASIMP report link to match."""
+                matched_link = match.group(1)
+                return matched_link + "\n" + regular_asimp_link
 
-        if new_content != content:
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(new_content)
-            print(f"Updated sidebar in {filename}")
+            new_content = pattern.sub(replacer, content)
+
+            if new_content != content:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(new_content)
+                print(f"Updated sidebar in {filename}")
+
+
+if __name__ == "__main__":
+    update_html_sidebars()

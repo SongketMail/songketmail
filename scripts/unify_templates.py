@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+unify_templates.py - Standardize all HTML files in the docs/ folder under the unified SongketMail layout.
+Sets up theme support, parses Markdown frontmatter metadata to insert metadata badges, creates
+unique heading anchors, and populates a dynamic sticky right Table of Contents.
+"""
+
 import os
 import re
 
@@ -78,6 +84,15 @@ SUBTITLE_MAP = {
 }
 
 def parse_frontmatter(md_path):
+    """
+    Parses OKF compliant YAML frontmatter from a Markdown file.
+
+    Args:
+        md_path (str): The file path of the Markdown file.
+
+    Returns:
+        dict: A dictionary of parsed YAML key-value pairs, or empty dict if not found.
+    """
     if not os.path.exists(md_path):
         return {}
     with open(md_path, 'r', encoding='utf-8') as f:
@@ -100,9 +115,27 @@ def parse_frontmatter(md_path):
     return metadata
 
 def strip_html_tags(text):
+    """
+    Strips raw HTML tags from a string.
+
+    Args:
+        text (str): Input text containing HTML.
+
+    Returns:
+        str: Text with all HTML tags removed.
+    """
     return re.sub(r'<[^>]+>', '', text)
 
 def generate_slug(text):
+    """
+    Transforms any string into a URL-friendly and clean anchor/slug string.
+
+    Args:
+        text (str): Input text.
+
+    Returns:
+        str: Alphanumeric and hyphen-separated slug.
+    """
     text = strip_html_tags(text).lower()
     text = re.sub(r'[^a-z0-9\s-]', '', text)
     text = re.sub(r'[\s_]+', '-', text)
@@ -110,6 +143,15 @@ def generate_slug(text):
     return text.strip('-')
 
 def inject_ids_and_collect_toc(content):
+    """
+    Finds h2 and h3 heading tags, inserts a unique 'id' attribute, and extracts headings list.
+
+    Args:
+        content (str): HTML content string.
+
+    Returns:
+        tuple: (updated_content, list_of_heading_dicts)
+    """
     headings = []
     slugs_seen = set()
 
@@ -154,6 +196,15 @@ def inject_ids_and_collect_toc(content):
     return new_content, headings
 
 def make_toc_card(headings):
+    """
+    Builds a Table of Contents sidebar panel using a hierarchical list of headings.
+
+    Args:
+        headings (list): A list of dictionaries containing 'tag', 'text', and 'slug'.
+
+    Returns:
+        str: Table of Contents card HTML block.
+    """
     if not headings:
         return ""
 
@@ -189,6 +240,16 @@ def make_toc_card(headings):
 """
 
 def get_html_title(filename, fm):
+    """
+    Returns a unified title string based on frontmatter and file context.
+
+    Args:
+        filename (str): The filename of the HTML page.
+        fm (dict): Frontmatter metadata dictionary.
+
+    Returns:
+        str: Fully formatted HTML title string.
+    """
     if filename == "index.html":
         return "SongketMail :: LAB — Secure Email Server Fabric"
     base_title = fm.get("title", "").strip().strip('"').strip("'")
@@ -197,6 +258,15 @@ def get_html_title(filename, fm):
     return f"{base_title} — SongketMail :: LAB"
 
 def make_sidebar(active_filename):
+    """
+    Orchestrates left-hand sidebar navigation list showing the active menu item.
+
+    Args:
+        active_filename (str): The name of the currently compiled file.
+
+    Returns:
+        str: Left sidebar HTML content block.
+    """
     sidebar_html = []
     for item in SIDEBAR_ITEMS:
         if "header" in item:
@@ -220,6 +290,18 @@ def make_sidebar(active_filename):
     return "\n".join(sidebar_html)
 
 def build_unified_html(filename, fm, center_content, right_sidebar_inner):
+    """
+    Combines the unified three-column layout wrapping around center and right content.
+
+    Args:
+        filename (str): Filename of target page.
+        fm (dict): Frontmatter dict.
+        center_content (str): Standardized center layout.
+        right_sidebar_inner (str): Dynamic Table of Contents sidebar.
+
+    Returns:
+        str: Fully compiled 12-column page HTML.
+    """
     head_title = get_html_title(filename, fm)
     brand_subtitle = SUBTITLE_MAP.get(filename, "SECURE EMAIL SERVER FABRIC // PODMAN 5+ & SYSTEMD QUADLET")
     sidebar_nav_html = make_sidebar(filename)
@@ -363,12 +445,22 @@ def build_unified_html(filename, fm, center_content, right_sidebar_inner):
 </html>"""
 
 def clean_content(content):
+    """
+    Substitutes obsolete and legacy CMSForNerd branding keywords with SongketMail.
+
+    Args:
+        content (str): Inner HTML layout string.
+
+    Returns:
+        str: Filtered HTML content.
+    """
     content = re.sub(r'CMSForNerd(\s*::\s*LAB)?', 'SongketMail :: LAB', content, flags=re.IGNORECASE)
     content = re.sub(r'CMSForNerd2', 'SongketMail', content, flags=re.IGNORECASE)
     content = re.sub(r'CmsForNerd Infrastructure', 'SongketMail Infrastructure', content, flags=re.IGNORECASE)
     return content
 
 def main():
+    """Main execution block to scan all .html pages and rebuild them cleanly."""
     docs_dir = "docs"
     html_files = [f for f in os.listdir(docs_dir) if f.endswith(".html")]
 
