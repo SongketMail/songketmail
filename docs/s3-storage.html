@@ -238,10 +238,16 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             <tr>
+                                <td class="px-3 py-3 font-bold text-violet-600 dark:text-violet-400">RustFS</td>
+                                <td class="px-3 py-3 font-mono">Apache-2.0</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Written in Rust, memory safety, 2.3x faster than MinIO for 4KB payloads, zero telemetry/GDPR-compliant, business-friendly, strong edge/IoT support.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Newer ecosystem; some highly-advanced distributed features are still under testing.</td>
+                            </tr>
+                            <tr>
                                 <td class="px-3 py-3 font-bold">MinIO</td>
                                 <td class="px-3 py-3 font-mono">AGPL-3.0</td>
                                 <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Extremely popular, rich UI, highly optimized S3 API compatibility.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">AGPL license is highly restrictive; heavy memory footprint on multiple buckets.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">AGPL-3.0 license is highly restrictive (risk of copyleft traps); heavy memory footprint; telemetry concerns.</td>
                             </tr>
                             <tr>
                                 <td class="px-3 py-3 font-bold">SeaweedFS</td>
@@ -253,7 +259,7 @@
                                 <td class="px-3 py-3 font-bold">Garage S3</td>
                                 <td class="px-3 py-3 font-mono">AGPL-3.0</td>
                                 <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Written in Rust, incredibly lightweight, designed for multi-region mesh replication.</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Not suitable for multi-petabyte datasets.</td>
+                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">AGPL-3.0 license; not suitable for massive multi-petabyte datasets.</td>
                             </tr>
                             <tr>
                                 <td class="px-3 py-3 font-bold">Ceph RADOS</td>
@@ -266,58 +272,82 @@
                 </div>
             </div>
 
-            <!-- Our Deployed S3 Store: MinIO -->
+            <!-- Why Not MinIO Section -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="our-deployed-s3-engine-minio" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>💡</span>
-                    <span>Our Deployed S3 Engine: MinIO</span>
+                <h3 id="why-not-minio-critical-pitfalls-of-deploying-minio" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span class="text-red-500">🚫</span>
+                    <span>Why Not MinIO? Critical Pitfalls of Deploying MinIO</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    For this SongketMail fabric baseline, we deploy <strong>MinIO</strong> as our primary S3-compatible object storage server. This provides a highly standardized, performant, and reliable storage backend with a complete administrative Console interface.
+                    While MinIO has historically been a popular baseline choice for S3-compatible storage, it has several critical downsides that make it unsuitable for modern, security-conscious, enterprise, and cloud-native deployments:
+                </p>
+                <ol class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-decimal">
+                    <li><strong class="text-slate-900 dark:text-white">Restrictive AGPL-3.0 Licensing (Copyleft Risk)</strong>: MinIO transitioned to the copyleft AGPL-3.0 license. This license is notoriously restrictive, introducing substantial legal risk for enterprise adoption and SaaS hosting. Integrating or modifying AGPL-licensed software can force organizations into copyleft traps, risking intellectual property pollution and forcing them to publish proprietary backend software.</li>
+                    <li><strong class="text-slate-900 dark:text-white">Heavy Resource and Memory Footprint</strong>: Written in Go, MinIO suffers from significant garbage collection (GC) overhead and high idle memory consumption. When running multiple buckets or under massive sustained loads, these GC pauses cause latency spikes. It is also too bloated for edge devices, gateways, and lightweight IoT deployments.</li>
+                    <li><strong class="text-slate-900 dark:text-white">Telemetry & Sovereignty Risks</strong>: MinIO includes automatic telemetry and licensing calls that communicate with external license servers. This creates potential data sovereignty issues and compliance risks under strict GDPR (Europe/UK), CCPA (US), and APPI (Japan) privacy laws.</li>
+                    <li><strong class="text-slate-900 dark:text-white">Poor Small-Payload Optimization</strong>: For typical email workloads where object payloads are small (typically around 4KB for simple message bodies), Go's runtime overhead and MinIO's heavy stack lead to severe performance inefficiencies compared to native Rust implementations.</li>
+                </ol>
+            </div>
+
+            <!-- Our Deployed S3 Engine: RustFS -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <h3 id="our-deployed-s3-engine-rustfs" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <span>💡</span>
+                    <span>Our Deployed S3 Engine: RustFS</span>
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    For the SongketMail fabric deployment, we select <strong>RustFS</strong> as our primary S3-compatible object storage engine. RustFS combines the simplicity of MinIO with the performance, memory safety, and raw speed of Rust, fully operating under a permissive <strong>Apache 2.0</strong> license.
                 </p>
                 <div class="bg-violet-50 dark:bg-slate-900/60 p-4 rounded-lg border border-violet-100 dark:border-slate-755 text-xs">
-                    <p class="font-semibold text-violet-750 dark:text-violet-350">🛠️ MinIO Storage Sovereignty</p>
+                    <p class="font-semibold text-violet-750 dark:text-violet-350">🛠️ RustFS Storage Sovereignty</p>
                     <p class="mt-1 text-slate-600 dark:text-slate-400 leading-relaxed">
-                        By utilizing unprivileged namespaces mapped to UID/GID 2001:2001, MinIO accesses host directories directly under <code>/var/srv/songketmail/minio/data</code> securely without dynamic permission shifts or root privileges.
+                        By utilizing unprivileged namespaces mapped to UID/GID 2001:2001, RustFS accesses host directories directly under <code>/var/srv/songketmail/rustfs/data</code> securely without dynamic permission shifts or root privileges. This prevents any host security exposure while maintaining absolute control over the physical block storage.
                     </p>
                 </div>
             </div>
 
-            <!-- Deployment Blueprint: MinIO Quadlet -->
+            <!-- Deployment Blueprint: RustFS Quadlet -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="minio-declarative-container-quadlet" class="text-lg font-bold text-slate-950 dark:text-white">MinIO Declarative Container Quadlet</h3>
+                <h3 id="rustfs-declarative-container-quadlet" class="text-lg font-bold text-slate-950 dark:text-white">RustFS Declarative Container Quadlet</h3>
                 <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By launching a standard MinIO server inside our unprivileged container fabric, we instantly gain a high-performance S3 endpoint.
+                    By launching RustFS inside our unprivileged container fabric, we instantly gain a secure, ultra-high-performance S3 endpoint.
                 </p>
                 <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
 ContainerName=songketmail-s3
 Network=songketmail-net
-Image=minio/minio:RELEASE.2024-07-04T14-25-45Z
-Volume=/var/srv/songketmail/minio/data:/data:Z
-Exec=server /data --console-address ":9001"
+Image=docker.io/rustfs/rustfs:1.0.0
+Volume=/var/srv/songketmail/rustfs/data:/data:Z
+Environment=RUSTFS_ACCESS_KEY=rustfs_admin
+Environment=RUSTFS_SECRET_KEY=rustfs_secure_pass
+Environment=RUSTFS_VOLUMES=/data
+Environment=RUSTFS_ADDRESS=:9000
+Environment=RUSTFS_CONSOLE_ADDRESS=:9001
 UserNS=keep-id:uid=2001,gid=2001
 
 [Service]
 Restart=always</pre>
             </div>
 
-            <!-- Dovecot MDA to MinIO S3 Object Storage Architecture -->
+            <!-- Dovecot MDA to RustFS S3 Object Storage Architecture -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="dovecot-mda-to-minio-s3-object-storage-architecture" class="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 id="dovecot-mda-to-rustfs-s3-object-storage-architecture" class="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3">
                     <span>🏗️</span>
-                    <span>Dovecot MDA to MinIO S3 Object Storage Architecture</span>
+                    <span>Dovecot MDA to RustFS S3 Object Storage Architecture</span>
                 </h3>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Dovecot separates indexing metadata from message payloads. Structural index files (<code>dovecot.index</code>) are stored on high-speed host NVMe volumes mounted at <code>/var/srv/songketmail/dovecot/indexes</code>. Message bodies are transmitted to MinIO S3 object storage via Dovecot's <strong>obox / s3</strong> plugin drivers.
+                    Dovecot separates indexing metadata from message payloads. Structural index files (<code>dovecot.index</code>) are stored on high-speed host NVMe volumes mounted at <code>/var/srv/songketmail/dovecot/indexes</code>. Message bodies and payloads are transmitted directly to the RustFS S3 storage cluster via Dovecot's <strong>obox / s3</strong> plugin drivers.
                 </p>
                 <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
                     This storage pipeline integrates three primary performance mechanisms:
                 </p>
                 <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
                     <li><strong>Local Filesystem Caching (fscache):</strong> A local ring-buffer cache (e.g., 512MB) configured on NVMe host storage at <code>/var/srv/songketmail/dovecot/cache</code> retains recently accessed message bodies. This reduces S3 API read requests during active IMAP client synchronization.</li>
-                    <li><strong>Data Compression (compress:zstd:3):</strong> Message bodies are compressed using Zstandard (level 3) before storage in MinIO, reducing network transfer overhead and storage utilization.</li>
-                    <li><strong>Dispersion Prefix Hashing (%8Mu/%u):</strong> An MD5 hash of the recipient's username is calculated, and the first 8 characters are prepended to the S3 object key path. This dispersion prefix prevents object key grouping, enabling MinIO to distribute object listings and I/O operations evenly across storage disks.</li>
+                    <li><strong>Data Compression (compress:zstd:3):</strong> Message bodies are compressed using Zstandard (level 3) before storage in RustFS, reducing network transfer overhead and storage utilization.</li>
+                    <li><strong>Dispersion Prefix Hashing (%8Mu/%u):</strong> An MD5 hash of the recipient's username is calculated, and the first 8 characters are prepended to the S3 object key path. This dispersion prefix prevents object key grouping, enabling RustFS to distribute object listings and I/O operations evenly across storage disks.</li>
                 </ul>
+                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    Given that RustFS is <strong>2.3x faster than MinIO</strong> for 4KB payloads, this architecture yields massive latency reductions during heavy client sync loops.
+                </p>
             </div>
 
             <!-- Back navigation / Action links -->
@@ -351,18 +381,23 @@ Restart=always</pre>
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#our-deployed-s3-engine-minio" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            💡 Our Deployed S3 Engine: MinIO
+                        <a href="#why-not-minio-critical-pitfalls-of-deploying-minio" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🚫 Why Not MinIO? Critical Pitfalls of Deploying MinIO
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#minio-declarative-container-quadlet" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            MinIO Declarative Container Quadlet
+                        <a href="#our-deployed-s3-engine-rustfs" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            💡 Our Deployed S3 Engine: RustFS
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#dovecot-mda-to-minio-s3-object-storage-architecture" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            🏗️ Dovecot MDA to MinIO S3 Object Storage Architecture
+                        <a href="#rustfs-declarative-container-quadlet" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            RustFS Declarative Container Quadlet
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#dovecot-mda-to-rustfs-s3-object-storage-architecture" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            🏗️ Dovecot MDA to RustFS S3 Object Storage Architecture
                         </a>
                     </li>
                 </ul>

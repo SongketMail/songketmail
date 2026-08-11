@@ -23,7 +23,7 @@ The core service fabric is fully decoupled and consists of **seven container ser
 2.  **`postfix`**: MTA (Mail Transfer Agent) for incoming/outgoing SMTP.
 3.  **`dovecot`**: IMAP/POP3 storage and access server.
 4.  **`db`**: PostgreSQL database storing virtual mail accounts, domains, and aliases.
-5.  **`s3`**: MinIO S3 object storage for remote, compressed, and dispersed mailbox storage.
+5.  **`s3`**: RustFS S3-compatible object storage for remote, compressed, and dispersed mailbox storage.
 6.  **`web`**: Roundcube webmail client.
 7.  **`rspamd`**: Spam filtering, DKIM/DMARC signing, and antivirus scanning service.
 
@@ -63,7 +63,7 @@ To ensure storage sovereignty, the fabric structures host persistent storage und
 6.  `dovecot/indexes` - Fast metadata storage indexes for IMAP/POP operations.
 7.  `dovecot/cache` - Local NVMe caching folders.
 8.  `postgres/data` - PostgreSQL virtual mailbox maps databases.
-9.  `minio/data` - Object blocks storage for MinIO S3 backend.
+9.  `rustfs/data` - Object blocks storage for RustFS S3 backend.
 10. `roundcube/config` - Webmail client plugin and site settings.
 11. `roundcube/db` - Local SQLite/metadata tables for Roundcube client sessions.
 12. `rspamd/config` - Filter rules, local symbols, and classifier settings.
@@ -113,7 +113,7 @@ The mail server uses a decoupled ingress mechanism:
 ## 📦 S3 Object Storage Integration (Dovecot Obox)
 
 Dovecot manages message storage using advanced S3 object storage capabilities:
-- Message bodies are transferred directly to MinIO S3 object storage via the **obox/s3 driver**.
+- Message bodies are transferred directly to RustFS S3 object storage via the **obox/s3 driver**.
 - **Performance Optimizations**:
   - Uses NVMe local filesystem caching (`fscache`).
   - Implements **Zstandard compression** at level 3 (`compress:zstd:3`).
