@@ -1,17 +1,19 @@
 [Unit]
-Description=SongketMail Object Storage Container (MinIO - Apache-licensed SeaweedFS could also be used as a high-performance alternative)
+Description=SongketMail Object Storage Container (RustFS S3-compatible Object Storage Engine)
 After=network-online.target
 
 [Container]
 ContainerName={{ cluster_prefix }}-s3
-Image=docker.io/minio/minio:{{ minio_image_tag }}
+Image=docker.io/rustfs/rustfs:{{ rustfs_image_tag }}
 Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
-Volume={{ storage_base_path }}/minio/data:/data:Z
+Volume={{ storage_base_path }}/rustfs/data:/data:Z
 Environment=TZ=UTC
-Environment=MINIO_ROOT_USER=minio_admin
-Environment=MINIO_ROOT_PASSWORD=minio_secure_pass
-Exec=server /data --console-address :9001
+Environment=RUSTFS_ACCESS_KEY=rustfs_admin
+Environment=RUSTFS_SECRET_KEY=rustfs_secure_pass
+Environment=RUSTFS_VOLUMES=/data
+Environment=RUSTFS_ADDRESS=:9000
+Environment=RUSTFS_CONSOLE_ADDRESS=:9001
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=s3
 
