@@ -9,7 +9,6 @@ for independent Ceph native deployment on Ubuntu 26.04.
 import os
 import re
 import configparser
-import pytest
 
 # --- Test Constants ---
 CEPH_DEPLOY_DIR = "ceph_deploy"
