@@ -1,0 +1,22 @@
+---
+# ceph_deploy/roles/validation_bench/tasks/main.yml
+# Executes synthetic rados and rbd write baseline benchmarks
+
+- name: Execute raw rados bench to capture cluster IOPS
+  ansible.builtin.command:
+    cmd: "cephadm shell -- rados bench -p {{ pve_rbd_pool }} 30 write --no-cleanup"
+  register: rados_bench_out
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Display raw storage IOPS results
+  ansible.builtin.debug:
+    var: rados_bench_out.stdout_lines
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Cleanup rados bench benchmark objects
+  ansible.builtin.command:
+    cmd: "cephadm shell -- rados -p {{ pve_rbd_pool }} cleanup"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)

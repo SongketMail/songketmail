@@ -1,0 +1,9 @@
+---
+# ceph_deploy/roles/ceph_prep/handlers/main.yml
+# FQCN-compliant systemd restart handler for Chrony NTP service
+
+- name: restart_chrony
+  ansible.builtin.systemd:
+    name: chrony
+    state: restarted
+  when: not (is_limited_environment | default(false) | bool)

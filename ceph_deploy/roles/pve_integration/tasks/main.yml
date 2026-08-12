@@ -1,0 +1,46 @@
+---
+# ceph_deploy/roles/pve_integration/tasks/main.yml
+# Extracts client keyring and configures external RBD storage on all 4 PVE nodes
+
+- name: Retrieve client keyring from Ceph bootstrap node
+  ansible.builtin.slurp:
+    src: "/etc/ceph/{{ ceph_cluster_name }}.client.admin.keyring"
+  register: ceph_keyring
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Securely deploy Ceph Client Keyring on PVE nodes
+  ansible.builtin.copy:
+    content: "{{ ceph_keyring.content | b64decode }}"
+    dest: "{{ pve_keyring_dest }}"
+    owner: root
+    group: root
+    mode: '0600'
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['pve_nodes'] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Distribute unified storage.cfg block to PVE nodes
+  ansible.builtin.blockinfile:
+    path: /etc/pve/storage.cfg
+    block: |
+      rbd: {{ pve_storage_id }}
+          monhost {{ ceph_mon_ips | join(';') }}
+          pool {{ pve_rbd_pool }}
+          username admin
+          content images,rootdir
+          krbd 0
+    state: present
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['pve_nodes'] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Provision a dummy VM disk to validate connection
+  ansible.builtin.command:
+    cmd: "qm create 9999 --name test-val-vm --scsihw virtio-scsi-pci --scsi0 {{ pve_storage_id }}:8"
+  delegate_to: "{{ groups['pve_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)

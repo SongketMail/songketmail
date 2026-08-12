@@ -1,0 +1,38 @@
+---
+# ceph_deploy/roles/security_hardening/tasks/main.yml
+# Implements strict Public and Cluster network isolation on storage nodes
+
+- name: Configure public interface access control rules
+  ansible.builtin.iptables:
+    chain: INPUT
+    source: "{{ ceph_public_network }}"
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+    comment: "Allow Ceph Public network traffic for MONs/MGRs/Clients"
+  loop:
+    - "6789"
+    - "3300"
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Restrict backend OSD replication cluster traffic
+  ansible.builtin.iptables:
+    chain: INPUT
+    source: "{{ ceph_cluster_network }}"
+    protocol: tcp
+    destination_port: "6800:7300"
+    jump: ACCEPT
+    comment: "Allow OSD peering/heartbeat on backend cluster network"
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Drop unauthorized incoming connections on public storage ports
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: DROP
+    comment: "Block unauthorized storage network access attempts"
+  loop:
+    - "6789"
+    - "3300"
+  when: not (is_limited_environment | default(false) | bool)

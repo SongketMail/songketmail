@@ -1,0 +1,103 @@
+---
+# ceph_deploy/roles/ceph_bootstrap/tasks/main.yml
+# Orchestrates containerized cephadm bootstrapping, MONs/MGRs setup, and OSD assignment
+
+- name: Create /etc/ceph and /var/lib/ceph configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /etc/ceph
+    - /var/lib/ceph
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Download standalone cephadm orchestrator CLI
+  ansible.builtin.get_url:
+    url: "https://bootstrap.ceph.com/cephadm"
+    dest: /usr/sbin/cephadm
+    owner: root
+    group: root
+    mode: '0755'
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Bootstrap the initial active Monitor and Manager daemon
+  ansible.builtin.command:
+    cmd: >
+      /usr/sbin/cephadm bootstrap
+      --mon-ip {{ ceph_mon_ips[0] }}
+      --fsid {{ ceph_fsid }}
+      --cluster-name {{ ceph_cluster_name }}
+      --initial-dashboard-user admin
+      --initial-dashboard-password admin_secret_password_here
+      --skip-monitoring-stack
+    creates: /etc/ceph/{{ ceph_cluster_name }}.conf
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - inventory_hostname == groups['ceph_nodes'][0]
+
+- name: Slurp Cephadm public SSH key from bootstrap node
+  ansible.builtin.slurp:
+    src: "/etc/ceph/{{ ceph_cluster_name }}.pub"
+  register: ceph_pub_key
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Authorize Cephadm SSH key on all storage nodes
+  ansible.posix.authorized_key:
+    user: root
+    state: present
+    key: "{{ ceph_pub_key.content | b64decode }}"
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Distribute SSH pub keys and register secondary storage hosts in cluster
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph orch host add {{ item }} {{ hostvars[item]['ansible_host'] }}"
+  loop: "{{ groups['ceph_nodes'] }}"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Deploy dynamic Managers (MGR) and Monitors (MON) to secondary nodes
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph orch apply mon --placement='3'"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Set placement group autoscaling policies
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph mgr module enable pg_autoscaler"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Provisions OSD daemons across raw storage drives on all nodes
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph orch daemon add osd {{ inventory_hostname }}:{{ item }}"
+  loop: "{{ ceph_osd_devices }}"
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Create the dedicated RBD production pool
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph osd pool create {{ pve_rbd_pool }} 128 128 replicated"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Set standard 3x replication policy on the RBD pool
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph osd pool set {{ pve_rbd_pool }} size {{ ceph_replication_size }}"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Enable fast RBD application support on pool
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm shell -- ceph osd pool application enable {{ pve_rbd_pool }} rbd"
+  delegate_to: "{{ groups['ceph_nodes'][0] }}"
+  run_once: true
+  when: not (is_limited_environment | default(false) | bool)

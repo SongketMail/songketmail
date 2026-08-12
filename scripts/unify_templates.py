@@ -30,6 +30,7 @@ SIDEBAR_ITEMS = [
     { "href": "mail-web-app-verification.html", "icon": "📧", "label": "17. Mail Web Ingress Verification", "section": "research" },
     { "href": "ansible-playbook-map.html", "icon": "🤖", "label": "18. Ansible Playbook Map", "section": "research" },
     { "href": "proxmox-ceph-hci.html", "icon": "📦", "label": "20. Proxmox & Ceph HCI", "section": "research" },
+    { "href": "ceph-ubuntu-deployment.html", "icon": "📦", "label": "21. Ceph Native Deployment", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -57,6 +58,7 @@ TOPIC_MAP = {
     "mail-web-app-verification.html": ("[ TOPIC: 17 ]", "[ AUDIT: MAIL_INGRESS ]", "[ PORTS: 25_80_443_587_993 ]"),
     "ansible-playbook-map.html": ("[ TOPIC: 18 ]", "[ MAP: PLAYBOOK_TO_DOC ]", "[ ENGINE: ANSIBLE_DRIVEN ]"),
     "proxmox-ceph-hci.html": ("[ TOPIC: 20 ]", "[ STORAGE: CEPH_HCI ]", "[ HOST: PVE_UBUNTU ]"),
+    "ceph-ubuntu-deployment.html": ("[ TOPIC: 21 ]", "[ STORAGE: CEPH_UBUNTU ]", "[ ENG: CEPHADM_TENTACLE ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -82,6 +84,7 @@ SUBTITLE_MAP = {
     "mail-web-app-verification.html": "Deep Research // Topic 17: Mail Web Application Ingress Verification",
     "ansible-playbook-map.html": "Deep Research // Topic 18: Ansible Playbook and Related Documents Map",
     "proxmox-ceph-hci.html": "Deep Research // Topic 20: Proxmox and Ceph Hyper-Converged Cluster Integration",
+    "ceph-ubuntu-deployment.html": "Deep Research // Topic 21: Ceph Native Deployment on Ubuntu 26.04 Server LTS",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
