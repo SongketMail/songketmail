@@ -29,6 +29,7 @@ SIDEBAR_ITEMS = [
     { "href": "ANSIBLE-ADOPTION-REVIEW.html", "icon": "⚙️", "label": "16. Ansible Adoption Review", "section": "research" },
     { "href": "mail-web-app-verification.html", "icon": "📧", "label": "17. Mail Web Ingress Verification", "section": "research" },
     { "href": "ansible-playbook-map.html", "icon": "🤖", "label": "18. Ansible Playbook Map", "section": "research" },
+    { "href": "proxmox-ceph-hci.html", "icon": "📦", "label": "20. Proxmox & Ceph HCI", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -55,6 +56,7 @@ TOPIC_MAP = {
     "ANSIBLE-ADOPTION-REVIEW.html": ("[ TOPIC: 16 ]", "[ CONCEPTS: PIPELINING_CALLBACK ]", "[ AUDIT: COMPLIANCE ]"),
     "mail-web-app-verification.html": ("[ TOPIC: 17 ]", "[ AUDIT: MAIL_INGRESS ]", "[ PORTS: 25_80_443_587_993 ]"),
     "ansible-playbook-map.html": ("[ TOPIC: 18 ]", "[ MAP: PLAYBOOK_TO_DOC ]", "[ ENGINE: ANSIBLE_DRIVEN ]"),
+    "proxmox-ceph-hci.html": ("[ TOPIC: 20 ]", "[ STORAGE: CEPH_HCI ]", "[ HOST: PVE_UBUNTU ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -79,6 +81,7 @@ SUBTITLE_MAP = {
     "ANSIBLE-ADOPTION-REVIEW.html": "Deep Research // Topic 16: Ansible Configuration Review and Adoption Assessment",
     "mail-web-app-verification.html": "Deep Research // Topic 17: Mail Web Application Ingress Verification",
     "ansible-playbook-map.html": "Deep Research // Topic 18: Ansible Playbook and Related Documents Map",
+    "proxmox-ceph-hci.html": "Deep Research // Topic 20: Proxmox and Ceph Hyper-Converged Cluster Integration",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
