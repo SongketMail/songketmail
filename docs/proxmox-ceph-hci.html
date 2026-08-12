@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxmox and Ceph Hyper-Converged Cluster Integration — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 20: Proxmox and Ceph Hyper-Converged Cluster Integration
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<!-- Column 2: Center Main Content Area (span 6) -->
+    <section class="space-y-6">
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            📦 Proxmox and Ceph Hyper-Converged Cluster Integration
+        </h1>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Traditional datacenter environments separate compute and storage into isolated silos, requiring expensive Storage Area Networks (SANs) or Network Attached Storage (NAS) appliances. <strong>Hyper-Converged Infrastructure (HCI)</strong> collapses these silos by co-locating compute (VMs and containers) and software-defined storage directly on the same physical hypervisor nodes.
+        </p>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Through native integration with <strong>Ceph</strong>, a highly scalable, distributed object store and file system, <strong>Proxmox VE (PVE)</strong> provides a turnkey platform to deploy, manage, and scale hyper-converged storage directly from the hypervisor console.
+        </p>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="proxmox-ceph-hci-architecture" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            🏛️ Proxmox + Ceph HCI Architecture
+        </h2>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            A healthy, production-grade Proxmox VE hyper-converged Ceph cluster typically starts with a <strong>minimum of 3 identical nodes</strong> to ensure high availability, data redundancy, and quorum.
+        </p>
+
+        <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+       +---------------------------------------------------+
+       |              Proxmox VE + Ceph HCI                |
+       +-----------------+-----------------+---------------+
+       |     Node 1      |     Node 2      |    Node 3     |
+       |  [MON] [MGR]    |  [MON] [MGR]    |  [MON] [MGR]  |
+       |  [OSD] [OSD]    |  [OSD] [OSD]    |  [OSD] [OSD]  |
+       +--------+--------+--------+--------+-------+-------+
+                |                 |                |
+  ==============+=================+================+==============  Ceph Public (10/25G)
+  ==============+=================+================+==============  Ceph Cluster (10/25G)
+  ==============+=================+================+==============  Corosync Link (1G)
+        </pre>
+
+        <h3 id="core-daemons-functions" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Core Daemons & Functions
+        </h3>
+
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Ceph Monitor (ceph-mon / MON)</strong>: Maintains the master copy of the cluster map and tracks cluster health. Quorum requires an odd number of MONs (minimum 3).</li>
+            <li><strong>Ceph Manager (ceph-mgr / MGR)</strong>: Runs alongside monitors to provide additional monitoring, PG autoscaling, device health checks, and orchestration interfaces.</li>
+            <li><strong>Ceph Object Storage Daemon (ceph-osd / OSD)</strong>: Handles physical disk read/write operations, peer replication, and data rebalancing. Usually, one OSD is mapped per physical disk.</li>
+            <li><strong>Ceph Metadata Server (ceph-mds / MDS)</strong>: Manages metadata for the <strong>CephFS</strong> POSIX-compliant filesystem, translating file paths to RADOS objects.</li>
+        </ul>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="hardware-network-requirements-for-stable-hci" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            ⚙️ Hardware & Network Requirements for Stable HCI
+        </h2>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Particularly in hyper-converged environments where compute and storage share resources, hardware sizing and network design dictate cluster stability.
+        </p>
+
+        <h3 id="1-compute-sizing-guidelines" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            1. Compute & Sizing Guidelines
+        </h3>
+
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>CPU Reservation</strong>: Allocate at least 1 physical core (or thread) purely to each OSD daemon. For modern enterprise NVMe drives capable of sustaining over 100,000 IOPS, an OSD can consume <strong>4 to 6 threads</strong> during peak performance or recovery loops.</li>
+            <li><strong>Memory Planning</strong>: Configure OSDs with a minimum of <strong>8 GiB of RAM</strong> per daemon (where the base OSD daemon consumes 4 GiB at idle, and the remaining headroom is critical for backfilling, rebalancing, or node failure recovery).</li>
+            <li><strong>Storage Controllers</strong>: <strong>Avoid RAID controllers</strong>. Use Host Bus Adapters (HBA) or flash controllers in IT/Pass-through mode. Ceph handles redundancy natively at the software layer; hardware RAID caching algorithms interfere with Ceph's BlueStore transactional engine, leading to latency spikes and silent corruption risks.</li>
+            <li><strong>BlueStore DB/WAL Separation</strong>: Utilize BlueStore (default engine) and, if budget permits, place the metadata database (<code>block.db</code>) and journal write-ahead log (<code>block.wal</code>) on a high-speed, low-latency NVMe SSD, while allocating standard SATA/SAS SSDs for bulk object storage.</li>
+        </ul>
+
+        <h3 id="2-physical-network-isolation" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            2. Physical Network Isolation
+        </h3>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            To safeguard the cluster from split-brain scenarios and corosync timeout failures (which would break Proxmox cluster quorum and trigger immediate node self-fencing), Ceph traffic must be physically segregated:
+        </p>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-800">
+                        <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Network Interface</th>
+                        <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Recommended Bandwidth</th>
+                        <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Purpose</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tr>
+                        <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">Corosync Link</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">1 Gbps (Dedicated, Low Latency)</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Latency-sensitive cluster heartbeat and quorum voting.</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">Ceph Public Net</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10 Gbps (or 25+ Gbps NVMe)</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Storage traffic between PVE hypervisor clients and Ceph daemons.</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">Ceph Cluster Net</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10 Gbps (or 25+ Gbps NVMe)</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">High-bandwidth backend replication and OSD heartbeat rebalancing.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="performance-tuning-pool-optimization" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            🛠️ Performance Tuning & Pool Optimization
+        </h2>
+
+        <h3 id="1-placement-group-pg-autoscaling" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            1. Placement Group (PG) Autoscaling
+        </h3>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Placement Groups are logical fragments used to group objects within a pool to distribute writes evenly across OSDs.
+        </p>
+
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li>Enable the <strong>PG Autoscaler</strong> to dynamically adjust the PG count based on dataset growth:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-3 rounded-lg text-xs font-mono overflow-x-auto mt-2">ceph mgr module enable pg_autoscaler
+ceph osd pool set &lt;pool-name&gt; pg_autoscale_mode on</pre>
+            </li>
+            <li>Setting <code>target_size</code> or <code>target_size_ratio</code> on pools gives the autoscaler early hints, preventing massive, performance-degrading reshuffles later.</li>
+        </ul>
+
+        <h3 id="2-erasure-coding-ec-fastec-optimization" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            2. Erasure Coding (EC) & FastEC Optimization
+        </h3>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Erasure Coding provides high storage efficiency compared to traditional 3x replication (e.g., <code>k=2, m=1</code> provides 66% usable capacity compared to 33% on 3x replication). To bypass the traditional latency penalty of EC on virtual machine workloads, enable <strong>FastEC</strong> on your data pool:
+        </p>
+
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li>Ensure the cluster is at least at the <strong>Tentacle</strong> release.</li>
+            <li>Verify the default EC profile uses a compatible technique (e.g., <code>reed_sol_van</code>).</li>
+            <li>Enable partial writes and partial reads optimization:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-3 rounded-lg text-xs font-mono overflow-x-auto mt-2">ceph osd pool set &lt;pool-name&gt;-data allow_ec_optimizations 1</pre>
+            </li>
+        </ul>
+
+        <p class="text-xs italic text-slate-500 dark:text-slate-400 mt-2">
+            Note: allow_ec_optimizations is a one-way switch. Once enabled, it cannot be cleared without draining and recreating the pool.
+        </p>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="ceph-native-deployment-on-ubuntu-2604-server-lts" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            🐧 Ceph Native Deployment on Ubuntu 26.04 Server LTS
+        </h2>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            While Proxmox VE manages Ceph natively through the GUI or <code>pveceph</code>, deploying an independent or connected Ceph cluster node on <strong>Ubuntu 26.04 LTS</strong> requires utilizing the official <strong><code>cephadm</code></strong> orchestrator.
+        </p>
+
+        <h3 id="1-bootstrapping-the-ubuntu-2604-storage-node" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            1. Bootstrapping the Ubuntu 26.04 Storage Node
+        </h3>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Install dependencies and bootstrap the cluster using a dedicated IP interface:
+        </p>
+
+        <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+# Update packages and install Docker/Podman container runtime
+sudo apt update && sudo apt install -y docker.io python3
+
+# Download and run the cephadm bootstrap
+curl --silent --remote-name https://download.ceph.com/rpm/el9/scap-security-guide/cephadm
+chmod +x cephadm
+sudo ./cephadm bootstrap --mon-ip &lt;UBUNTU_NODE_IP&gt;
+        </pre>
+
+        <h3 id="2-provisioning-osds-on-ubuntu" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            2. Provisioning OSDs on Ubuntu
+        </h3>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Once the cluster is running, identify raw, unpartitioned disks on the host and assign them as OSD storage devices:
+        </p>
+
+        <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+# List available storage devices
+sudo ceph orch device ls
+
+# Add a specific disk as an OSD daemon
+sudo ceph orch daemon add osd &lt;ubuntu-hostname&gt;:&lt;device-path&gt;
+        </pre>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="cross-cluster-connectivity-pve-to-ubuntu-2604" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            🔗 Cross-Cluster Connectivity: PVE to Ubuntu 26.04
+        </h2>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            To scale storage limitlessly or split storage costs, a Proxmox VE hyper-converged cluster can either consume external pools running on Ubuntu 26.04 or export its own pools to Ubuntu clients.
+        </p>
+
+        <h3 id="case-a-proxmox-ve-consuming-external-ceph-storage-ubuntu-2604" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Case A: Proxmox VE Consuming External Ceph Storage (Ubuntu 26.04)
+        </h3>
+
+        <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+  +------------------+                   +--------------------+
+  |  Proxmox VE      |  (RBD / CephFS)   |  Ubuntu 26.04 LTS  |
+  |  HCI Cluster     | &lt;================ |  External Storage  |
+  |  [VMs/Containers]|   Port 6789/tcp   |  [OSD Cluster]     |
+  +------------------+                   +--------------------+
+        </pre>
+
+        <ol class="list-decimal list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Extract Client Keyring</strong>: On the Ubuntu 26.04 Ceph cluster, retrieve the admin keyring:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">sudo ceph auth get-or-create client.admin</pre>
+            </li>
+            <li><strong>Transfer Keyring to PVE</strong>: Copy the keyring file to the secure Proxmox filesystem (pmxcfs):
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">mkdir -p /etc/pve/priv/ceph
+scp user@&lt;ubuntu-ip&gt;:/etc/ceph/ceph.client.admin.keyring /etc/pve/priv/ceph/&lt;storage-id&gt;.keyring</pre>
+            </li>
+            <li><strong>Configure Storage backend in PVE</strong>: Add the external configuration to <code>/etc/pve/storage.cfg</code>:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">rbd: external-ubuntu-ceph
+    monhost 10.10.10.20:6789;10.10.10.21:6789;10.10.10.22:6789
+    pool rbd-vm-pool
+    username admin
+    content images,rootdir
+    krbd 0</pre>
+            </li>
+        </ol>
+
+        <h3 id="case-b-ubuntu-2604-client-mounting-pve-cephfs" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Case B: Ubuntu 26.04 Client Mounting PVE CephFS
+        </h3>
+
+        <ol class="list-decimal list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Export PVE Configuration</strong>: Copy PVE's <code>ceph.conf</code> and the client key to Ubuntu:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">scp root@&lt;pve-ip&gt;:/etc/pve/ceph.conf /etc/ceph/ceph.conf
+scp root@&lt;pve-ip&gt;:/etc/pve/priv/ceph/cephfs.keyring /etc/ceph/ceph.keyring</pre>
+            </li>
+            <li><strong>Mount CephFS via fstab</strong>: Add the mount option to <code>/etc/fstab</code> on Ubuntu:
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">10.10.10.1:6789,10.10.10.2:6789,10.10.10.3:6789:/ /mnt/cephfs ceph name=admin,secretfile=/etc/ceph/ceph.keyring,_netdev,x-systemd.mount-timeout=15s 0 0</pre>
+            </li>
+        </ol>
+    </section>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#proxmox-ceph-hci-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏛️ Proxmox + Ceph HCI Architecture
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#core-daemons-functions" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Core Daemons & Functions
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#hardware-network-requirements-for-stable-hci" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚙️ Hardware & Network Requirements for Stable HCI
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#1-compute-sizing-guidelines" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1. Compute & Sizing Guidelines
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-physical-network-isolation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2. Physical Network Isolation
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#performance-tuning-pool-optimization" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛠️ Performance Tuning & Pool Optimization
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#1-placement-group-pg-autoscaling" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1. Placement Group (PG) Autoscaling
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-erasure-coding-ec-fastec-optimization" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2. Erasure Coding (EC) & FastEC Optimization
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#ceph-native-deployment-on-ubuntu-2604-server-lts" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🐧 Ceph Native Deployment on Ubuntu 26.04 Server LTS
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#1-bootstrapping-the-ubuntu-2604-storage-node" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1. Bootstrapping the Ubuntu 26.04 Storage Node
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-provisioning-osds-on-ubuntu" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2. Provisioning OSDs on Ubuntu
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#cross-cluster-connectivity-pve-to-ubuntu-2604" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔗 Cross-Cluster Connectivity: PVE to Ubuntu 26.04
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#case-a-proxmox-ve-consuming-external-ceph-storage-ubuntu-2604" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Case A: Proxmox VE Consuming External Ceph Storage (Ubuntu 26.04)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#case-b-ubuntu-2604-client-mounting-pve-cephfs" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Case B: Ubuntu 26.04 Client Mounting PVE CephFS
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 20 ]</span>
+            <span>|</span>
+            <span>[ STORAGE: CEPH_HCI ]</span>
+            <span>|</span>
+            <span>[ HOST: PVE_UBUNTU ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>
