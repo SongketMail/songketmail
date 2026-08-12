@@ -1,0 +1,50 @@
+---
+# ceph_deploy/group_vars/all.yml
+# FQCN-compliant variables for Ceph Tentacle on Ubuntu 26.04 LTS & Proxmox VE 9
+
+# Cluster Global Config
+ceph_cluster_name: "ceph-prod"
+ceph_release: "tentacle"
+ceph_fsid: "8c3a10e0-3bf0-47b1-91ea-02a3a9de0201"
+
+# Capacity & Sizing (154TB raw, 51TB usable under 3x replication)
+ceph_raw_capacity_tb: 154
+ceph_usable_capacity_tb: 51
+ceph_replication_size: 3
+ceph_replication_min_size: 2
+
+# Network Segmentation (Strict Physical Isolation)
+# PVE management network (Storage access is separate)
+pve_mgmt_network: "10.10.10.0/24"
+# Ceph Public Network: Client communications & MONs
+ceph_public_network: "10.10.20.0/24"
+# Ceph Cluster Network: Peer replication & backend heartbeats
+ceph_cluster_network: "10.10.30.0/24"
+
+# Node IP definitions (Public Interfaces)
+ceph_mon_ips:
+  - "10.10.20.11"
+  - "10.10.20.12"
+  - "10.10.20.13"
+
+# Storage Devices mapped to OSDs (IT/Passthrough mode disks)
+ceph_osd_devices:
+  - "/dev/nvme0n1"
+  - "/dev/nvme1n1"
+  - "/dev/nvme2n1"
+
+# PVE-Ceph Integration parameters
+pve_storage_id: "external-ceph-prod"
+pve_rbd_pool: "pve-rbd-pool"
+pve_keyring_dest: "/etc/pve/priv/ceph/{{ pve_storage_id }}.keyring"
+
+# OS Prep packages & kernels
+cephadm_required_packages:
+  - "python3"
+  - "podman"
+  - "lvm2"
+  - "chrony"
+  - "curl"
+
+# Flag to support sandboxed/non-sandbox runs
+is_limited_environment: false

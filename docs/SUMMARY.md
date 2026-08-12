@@ -32,6 +32,7 @@ topics: [summary, index, navigation]
 * [Part 18: Ansible Playbook and Related Documents Map](ansible-playbook-map.md)
 * [Part 19: Legal Notice & Disclaimer](legal-notice.md)
 * [Part 20: Proxmox & Ceph Hyper-Converged Integration](proxmox-ceph-hci.md)
+* [Part 21: Ceph Native Deployment on Ubuntu 26.04 Server LTS](ceph-ubuntu-deployment.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*

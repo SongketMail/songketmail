@@ -1,0 +1,33 @@
+---
+# ceph_deploy/playbook.yml
+# Orchestrates high-availability Ceph Tentacle deployment on Ubuntu 26.04 nodes
+
+- name: Prepare Ubuntu 26.04 Ceph Storage Nodes
+  hosts: ceph_nodes
+  become: yes
+  roles:
+    - role: ceph_prep
+
+- name: Bootstrap Ceph Cluster & OSDs
+  hosts: ceph_nodes
+  become: yes
+  roles:
+    - role: ceph_bootstrap
+
+- name: Apply Strict Public & Cluster Network Hardening
+  hosts: ceph_nodes
+  become: yes
+  roles:
+    - role: security_hardening
+
+- name: Integrate Proxmox VE 9 Cluster Nodes with External Ceph
+  hosts: pve_nodes
+  become: yes
+  roles:
+    - role: pve_integration
+
+- name: Run Storage Performance and IOPS Baseline Validation
+  hosts: ceph_nodes
+  become: yes
+  roles:
+    - role: validation_bench

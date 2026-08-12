@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceph Native Deployment on Ubuntu 26.04 Server LTS — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 21: Ceph Native Deployment on Ubuntu 26.04 Server LTS
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+                    <a href="ceph-ubuntu-deployment.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>📦</span>
+                        <span>21. Ceph Native Deployment</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        📦 Ceph Native Deployment on Ubuntu 26.04 Server LTS
+    </h1>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        This documentation details the architecture, design, and end-to-end automation of a 3-node independent Ceph storage cluster running <strong>Ubuntu 26.04 LTS (Noble Numbat)</strong> and the <strong>Ceph Tentacle</strong> release, fully integrated as an external storage provider for a 4-node <strong>Proxmox Virtual Environment (PVE) 9</strong> compute cluster.
+    </p>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="1-design-planning" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        📐 1. Design & Planning
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Establishing an enterprise-grade storage backend requires strict separation of concerns, high-bandwidth storage fabrics, and granular resource limits on hypervisors and storage nodes.
+    </p>
+
+    <h3 id="11-physical-network-segmentation-addressing-plan" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        1.1 Physical Network Segmentation & Addressing Plan
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        To avoid packet contention, split-brain conditions, and latency spikes on PVE quorum heartbeats, the cluster architecture uses three physically separated networks, each bound to non-overlapping IP subnets:
+    </p>
+
+    <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+               +-------------------------------------------+
+               |         ENTERPRISE FABRIC SEGMENTS        |
+               +-------------------------------------------+
+               |                                           |
+               |  === [ PVE MGMT NETWORK: 10.10.10.0/24 ]  |
+               |      Used for VM/CT console, API access   |
+               |                                           |
+               |  === [ CEPH PUBLIC NET: 10.10.20.0/24  ]  |
+               |      Used for MON quorum, client mounts   |
+               |                                           |
+               |  === [ CEPH CLUSTER NET: 10.10.30.0/24 ]  |
+               |      Used for OSD peer backfill/rebalance |
+               |                                           |
+               +-------------------------------------------+
+    </pre>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+            <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800">
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Hostname</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Role</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">PVE MGMT IP</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Ceph Public IP</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-white">Ceph Cluster IP</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">ceph-node1</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Ceph Storage MON/MGR/OSD</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.11</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.30.11</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">ceph-node2</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Ceph Storage MON/MGR/OSD</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.12</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.30.12</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">ceph-node3</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Ceph Storage MON/MGR/OSD</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.13</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.30.13</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">pve-node1</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">PVE 9 Compute Host</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.10.21</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.21</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">pve-node2</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">PVE 9 Compute Host</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.10.22</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.22</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">pve-node3</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">PVE 9 Compute Host</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.10.23</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.23</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-white">pve-node4</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">PVE 9 Compute Host</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.10.24</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">10.10.20.24</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 id="12-capacity-sizing-calculations" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        1.2 Capacity Sizing & Calculations
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        The raw disk array sizing target provides high performance and data durability using standard <strong>3x replication</strong> policies:
+    </p>
+
+    <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>Raw NVMe Storage Array</strong>: Each Ceph storage node houses 3× 17.1TB enterprise NVMe SSDs in IT/Passthrough mode.</li>
+        <li><strong>Raw Total Capacity</strong>: 3 nodes × 3 drives × 17.1TB = <strong>153.9TB Raw (approx. 154TB)</strong>.</li>
+        <li><strong>Usable Pool Capacity (3x Replication)</strong>: 154TB / 3 = <strong>51.3TB Usable (approx. 51TB)</strong>.</li>
+        <li><strong>OSD Resource Sizing</strong>:
+            <ul class="list-circle list-inside space-y-1 pl-4">
+                <li><strong>Memory Limits</strong>: 8 GiB RAM per OSD daemon (Total 24 GiB per storage node reserved exclusively for OSDs).</li>
+                <li><strong>CPU Allocation</strong>: Minimum 1 physical core/thread per OSD daemon.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="2-pve-cluster-build" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        🖥️ 2. PVE Cluster Build
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        The compute layer consists of four greenfield Proxmox VE 9 nodes designed to execute virtual machines and containerized workloads.
+    </p>
+
+    <h3 id="21-pve-greenfield-install-quorum" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        2.1 PVE Greenfield Install & Quorum
+    </h3>
+
+    <ol class="list-decimal list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>Host OS Provisioning</strong>: Install Proxmox VE 9 on each of the 4 compute nodes. Keep local system volumes isolated from Ceph.</li>
+        <li><strong>Corosync Configuration</strong>: Initialize a redundant Corosync cluster link over dedicated low-latency physical switches:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">pvecm create pve-compute-cluster --link0 10.10.10.21</pre>
+        </li>
+        <li><strong>Cluster Joining</strong>: Join the remaining three nodes to form a highly available, 4-node quorum cluster:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">pvecm add 10.10.10.21 --link0 10.10.10.22  # From pve-node2
+pvecm add 10.10.10.21 --link0 10.10.10.23  # From pve-node3
+pvecm add 10.10.10.21 --link0 10.10.10.24  # From pve-node4</pre>
+        </li>
+    </ol>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="3-ceph-production-cluster-deployment" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        🐙 3. Ceph Production Cluster Deployment
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        This stage uses Ansible to prepare the minimal Ubuntu 26.04 Server hosts and deploy containerized Ceph daemons via the native <strong>cephadm</strong> orchestrator.
+    </p>
+
+    <h3 id="31-ansible-automated-roles" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        3.1 Ansible Automated Roles
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Our standalone Ansible Playbook structures deployment into five modular phases:
+    </p>
+    <ul class="list-disc list-inside space-y-1 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>ceph_prep</strong>: Installs podman, configures kernel requirements (file max, netfilter modules), and synchronizes Chrony NTP clocks.</li>
+        <li><strong>ceph_bootstrap</strong>: Downloads cephadm, bootstraps the active MON/MGR, clusters the storage nodes, and spins up OSDs across nvme target drives.</li>
+        <li><strong>security_hardening</strong>: Hardens storage nodes using precise network isolation rules.</li>
+        <li><strong>pve_integration</strong>: Handles keyring transfer, storage.cfg distribution, and VM storage verification.</li>
+        <li><strong>validation_bench</strong>: Runs storage synthetic benchmarking to output cluster statistics.</li>
+    </ul>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="4-pveceph-integration" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        🔗 4. PVE–Ceph Integration
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Integrating the independent Ceph cluster as an external storage backend for Proxmox VE requires client keyring delegation and clustered storage registration.
+    </p>
+
+    <h3 id="41-keyring-extraction-delegation" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        4.1 Keyring Extraction & Delegation
+    </h3>
+
+    <ol class="list-decimal list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li>On <strong>ceph-node1</strong> (the bootstrap node), extract the administrative access keyring:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">ceph auth get-or-create client.admin</pre>
+        </li>
+        <li>Distribute this keyring securely to all PVE compute hosts inside the secure Proxmox cluster directory:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">mkdir -p /etc/pve/priv/ceph/
+scp /etc/ceph/ceph-prod.client.admin.keyring root@10.10.10.21:/etc/pve/priv/ceph/external-ceph-prod.keyring</pre>
+        </li>
+    </ol>
+
+    <h3 id="42-storage-registration-etcpvestoragecfg" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        4.2 Storage Registration (/etc/pve/storage.cfg)
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Define the external RADOS Block Device (RBD) backend in the PVE clustered configuration:
+    </p>
+
+    <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+rbd: external-ceph-prod
+    monhost 10.10.20.11;10.10.20.12;10.10.20.13
+    pool pve-rbd-pool
+    username admin
+    content images,rootdir
+    krbd 0
+    </pre>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="5-network-security-hardening" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        🛡️ 5. Network & Security Hardening
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        To guarantee maximum protection of storage assets, physical networks must be isolated using firewall policies.
+    </p>
+
+    <h3 id="51-iptables-storage-isolation-rules" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        5.1 IPTables Storage Isolation Rules
+    </h3>
+
+    <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
++---------------------------------------------------------------------------------------------------+
+|                                 STORAGE HARDENING FIREWALL                                        |
++---------------------------------------------------------------------------------------------------+
+|  [ INCOMING TRAFFIC ]                                                                             |
+|                                                                                                   |
+|    Source: 10.10.20.0/24 (Public Net)  -->  Ports: 6789, 3300 (MON/MGR)  -->  [ ALLOW ]           |
+|    Source: 10.10.30.0/24 (Cluster Net) -->  Ports: 6800:7300 (OSDs)      -->  [ ALLOW ]           |
+|    Source: Any (Outside segments)      -->  Ports: 6789, 3300            -->  [ DROP ]            |
+|                                                                                                   |
++---------------------------------------------------------------------------------------------------+
+    </pre>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Our playbook implements these restrictions natively via FQCN-compliant firewall tasks:
+    </p>
+    <ul class="list-disc list-inside space-y-1 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>Rule 1</strong>: Allow inbound traffic on ports 6789 and 3300 only if originating from the 10.10.20.0/24 Public network.</li>
+        <li><strong>Rule 2</strong>: Allow inbound traffic on port range 6800:7300 (OSD daemons) only if originating from the 10.10.30.0/24 Cluster network.</li>
+        <li><strong>Rule 3</strong>: Explicitly drop any remaining storage traffic attempts from untrusted segments.</li>
+    </ul>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="6-validation-benchmarking" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        📊 6. Validation & Benchmarking
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Verifying performance baselines helps confirm proper disk, fabric, and controller initialization before VM provisioning.
+    </p>
+
+    <h3 id="61-cluster-rados-benchmarking" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        6.1 Cluster RADOS Benchmarking
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Run the synthetic object bench tool directly from containerized cephadm shell:
+    </p>
+    <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">cephadm shell -- rados bench -p pve-rbd-pool 30 write --no-cleanup</pre>
+
+    <ul class="list-disc list-inside space-y-1 text-base text-slate-600 dark:text-slate-300 pl-4 mt-2">
+        <li>Capture throughput (MB/s), average write latency (ms), and sustained IOPS.</li>
+        <li>Cleanup test benchmarks objects:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">cephadm shell -- rados -p pve-rbd-pool cleanup</pre>
+        </li>
+    </ul>
+
+    <hr class="border-slate-200 dark:border-slate-800" />
+
+    <h2 id="7-ha-testing-operational-runbook" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        🔄 7. HA Testing & Operational Runbook
+    </h2>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        This runbook guides administrators through routine storage node maintenance, recovery drills, and quorum failover handling.
+    </p>
+
+    <h3 id="71-simulated-storage-node-outage-drain-and-maintenance" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        7.1 Simulated Storage Node Outage (Drain and Maintenance)
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        When performing standard kernel upgrades or physical hardware repairs on a storage host, follow these precise maintenance commands:
+    </p>
+
+    <ol class="list-decimal list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>Set Cluster OSD Maintenance Flags</strong>: Inform the cluster that a node is temporarily going offline to prevent immediate data replication or backfilling overhead:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">ceph osd set noout</pre>
+        </li>
+        <li><strong>Gracefully stop OSD services on the node</strong>: Shut down target daemons on the active maintenance node:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">systemctl stop ceph-osd@*</pre>
+        </li>
+        <li><strong>Execute Host Repair</strong>: Perform OS/kernel patching, reboot the host, and ensure all networks reconnect correctly.</li>
+        <li><strong>Restore Services and Clear Flags</strong>: Re-enable standard data backfilling and healing:
+            <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2 rounded-lg text-xs font-mono overflow-x-auto mt-1">systemctl start ceph-osd@*
+ceph osd unset noout</pre>
+        </li>
+    </ol>
+
+    <h3 id="72-storage-quorum-healing-verification" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+        7.2 Storage Quorum Healing Verification
+    </h3>
+
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Check the real-time cluster health and recovery status during rebalancing operations:
+    </p>
+    <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+ceph status
+ceph -w
+    </pre>
+    <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        Confirm health returns to <code>HEALTH_OK</code> once replication catchup completes.
+    </p>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#1-design-planning" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📐 1. Design & Planning
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#11-physical-network-segmentation-addressing-plan" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1.1 Physical Network Segmentation & Addressing Plan
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#12-capacity-sizing-calculations" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1.2 Capacity Sizing & Calculations
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-pve-cluster-build" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🖥️ 2. PVE Cluster Build
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#21-pve-greenfield-install-quorum" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2.1 PVE Greenfield Install & Quorum
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-ceph-production-cluster-deployment" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🐙 3. Ceph Production Cluster Deployment
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#31-ansible-automated-roles" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.1 Ansible Automated Roles
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-pveceph-integration" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔗 4. PVE–Ceph Integration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#41-keyring-extraction-delegation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            4.1 Keyring Extraction & Delegation
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#42-storage-registration-etcpvestoragecfg" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            4.2 Storage Registration (/etc/pve/storage.cfg)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#5-network-security-hardening" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛡️ 5. Network & Security Hardening
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#51-iptables-storage-isolation-rules" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            5.1 IPTables Storage Isolation Rules
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#6-validation-benchmarking" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📊 6. Validation & Benchmarking
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#61-cluster-rados-benchmarking" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            6.1 Cluster RADOS Benchmarking
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#7-ha-testing-operational-runbook" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔄 7. HA Testing & Operational Runbook
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#71-simulated-storage-node-outage-drain-and-maintenance" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            7.1 Simulated Storage Node Outage (Drain and Maintenance)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#72-storage-quorum-healing-verification" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            7.2 Storage Quorum Healing Verification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 21 ]</span>
+            <span>|</span>
+            <span>[ STORAGE: CEPH_UBUNTU ]</span>
+            <span>|</span>
+            <span>[ ENG: CEPHADM_TENTACLE ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

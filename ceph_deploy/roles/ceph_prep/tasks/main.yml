@@ -1,0 +1,46 @@
+---
+# ceph_deploy/roles/ceph_prep/tasks/main.yml
+# Prepares minimal Ubuntu 26.04 LTS servers for containerized cephadm deployment
+
+- name: Update apt cache and upgrade base OS packages
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Install required baseline packages
+  ansible.builtin.apt:
+    name: "{{ cephadm_required_packages }}"
+    state: present
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Configure sysctl parameter for file descriptor limits
+  ansible.posix.sysctl:
+    name: fs.file-max
+    value: "2097152"
+    sysctl_set: yes
+    state: present
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Enable kernel modules for container networks
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Configure Chrony NTP service for sub-millisecond precision
+  ansible.builtin.copy:
+    content: |
+      pool pool.ntp.org iburst
+      driftfile /var/lib/chrony/drift
+      makestep 1.0 3
+      rtcsync
+    dest: /etc/chrony/chrony.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart_chrony
+  when: not (is_limited_environment | default(false) | bool)
