@@ -455,3 +455,53 @@ def test_local_links_resolution(source_file, link_value, resolved_path):
     base_path = resolved_path.split("?")[0]
 
     assert os.path.exists(base_path), f"In file {source_file}: Link {link_value} resolves to non-existent path {base_path}"
+
+
+# --- Test Group 7: Proxmox/Ceph HCI Manpower Analysis Content Verification ---
+
+def test_proxmox_ceph_hci_manpower_markdown_content():
+    """
+    Verifies that the Proxmox/Ceph HCI Markdown file contains the correct
+    headings and keywords for the newly introduced Manpower & Operational Effort Analysis.
+    """
+    md_file = "docs/proxmox-ceph-hci.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    with open(md_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify the new section title and the scenarios exist
+    assert "## 📊 Manpower & Operational Effort Analysis" in content
+    assert "### 1. Scenario A: Decoupled Proxmox VE Compute + Proxmox-Managed Ceph" in content
+    assert "### 2. Scenario B: Proxmox VE Compute + Ubuntu Ceph (via `cephadm`)" in content
+    assert "### ⚖️ Operational Effort Comparison Matrix" in content
+
+    # Check key terms to confirm complete analysis coverage
+    assert "cephadm" in content.lower()
+    assert "subscription" in content.lower()
+    assert "learning curve" in content.lower()
+
+
+def test_proxmox_ceph_hci_manpower_html_content():
+    """
+    Verifies that the Proxmox/Ceph HCI unified HTML file contains the correct
+    HTML structure, ID anchors, and tables matching the Markdown changes.
+    """
+    html_file = "docs/proxmox-ceph-hci.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify matching HTML ID anchors
+    assert 'id="manpower-operational-effort-analysis"' in content
+    assert 'id="1-scenario-a-decoupled-proxmox-ve-compute-proxmox-managed-ceph-two-pve-clusters"' in content
+    assert 'id="2-scenario-b-proxmox-ve-compute-ubuntu-ceph-via-cephadm"' in content
+    assert 'id="operational-effort-comparison-matrix"' in content
+
+    # Verify key structural elements (comparison matrix table, list tags, styling classes)
+    assert "<table" in content
+    assert "Scenario A: Proxmox-Managed Ceph (2 PVE Clusters)" in content
+    assert "Scenario B: Ubuntu Ceph" in content
+    assert "Initial Deployment" in content
+    assert "Upgrade Lifecycle" in content
