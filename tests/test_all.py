@@ -505,3 +505,55 @@ def test_proxmox_ceph_hci_manpower_html_content():
     assert "Scenario B: Ubuntu Ceph" in content
     assert "Initial Deployment" in content
     assert "Upgrade Lifecycle" in content
+
+
+# --- Test Group 8: Proxmox/Ceph HCI Deployment Flow Content Verification ---
+
+def test_proxmox_ceph_hci_deployment_flow_markdown_content():
+    """Verifies that the Proxmox/Ceph HCI Markdown file contains the correct deployment flow headings.
+
+    This test checks for the presence of the 6-stage deployment and operational flow
+    introduced in this session to make sure the OKF-compliant documentation remains intact.
+
+    Raises:
+        AssertionError: If any of the required section headings or stage descriptions are missing.
+    """
+    md_file = "docs/proxmox-ceph-hci.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    with open(md_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify section title and deployment stages exist in markdown format
+    assert "## 🔄 Deployment Flow — Proxmox VE + External Ceph (Production & DR)" in content
+    assert "### Stage 1: Compute Cluster Provisioning" in content
+    assert "### Stage 2: Dual-Site Ceph Cluster Sizing & Bootstrap" in content
+    assert "### Stage 3: High-Performance WAN/Replication Mirroring" in content
+    assert "### Stage 4: Cross-Cluster Integration" in content
+    assert "### Stage 5: Rigorous Validation & Stress Testing" in content
+    assert "### Stage 6: Documentation, UAT & Handover" in content
+
+
+def test_proxmox_ceph_hci_deployment_flow_html_content():
+    """Verifies that the Proxmox/Ceph HCI HTML file contains correct ID anchors for deployment flow.
+
+    This test checks that the HTML anchors and generated list elements exist to ensure
+    the Table of Contents generation and frontend link resolution work perfectly.
+
+    Raises:
+        AssertionError: If any of the required HTML IDs, anchors, or content markers are missing.
+    """
+    html_file = "docs/proxmox-ceph-hci.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify matching HTML ID anchors are generated and linked correctly
+    assert 'id="deployment-flow-proxmox-ve-external-ceph-production-dr"' in content
+    assert 'id="stage-1-compute-cluster-provisioning"' in content
+    assert 'id="stage-2-dual-site-ceph-cluster-sizing-bootstrap"' in content
+    assert 'id="stage-3-high-performance-wanreplication-mirroring"' in content
+    assert 'id="stage-4-cross-cluster-integration"' in content
+    assert 'id="stage-5-rigorous-validation-stress-testing"' in content
+    assert 'id="stage-6-documentation-uat-handover"' in content
