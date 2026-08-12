@@ -9,6 +9,81 @@ topics: [proxmox, ceph, hyper-converged, rbd, cephfs, ubuntu]
 ---
 # 📦 Proxmox and Ceph Hyper-Converged Cluster Integration
 
+This guide outlines the integration of Proxmox Virtual Environment (PVE) and Ceph, covering hyper-converged architecture, physical network isolation, performance tuning, and the end-to-end deployment flow for production and disaster recovery (DR) environments.
+
+---
+
+## 🔄 Deployment Flow — Proxmox VE + External Ceph (Production & DR)
+
+Implementing an enterprise-grade Proxmox VE hypervisor cluster coupled with an external, independent Ceph storage backend involves a structured multi-stage deployment flow. This design guarantees clear separation of concerns, high-performance replication, and bulletproof failover capability between active production and passive disaster recovery (DR) sites.
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                     DEPLOYMENT STAGE FLOW                                         |
++---------------------------------------------------------------------------------------------------+
+|  STAGE 1: Configure Proxmox VE 9 Compute Cluster (4 nodes, no local Ceph)                         |
+|    |                                                                                              |
+|    +---> STAGE 2A: Configure Ceph Production Cluster (3 nodes, Ubuntu 26.04 + Tentacle)           |
+|    |       |                                                                                      |
+|    |       +---> STAGE 3: Configure RBD Mirroring Production <-> DR (replication link)            |
+|    |       |       |                                                                              |
+|    +---> STAGE 2B: Configure Ceph DR Cluster (3 nodes, Ubuntu 26.04 + Tentacle)                   |
+|            |       |                                                                              |
+|            |       v                                                                              |
+|            +---> STAGE 4: Integrate PVE <-> Ceph (Keyring transfer, storage.cfg, test VM on pool)  |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 5: Validate & Test (Benchmark, HA node failure, DR failover / failback)     |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 6: Documentation, UAT & Handover to Customer                             |
++---------------------------------------------------------------------------------------------------+
+```
+
+### Stage 1: Compute Cluster Provisioning
+* **Objective**: Deploy a robust, high-availability compute layer on Proxmox VE 9 without storage resource contention.
+* **Actions**:
+  - Provision a **4-node Proxmox VE 9 compute cluster** on physical hardware nodes.
+  - Disable local Ceph services (`pveceph` is not bootstrapped locally) to preserve maximum CPU and memory capacity for guest virtual machines and containers.
+  - Configure redundant corosync interfaces on dedicated low-latency physical switches to prevent cluster split-brain.
+
+### Stage 2: Dual-Site Ceph Cluster Sizing & Bootstrap
+* **Objective**: Establish independent production and disaster recovery (DR) storage clusters using minimal Ubuntu 26.04 LTS installations.
+* **Actions**:
+  - **Production Site (Stage 2A)**: Bootstrap a **3-node Ceph Production cluster** running Ubuntu 26.04 LTS and the Ceph **Tentacle** release (containerised via `cephadm`). Assign at least 3 Monitors (MONs) and 3 Managers (MGRs) for robust quorum, mapping physical disks to dedicated OSD daemons.
+  - **Disaster Recovery Site (Stage 2B)**: Deploy a mirroring clone of the production storage setup using another **3-node Ceph DR cluster** on identical hardware and Ubuntu 26.04 + Tentacle software stacks.
+
+### Stage 3: High-Performance WAN/Replication Mirroring
+* **Objective**: Connect the isolated storage clusters over a WAN link for block-level data replication.
+* **Actions**:
+  - Configure **Ceph RADOS Block Device (RBD) Mirroring** between the Production and DR clusters.
+  - Set up an active-passive replication link using daemon-to-daemon token exchange.
+  - Define mirroring policies (journal-based or snapshot-based) to enforce target Recovery Point Objectives (RPO) and Recovery Time Objectives (RTO).
+
+### Stage 4: Cross-Cluster Integration
+* **Objective**: Bind the Proxmox VE 9 compute hypervisors directly to the external Ceph production and DR pools.
+* **Actions**:
+  - Extract the client keyrings from the production and DR storage clusters.
+  - Securely transfer keyrings onto the Proxmox clustered filesystem (`pmxcfs`) at `/etc/pve/priv/ceph/`.
+  - Register the external pools in `/etc/pve/storage.cfg` on the PVE cluster.
+  - Deploy a test virtual machine directly onto the external Production RBD pool to verify end-to-end read, write, and dynamic volume provisioning capabilities.
+
+### Stage 5: Rigorous Validation & Stress Testing
+* **Objective**: Verify cluster stability, network isolation, throughput, and failover behavior under simulated disaster scenarios.
+* **Actions**:
+  - Run synthetic storage benchmarks (using `fio` and `rados bench`) to capture baseline read/write IOPS and latency.
+  - Perform **High Availability (HA) Node Failure Testing**: Forcefully terminate or fence PVE compute nodes and Ceph OSD/MON hosts to verify automatic workload relocation and storage rebalancing.
+  - Execute **DR Failover & Failback Drills**: Demote the active production pools, promote the DR pools, redirect PVE hypervisors to mount the promoted DR storage, and verify virtual machine bootability. Follow up with a reverse failback drill to restore normal operations.
+
+### Stage 6: Documentation, UAT & Handover
+* **Objective**: Package operational knowledge, finalize formal client sign-off, and execute the operational transition.
+* **Actions**:
+  - Compile the system blueprint, network configuration worksheets, keyring management procedures, and disaster recovery execution runbooks.
+  - Perform the User Acceptance Testing (UAT) review with client stakeholders.
+  - Formally hand over the integrated, highly available Proxmox VE 9 + External Ceph architecture to the customer's operations team.
+
+---
+
 Traditional datacenter environments separate compute and storage into isolated silos, requiring expensive Storage Area Networks (SANs) or Network Attached Storage (NAS) appliances. **Hyper-Converged Infrastructure (HCI)** collapses these silos by co-locating compute (VMs and containers) and software-defined storage directly on the same physical hypervisor nodes.
 
 Through native integration with **Ceph**, a highly scalable, distributed object store and file system, **Proxmox VE (PVE)** provides a turnkey platform to deploy, manage, and scale hyper-converged storage directly from the hypervisor console.

@@ -214,6 +214,129 @@
         </h1>
 
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            This guide outlines the integration of Proxmox Virtual Environment (PVE) and Ceph, covering hyper-converged architecture, physical network isolation, performance tuning, and the end-to-end deployment flow for production and disaster recovery (DR) environments.
+        </p>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <h2 id="deployment-flow-proxmox-ve-external-ceph-production-dr" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            🔄 Deployment Flow — Proxmox VE + External Ceph (Production & DR)
+        </h2>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Implementing an enterprise-grade Proxmox VE hypervisor cluster coupled with an external, independent Ceph storage backend involves a structured multi-stage deployment flow. This design guarantees clear separation of concerns, high-performance replication, and bulletproof failover capability between active production and passive disaster recovery (DR) sites.
+        </p>
+
+        <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
++---------------------------------------------------------------------------------------------------+
+|                                     DEPLOYMENT STAGE FLOW                                         |
++---------------------------------------------------------------------------------------------------+
+|  STAGE 1: Configure Proxmox VE 9 Compute Cluster (4 nodes, no local Ceph)                         |
+|    |                                                                                              |
+|    +---> STAGE 2A: Configure Ceph Production Cluster (3 nodes, Ubuntu 26.04 + Tentacle)           |
+|    |       |                                                                                      |
+|    |       +---> STAGE 3: Configure RBD Mirroring Production &lt;-&gt; DR (replication link)            |
+|    |       |       |                                                                              |
+|    +---> STAGE 2B: Configure Ceph DR Cluster (3 nodes, Ubuntu 26.04 + Tentacle)                   |
+|            |       |                                                                              |
+|            |       v                                                                              |
+|            +---> STAGE 4: Integrate PVE &lt;-&gt; Ceph (Keyring transfer, storage.cfg, test VM on pool)  |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 5: Validate &amp; Test (Benchmark, HA node failure, DR failover / failback)     |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 6: Documentation, UAT &amp; Handover to Customer                             |
++---------------------------------------------------------------------------------------------------+
+        </pre>
+
+        <h3 id="stage-1-compute-cluster-provisioning" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 1: Compute Cluster Provisioning
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Deploy a robust, high-availability compute layer on Proxmox VE 9 without storage resource contention.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li>Provision a <strong>4-node Proxmox VE 9 compute cluster</strong> on physical hardware nodes.</li>
+                    <li>Disable local Ceph services (<code>pveceph</code> is not bootstrapped locally) to preserve maximum CPU and memory capacity for guest virtual machines and containers.</li>
+                    <li>Configure redundant corosync interfaces on dedicated low-latency physical switches to prevent cluster split-brain.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="stage-2-dual-site-ceph-cluster-sizing-bootstrap" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 2: Dual-Site Ceph Cluster Sizing & Bootstrap
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Establish independent production and disaster recovery (DR) storage clusters using minimal Ubuntu 26.04 LTS installations.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li><strong>Production Site (Stage 2A)</strong>: Bootstrap a <strong>3-node Ceph Production cluster</strong> running Ubuntu 26.04 LTS and the Ceph <strong>Tentacle</strong> release (containerised via <code>cephadm</code>). Assign at least 3 Monitors (MONs) and 3 Managers (MGRs) for robust quorum, mapping physical disks to dedicated OSD daemons.</li>
+                    <li><strong>Disaster Recovery Site (Stage 2B)</strong>: Deploy a mirroring clone of the production storage setup using another <strong>3-node Ceph DR cluster</strong> on identical hardware and Ubuntu 26.04 + Tentacle software stacks.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="stage-3-high-performance-wanreplication-mirroring" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 3: High-Performance WAN/Replication Mirroring
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Connect the isolated storage clusters over a WAN link for block-level data replication.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li>Configure <strong>Ceph RADOS Block Device (RBD) Mirroring</strong> between the Production and DR clusters.</li>
+                    <li>Set up an active-passive replication link using daemon-to-daemon token exchange.</li>
+                    <li>Define mirroring policies (journal-based or snapshot-based) to enforce target Recovery Point Objectives (RPO) and Recovery Time Objectives (RTO).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="stage-4-cross-cluster-integration" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 4: Cross-Cluster Integration
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Bind the Proxmox VE 9 compute hypervisors directly to the external Ceph production and DR pools.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li>Extract the client keyrings from the production and DR storage clusters.</li>
+                    <li>Securely transfer keyrings onto the Proxmox clustered filesystem (<code>pmxcfs</code>) at <code>/etc/pve/priv/ceph/</code>.</li>
+                    <li>Register the external pools in <code>/etc/pve/storage.cfg</code> on the PVE cluster.</li>
+                    <li>Deploy a test virtual machine directly onto the external Production RBD pool to verify end-to-end read, write, and dynamic volume provisioning capabilities.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="stage-5-rigorous-validation-stress-testing" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 5: Rigorous Validation & Stress Testing
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Verify cluster stability, network isolation, throughput, and failover behavior under simulated disaster scenarios.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li>Run synthetic storage benchmarks (using <code>fio</code> and <code>rados bench</code>) to capture baseline read/write IOPS and latency.</li>
+                    <li>Perform <strong>High Availability (HA) Node Failure Testing</strong>: Forcefully terminate or fence PVE compute nodes and Ceph OSD/MON hosts to verify automatic workload relocation and storage rebalancing.</li>
+                    <li>Execute <strong>DR Failover & Failback Drills</strong>: Demote the active production pools, promote the DR pools, redirect PVE hypervisors to mount the promoted DR storage, and verify virtual machine bootability. Follow up with a reverse failback drill to restore normal operations.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="stage-6-documentation-uat-handover" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Stage 6: Documentation, UAT & Handover
+        </h3>
+        <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+            <li><strong>Objective</strong>: Package operational knowledge, finalize formal client sign-off, and execute the operational transition.</li>
+            <li><strong>Actions</strong>:
+                <ul class="list-circle list-inside space-y-1 pl-4">
+                    <li>Compile the system blueprint, network configuration worksheets, keyring management procedures, and disaster recovery execution runbooks.</li>
+                    <li>Perform the User Acceptance Testing (UAT) review with client stakeholders.</li>
+                    <li>Formally hand over the integrated, highly available Proxmox VE 9 + External Ceph architecture to the customer's operations team.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
             Traditional datacenter environments separate compute and storage into isolated silos, requiring expensive Storage Area Networks (SANs) or Network Attached Storage (NAS) appliances. <strong>Hyper-Converged Infrastructure (HCI)</strong> collapses these silos by co-locating compute (VMs and containers) and software-defined storage directly on the same physical hypervisor nodes.
         </p>
 
@@ -584,6 +707,41 @@ scp root@&lt;pve-ip&gt;:/etc/pve/priv/ceph/cephfs.keyring /etc/ceph/ceph.keyring
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
                 <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#deployment-flow-proxmox-ve-external-ceph-production-dr" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔄 Deployment Flow — Proxmox VE + External Ceph (Production & DR)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-1-compute-cluster-provisioning" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 1: Compute Cluster Provisioning
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-2-dual-site-ceph-cluster-sizing-bootstrap" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 2: Dual-Site Ceph Cluster Sizing & Bootstrap
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-3-high-performance-wanreplication-mirroring" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 3: High-Performance WAN/Replication Mirroring
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-4-cross-cluster-integration" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 4: Cross-Cluster Integration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-5-rigorous-validation-stress-testing" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 5: Rigorous Validation & Stress Testing
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#stage-6-documentation-uat-handover" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Stage 6: Documentation, UAT & Handover
+                        </a>
+                    </li>
                     <li class="pl-0">
                         <a href="#proxmox-ceph-hci-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
                             🏛️ Proxmox + Ceph HCI Architecture
