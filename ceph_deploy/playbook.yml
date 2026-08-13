@@ -1,8 +1,8 @@
 ---
 # ceph_deploy/playbook.yml
-# Orchestrates high-availability Ceph Tentacle deployment on Ubuntu 26.04 nodes
+# Orchestrates high-availability Ceph Tentacle deployment on Ubuntu 26.04 LTS & AlmaLinux 9.6 nodes
 
-- name: Prepare Ubuntu 26.04 Ceph Storage Nodes
+- name: Prepare Ubuntu 26.04 LTS & AlmaLinux 9.6 Ceph Storage Nodes
   hosts: ceph_nodes
   become: yes
   roles:

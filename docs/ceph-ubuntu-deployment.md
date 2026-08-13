@@ -1,15 +1,15 @@
 ---
 okf_version: 0.1
 type: documentation
-title: "Ceph Native Deployment on Ubuntu 26.04 Server LTS"
-description: "A comprehensive guide on deploying an independent 3-node Ceph storage cluster on Ubuntu 26.04 Server LTS, integrating it with a 4-node Proxmox VE 9 cluster, and performance tuning."
+title: "Ceph Native Deployment on Ubuntu 26.04 & AlmaLinux 9.6"
+description: "A comprehensive guide on deploying an independent 3-node Ceph storage cluster on Ubuntu 26.04 LTS and AlmaLinux 9.6, integrating it with a 4-node Proxmox VE 9 cluster, and performance tuning."
 resource: "file:///docs/ceph-ubuntu-deployment.md"
 timestamp: 2026-08-12T12:00:00Z
-topics: [ceph, ubuntu, proxmox, deployment, rbd, architecture]
+topics: [ceph, ubuntu, almalinux, proxmox, deployment, rbd, architecture]
 ---
-# 📦 Ceph Native Deployment on Ubuntu 26.04 Server LTS
+# 📦 Ceph Native Deployment on Ubuntu 26.04 & AlmaLinux 9.6
 
-This documentation details the architecture, design, and end-to-end automation of a 3-node independent Ceph storage cluster running **Ubuntu 26.04 LTS (Noble Numbat)** and the **Ceph Tentacle** release, fully integrated as an external storage provider for a 4-node **Proxmox Virtual Environment (PVE) 9** compute cluster.
+This documentation details the architecture, design, and end-to-end automation of a 3-node independent Ceph storage cluster running **Ubuntu 26.04 LTS (Noble Numbat)** or **AlmaLinux 9.6** and the **Ceph Tentacle** release, fully integrated as an external storage provider for a 4-node **Proxmox Virtual Environment (PVE) 9** compute cluster.
 
 ---
 
@@ -82,12 +82,15 @@ The compute layer consists of four greenfield Proxmox VE 9 nodes designed to exe
 
 ## 🐙 3. Ceph Production Cluster Deployment
 
-This stage uses Ansible to prepare the minimal Ubuntu 26.04 Server hosts and deploy containerized Ceph daemons via the native **`cephadm`** orchestrator.
+This stage uses Ansible to prepare the minimal hosts (Ubuntu 26.04 LTS and AlmaLinux 9.6) and deploy containerized Ceph daemons via the native **`cephadm`** orchestrator.
 
 ### 3.1 Ansible Automated Roles
 
 Our standalone Ansible Playbook structures deployment into five modular phases:
-- **`ceph_prep`**: Installs `podman`, configures kernel requirements (file max, netfilter modules), and synchronizes Chrony NTP clocks.
+- **`ceph_prep`**: Prepares base nodes dynamically based on OS family:
+  - On **Debian/Ubuntu** (Ubuntu 26.04): Updates apt cache, configures official apt keys, runs system packages upgrade, and installs required baseline packages along with `cephadm`.
+  - On **RedHat/AlmaLinux** (AlmaLinux 9.6): Installs EPEL repository, runs dnf upgrade, configures the native Ceph repository via `cephadm add-repo`, and installs prerequisite packages and `cephadm` using `dnf`.
+  - On both families: Sets kernel sysctl parameter `fs.file-max=2097152`, enables container modules (`br_netfilter`, `overlay`), and deploys synchronized Chrony NTP config with dynamic service daemon names (`chronyd` on RedHat/AlmaLinux vs `chrony` on Debian/Ubuntu).
 - **`ceph_bootstrap`**: Downloads `cephadm`, bootstraps the active MON/MGR, clusters the storage nodes, and spins up OSDs across nvme target drives.
 - **`security_hardening`**: Hardens storage nodes using precise network isolation rules.
 - **`pve_integration`**: Handles keyring transfer, storage.cfg distribution, and VM storage verification.
