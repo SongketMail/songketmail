@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ansible Playbook and Related Documents Map — SongketMail :: LAB</title>
+    <title>Geolocated Regional Data Center Design — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 18: Ansible Playbook and Related Documents Map
+                    Deep Research // Topic 22: Geolocated Regional Proxmox & Ceph Data Center Design
                 </div>
             </div>
 
@@ -176,7 +176,7 @@
                         <span>📧</span>
                         <span>17. Mail Web Ingress Verification</span>
                     </a>
-                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>🤖</span>
                         <span>18. Ansible Playbook Map</span>
                     </a>
@@ -188,7 +188,7 @@
                         <span>📦</span>
                         <span>21. Ceph Native Deployment</span>
                     </a>
-                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>🌐</span>
                         <span>22. Geolocated Regional DC</span>
                     </a>
@@ -216,141 +216,37 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-<header class="mb-12">
-                <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-semibold text-xs uppercase tracking-wider mb-2">
-                    <span>🤖</span>
-                    <span>Automation Matrix & Mapping Spec</span>
-                </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-                    Ansible Playbook and Related Documents Map
-                </h1>
-                <p class="text-xl text-slate-600 dark:text-slate-400 mt-4 font-light">
-                    A cohesive architectural dictionary linking automated playbook files with their core roles, unprivileged services, and deployment/operational documentation.
-                </p>
-            </header>
+<h2 id="geolocated-regional-data-center-design">🌐 Geolocated Regional Data Center Design</h2>
+    <p>This document details the technical design, architectural patterns, and systemic improvements for the SongketMail Regional Data Center Infrastructure.</p>
 
-            <section class="mb-12 bg-indigo-50/50 dark:bg-slate-850 border border-indigo-100 dark:border-slate-700 rounded-2xl p-6">
-                <h2 id="operational-objective" class="text-lg font-bold text-slate-950 dark:text-white mb-3">🎯 Operational Objective</h2>
-                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-0">
-                    To guarantee that all aspects of the **SongketMail Email Server Fabric**—specifically deployment, monitoring, security auditing, and local developer telemetry—are entirely **Ansible-driven**, and fully integrated with our rich OKF documentation baseline.
-                </p>
-            </section>
+    <h2 id="1-multi-region-geodistributed-topology">🗺️ 1. Multi-Region Geodistributed Topology</h2>
+    <p>The core architecture consists of three geographically isolated regional data centers communicating over secure, dedicated low-latency Wide Area Networks (WAN).</p>
+    <h3 id="11-regional-characteristics">1.1 Regional Characteristics</h3>
+    <p>Details about Region Alpha, Region Beta, and Region Gamma.</p>
 
-            <!-- Section 1 -->
-            <section class="mb-12">
-                <h2 id="master-playbook-and-document-matrix" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">🗺️ Master Playbook and Document Matrix</h2>
-                <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
-                    This unified table acts as an interactive directory, tracing every YAML playbook file directly to its roles, managed services, and corresponding documentation chapters:
-                </p>
-                <div class="overflow-x-auto my-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 p-2">
-                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Playbook</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Purpose</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Services Managed</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Related Documents</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm text-slate-600 dark:text-slate-300">
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white"><code>site.yml</code></td>
-                                <td class="px-4 py-4">Primary Core Fabric Deployment</td>
-                                <td class="px-4 py-4">BunkerWeb, Postfix, Dovecot, PostgreSQL, MinIO, Roundcube, Rspamd</td>
-                                <td class="px-4 py-4">
-                                    <a href="podman-rootless.html" class="underline block">1. Podman Rootless</a>
-                                    <a href="ansible-fqcn.html" class="underline block">2. Ansible FQCN</a>
-                                    <a href="postfix-dovecot.html" class="underline block">3. Postfix & Dovecot</a>
-                                    <a href="s3-storage.html" class="underline block">4. S3 Storage</a>
-                                    <a href="architectural-blueprint.html" class="underline block">7. Architecture Spec</a>
-                                    <a href="mail-web-app-verification.html" class="underline block">17. Ingress Verification</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white"><code>asimp_hardening_playbook.yml</code></td>
-                                <td class="px-4 py-4">OS Security Hardening, Auditing & Compliance</td>
-                                <td class="px-4 py-4">Host kernel sysctl tuning, packages, OpenSCAP & Lynis Auditing</td>
-                                <td class="px-4 py-4">
-                                    <a href="asimp-hardening-report.html" class="underline block">13. Hardening Report</a>
-                                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="underline block">14. Discovery Protocol</a>
-                                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="underline block">16. Adoption Review</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white"><code>wsl_feedback_playbook.yml</code></td>
-                                <td class="px-4 py-4">WSL Developer Testing & Telemetry Loop</td>
-                                <td class="px-4 py-4">Local WSL, Podman Mappings, GitHub PR Comment API</td>
-                                <td class="px-4 py-4">
-                                    <a href="wsl-development-feedback.html" class="underline block">15. WSL Feedback Loop</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white"><code>playbooks/matrix_test.yml</code></td>
-                                <td class="px-4 py-4">Multi-OS Local Test Matrix Orchestration</td>
-                                <td class="px-4 py-4">Ubuntu, AlmaLinux, Debian container sandboxes</td>
-                                <td class="px-4 py-4">
-                                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="underline block">16. Adoption Review</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    <h2 id="2-generalized-node-architecture-per-region">🏛️ 2. Generalized Node Architecture (Per Region)</h2>
+    <p>Each regional node abstracts physical hardware dependencies into standardized, enterprise-grade compute, security, and storage building blocks.</p>
+    <h3 id="21-hardware-sizing-amp-refinement">2.1 Hardware Sizing &amp; Refinement</h3>
+    <p>Compute, Security, Networking, Backup, and AI details.</p>
 
-            <!-- Section 2 -->
-            <section class="mb-12">
-                <h2 id="1-deployment-the-siteyml-playbook" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">🛠️ 1. Deployment: The <code>site.yml</code> Playbook</h2>
-                <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
-                    The principal deployment mechanism for the SongketMail cluster. It adopts the <strong>"Symmetric Privilege"</strong> pattern, executing system-level bootstrap procedures as root before performing unprivileged application orchestration.
-                </p>
-                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 space-y-4 shadow-sm">
-                    <h3 id="a-host-environment-preparation-rootful-privilege" class="font-bold text-indigo-600 dark:text-indigo-400">A. Host Environment Preparation (Rootful Privilege)</h3>
-                    <ul class="list-disc pl-6 text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                        <li><strong>Packages:</strong> Installs core system utilities alongside Podman 5 and the Podman-Docker bridge.</li>
-                        <li><strong>Low Ports:</strong> Sets <code>net.ipv4.ip_unprivileged_port_start=25</code> allowing the rootless BunkerWeb container to bind public SMTP and HTTP ports.</li>
-                        <li><strong>Persistence Trinity Directories:</strong> Provisions 14 host-level directories under <code>/var/srv/songketmail/</code> with <code>0700</code> owner-only access limits.</li>
-                    </ul>
+    <h2 id="3-dual-tier-ceph-storage-strategy">🗄️ 3. Dual-Tier Ceph Storage Strategy</h2>
+    <p>Balancing local hyper-converged low-latency VM disks (Tier 1) with external AlmaLinux-managed independent Ceph clusters (Tier 2).</p>
+    <h3 id="31-tier-1-local-hyper-converged-ceph-proxmox-managed">3.1 Tier 1: Local Hyper-Converged Ceph (Proxmox-Managed)</h3>
+    <p>Managed via native Proxmox VE (pveceph).</p>
+    <h3 id="32-tier-2-external-independent-ceph-almalinux-managed">3.2 Tier 2: External Independent Ceph (AlmaLinux-Managed)</h3>
+    <p>Sourced from the CentOS Storage SIG Repository.</p>
 
-                    <h3 id="b-quadlet-application-container-provisioning-rootless" class="font-bold text-indigo-600 dark:text-indigo-400">B. Quadlet Application Container Provisioning (Rootless)</h3>
-                    <ul class="list-disc pl-6 text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                        <li><strong>Quadlet Generation:</strong> Translates playbook templates into native systemd user configuration files in <code>~/.config/containers/systemd/</code>.</li>
-                        <li><strong>Session Management:</strong> Configures Alpine Alpine/Dbus system variables and enables services to run continuously across reboots with systemd session linger.</li>
-                    </ul>
-                </div>
-            </section>
+    <h2 id="4-external-ceph-visibility-inside-proxmox-vms">🔗 4. External Ceph Visibility Inside Proxmox VMs</h2>
+    <p>Answering the critical design question: Can the external Ceph cluster be seen and consumed directly by a Virtual Machine running inside Proxmox?</p>
+    <h3 id="approach-a-hypervisor-mediated-virtualization-storagecfg">Approach A: Hypervisor-Mediated Virtualization (Storage.cfg)</h3>
+    <p>Mapping external Ceph as a native storage pool in PVE.</p>
+    <h3 id="approach-b-guest-native-direct-storage-protocol-access">Approach B: Guest-Native Direct Storage Protocol Access</h3>
+    <p>Mapping RBD and CephFS mounts directly inside the VM.</p>
+    <h3 id="approach-c-s3-compatible-object-storage-gateway-ceph-rgw">Approach C: S3-Compatible Object Storage Gateway (Ceph RGW)</h3>
+    <p>Accessing storage via RESTful RGW S3 APIs.</p>
 
-            <!-- Section 3 -->
-            <section class="mb-12">
-                <h2 id="2-security-operations-the-hardening-playbook" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">🛡️ 2. Security Operations: The Hardening Playbook</h2>
-                <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
-                    OS-level security hardening is managed via <code>asimp_hardening_playbook.yml</code>, integrating baseline policy validations alongside preventative break-prevention checks:
-                </p>
-                <div class="bg-slate-900 text-slate-100 rounded-xl p-5 mb-4 overflow-x-auto text-sm">
-                    <pre><code class="language-yaml"># Pre-Remediation Safety Gate Check Block
-- name: Verify no critical risk factors that would break the system
-  ansible.builtin.assert:
-    that:
-      - asimp_risk_level not in ['CRITICAL_RISK', 'HIGH_RISK']
-    fail_msg: "Pre-Remediation Safety Check failed: High risk of system breakage detected. Aborting!"</code></pre>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
-                    By validating SSH key status, listening ports, and filesystem availability, the playbook safely drops back to simulations (Audits) in unprivileged containers/Google Jules sandboxes.
-                </p>
-            </section>
-
-            <!-- Section 4 -->
-            <section class="mb-12">
-                <h2 id="3-monitoring-telemetry-and-multi-os-verification" class="text-2xl font-bold text-slate-900 dark:text-white mb-4">📊 3. Monitoring, Telemetry and Multi-OS Verification</h2>
-                <p class="mb-4 text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Diagnostic pipelines are triggered through Ansible playbooks to preserve engineering transparency:
-                </p>
-                <ul class="list-disc pl-6 text-slate-600 dark:text-slate-400 space-y-3">
-                    <li><strong>Continuous Integration (CI/CD):</strong> <code>playbooks/matrix_test.yml</code> spins up sandboxed environments (Debian, AlmaLinux, Ubuntu) locally on the engine to verify that updates don't trigger package or systemd configuration crashes.</li>
-                    <li><strong>Developer Feedback Loop:</strong> <code>wsl_feedback_playbook.yml</code> (gated strictly to development execution contexts) reads local Podman configurations and routes structured reports directly to developers via active Jules remote sessions and GitHub comment APIs.</li>
-                </ul>
-            </section>
-
-            <!-- DSOM AI Protocol Footer -->
+    <h2 id="5-architectural-improvements-amp-hardening-recommendations">🚀 5. Architectural Improvements &amp; Hardening Recommendations</h2>
+    <p>Recommendations on Chrony Geolocation, MTU Tuning, Network Ring Fencing, and LACP Bonding.</p>
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
@@ -361,38 +257,68 @@
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
                 <ul class="space-y-2 text-sm">
                     <li class="pl-0">
-                        <a href="#operational-objective" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            🎯 Operational Objective
+                        <a href="#geolocated-regional-data-center-design" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🌐 Geolocated Regional Data Center Design
                         </a>
                     </li>
                     <li class="pl-0">
-                        <a href="#master-playbook-and-document-matrix" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            🗺️ Master Playbook and Document Matrix
-                        </a>
-                    </li>
-                    <li class="pl-0">
-                        <a href="#1-deployment-the-siteyml-playbook" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            🛠️ 1. Deployment: The site.yml Playbook
+                        <a href="#1-multi-region-geodistributed-topology" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🗺️ 1. Multi-Region Geodistributed Topology
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#a-host-environment-preparation-rootful-privilege" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            A. Host Environment Preparation (Rootful Privilege)
+                        <a href="#11-regional-characteristics" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1.1 Regional Characteristics
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-generalized-node-architecture-per-region" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏛️ 2. Generalized Node Architecture (Per Region)
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#b-quadlet-application-container-provisioning-rootless" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            B. Quadlet Application Container Provisioning (Rootless)
+                        <a href="#21-hardware-sizing-amp-refinement" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2.1 Hardware Sizing &amp; Refinement
                         </a>
                     </li>
                     <li class="pl-0">
-                        <a href="#2-security-operations-the-hardening-playbook" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            🛡️ 2. Security Operations: The Hardening Playbook
+                        <a href="#3-dual-tier-ceph-storage-strategy" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🗄️ 3. Dual-Tier Ceph Storage Strategy
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#31-tier-1-local-hyper-converged-ceph-proxmox-managed" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.1 Tier 1: Local Hyper-Converged Ceph (Proxmox-Managed)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#32-tier-2-external-independent-ceph-almalinux-managed" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.2 Tier 2: External Independent Ceph (AlmaLinux-Managed)
                         </a>
                     </li>
                     <li class="pl-0">
-                        <a href="#3-monitoring-telemetry-and-multi-os-verification" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            📊 3. Monitoring, Telemetry and Multi-OS Verification
+                        <a href="#4-external-ceph-visibility-inside-proxmox-vms" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔗 4. External Ceph Visibility Inside Proxmox VMs
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#approach-a-hypervisor-mediated-virtualization-storagecfg" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Approach A: Hypervisor-Mediated Virtualization (Storage.cfg)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#approach-b-guest-native-direct-storage-protocol-access" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Approach B: Guest-Native Direct Storage Protocol Access
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#approach-c-s3-compatible-object-storage-gateway-ceph-rgw" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Approach C: S3-Compatible Object Storage Gateway (Ceph RGW)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#5-architectural-improvements-amp-hardening-recommendations" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🚀 5. Architectural Improvements &amp; Hardening Recommendations
                         </a>
                     </li>
                 </ul>
@@ -412,11 +338,11 @@
             <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-<span>[ TOPIC: 18 ]</span>
+<span>[ TOPIC: 22 ]</span>
             <span>|</span>
-            <span>[ MAP: PLAYBOOK_TO_DOC ]</span>
+            <span>[ ARCH: GEOLOCATED_DC ]</span>
             <span>|</span>
-            <span>[ ENGINE: ANSIBLE_DRIVEN ]</span>
+            <span>[ OS: ALMALINUX_9 ]</span>
         </div>
     </footer>
 
