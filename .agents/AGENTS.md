@@ -150,6 +150,34 @@ To prevent build issues and maintain semantic standards, all AI agents **must** 
 
 ---
 
+## 🛠️ Google Antigravity & Jules Agent Skills (.agents/skills/)
+
+To enable seamless collaborative intelligence between Google Jules and Google Antigravity, the repository features a comprehensive suite of modular, Antigravity-compatible Agent Skills. Each skill is structured as a dedicated folder under `.agents/skills/` containing a `SKILL.md` file.
+
+These skills represent packages of knowledge, operational workflows, and domain-specific rules that the agents load dynamically based on active task context (Progressive Disclosure):
+1. **Discovery**: At session start, the agent reads only the name and description in each skill's frontmatter.
+2. **Activation**: When a task matches a skill's description, the agent imports the complete `SKILL.md`.
+3. **Execution**: The agent executes tasks adhering strictly to the guidelines and invoking bundled scripts.
+
+### 📋 Consolidated Agent Skills Register
+
+| Skill Directory | Core Objective / Competence | Primary Topics |
+|---|---|---|
+| `dockpod-integration` | Unprivileged Podman socket activation and MCP SSE routing | `[dockpod, socket, mcp]` |
+| `jekyll-gh-pages` | Liquid template escaping and GitHub Pages publication | `[jekyll, github-pages]` |
+| `jules-agent-protocol` | Jules operational standards and standard DSOM footer validation | `[jules, agent-protocol]` |
+| `jules-sandbox-mode` | Unprivileged virtualization constraints and safety checks | `[sandbox, privilege, asimp]` |
+| `songketmail-architecture` | Storage sovereignty, keep-id, and the Persistence Trinity | `[architecture, keep-id]` |
+| `songketmail-deployment` | Host OS tuning, FQCN compliance, and systemd-user management | `[deployment, ansible, fqcn]` |
+| `ceph-deployment` | Modular, independent Ceph storage cluster multi-OS deployment | `[ceph, deployment, chrony]` |
+| `wsl-development-feedback` | Sequential WSL 2 testing matrix and feedback reporting pipelines | `[wsl, feedback-loop, telemetry]` |
+| `s3-storage-integration` | RustFS S3 deployment and Dovecot Obox/S3 driver tuning | `[s3, rustfs, dovecot]` |
+| `template-unification` | Unifying HTML pages into a 12-column layout and generating TOC | `[template, html, css]` |
+
+Each skill's frontmatter utilizes a combined OKF/Antigravity metadata header and concludes with the standard Deep State of Mind (DSOM) AI Protocol footer to guarantee cross-agent compliance.
+
+---
+
 ## 🔍 Local Knowledge-First & Metadata Discovery Mandate (Rule 29)
 
 To prevent unnecessary exploratory terminal commands, token window exhaustion, and context loss, the AI agent MUST strictly adhere to the Local Knowledge-First Protocol:
