@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
-"""
-unify_templates.py - Standardize all HTML files in the docs/ folder under the unified SongketMail layout.
-Sets up theme support, parses Markdown frontmatter metadata to insert metadata badges, creates
-unique heading anchors, and populates a dynamic sticky right Table of Contents.
+"""Standardize all HTML files under the unified SongketMail layout template.
+
+This module automates the structural synchronization and styling unification of
+all custom HTML documentation pages in the `docs/` folder. It processes each target page
+by:
+  1. Injecting standard light/dark/auto theme support toggles.
+  2. Rendering side-bar navigation with synchronized active indicators.
+  3. Parsing Markdown frontmatter YAML headers from corresponding `.md` source files.
+  4. Dynamically extracting and clean-formatting unique ID attributes for all
+     `<h2>` and `<h3>` heading tags on the fly.
+  5. Generating a hierarchical Table of Contents (TOC) sidebar menu.
+  6. Enforcing consistent branding guidelines and legal notice footers.
+
+Typical usage example:
+    $ python3 scripts/unify_templates.py
 """
 
 import os
 import re
 
+# Static registration of sidebar menus, headers, and section groupings
 SIDEBAR_ITEMS = [
     { "href": "index.html", "icon": "🏠", "label": "Home", "section": "home" },
     { "header": "Deep Research Series", "section": "research" },
@@ -38,6 +50,7 @@ SIDEBAR_ITEMS = [
     { "href": "legal-notice.html", "icon": "⚖️", "label": "Legal Notice & Disclaimer", "section": "legal" }
 ]
 
+# Topic pill mappings for global unified footer badges
 TOPIC_MAP = {
     "index.html": ("[ REL: 5.0.0 ]", "[ STD: RFC_9116 ]", "[ ENV: PODMAN_5 ]", "[ VIEW: STANDARD ]"),
     "podman-rootless.html": ("[ TOPIC: 1 ]", "[ ORCH: QUADLET ]", "[ USER: ROOTLESS ]"),
@@ -65,6 +78,7 @@ TOPIC_MAP = {
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
 
+# Subtitle string definitions per page mapping
 SUBTITLE_MAP = {
     "index.html": "SECURE EMAIL SERVER FABRIC // PODMAN 5+ & SYSTEMD QUADLET",
     "podman-rootless.html": "Deep Research // Topic 1: Rootless Podman 5+ & Quadlet Orchestration",
@@ -92,9 +106,11 @@ SUBTITLE_MAP = {
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
 
+
 def parse_frontmatter(md_path):
-    """
-    Parses OKF compliant YAML frontmatter from a Markdown file.
+    """Parses OKF compliant YAML frontmatter from a Markdown file.
+
+    Extracts keys and values bounded by triple dashes (---) from the file head.
 
     Args:
         md_path (str): The file path of the Markdown file.
@@ -123,9 +139,11 @@ def parse_frontmatter(md_path):
             metadata[key] = val
     return metadata
 
+
 def strip_html_tags(text):
-    """
-    Strips raw HTML tags from a string.
+    """Strips raw HTML tags from a string.
+
+    Uses regular expressions to locate and remove bracketed HTML tag pairs.
 
     Args:
         text (str): Input text containing HTML.
@@ -135,9 +153,12 @@ def strip_html_tags(text):
     """
     return re.sub(r'<[^>]+>', '', text)
 
+
 def generate_slug(text):
-    """
-    Transforms any string into a URL-friendly and clean anchor/slug string.
+    """Transforms any string into a URL-friendly and clean anchor/slug string.
+
+    Lowercases the characters, strips any non-alphanumeric text except spaces
+    and hyphens, replaces spaces with hyphens, and deduplicates consecutive hyphens.
 
     Args:
         text (str): Input text.
@@ -151,15 +172,24 @@ def generate_slug(text):
     text = re.sub(r'-+', '-', text)
     return text.strip('-')
 
+
 def inject_ids_and_collect_toc(content):
-    """
-    Finds h2 and h3 heading tags, inserts a unique 'id' attribute, and extracts headings list.
+    """Finds h2 and h3 heading tags, inserts a unique 'id' attribute, and extracts headings list.
+
+    Scans the HTML stream using regular expressions, computes clean slug values,
+    injects them directly back into heading tag attributes, and aggregates a hierarchical
+    Table of Contents manifest.
 
     Args:
         content (str): HTML content string.
 
     Returns:
         tuple: (updated_content, list_of_heading_dicts)
+            - updated_content (str): Modified HTML string with injected ID anchors.
+            - list_of_heading_dicts (list): Aggregated list of parsed headings metadata:
+                - tag (str): Heading tag level ('h2' or 'h3').
+                - text (str): Clean text content of the heading.
+                - slug (str): The unique ID attribute assigned to it.
     """
     headings = []
     slugs_seen = set()
@@ -204,9 +234,12 @@ def inject_ids_and_collect_toc(content):
     new_content = pattern.sub(repl, content)
     return new_content, headings
 
+
 def make_toc_card(headings):
-    """
-    Builds a Table of Contents sidebar panel using a hierarchical list of headings.
+    """Builds a Table of Contents sidebar panel using a hierarchical list of headings.
+
+    Formats an HTML navigation card with distinct nesting levels and styling for
+    h2 and h3 headers.
 
     Args:
         headings (list): A list of dictionaries containing 'tag', 'text', and 'slug'.
@@ -248,9 +281,9 @@ def make_toc_card(headings):
             </div>
 """
 
+
 def get_html_title(filename, fm):
-    """
-    Returns a unified title string based on frontmatter and file context.
+    """Returns a unified title string based on frontmatter and file context.
 
     Args:
         filename (str): The filename of the HTML page.
@@ -266,9 +299,12 @@ def get_html_title(filename, fm):
         base_title = filename.replace(".html", "").replace("-", " ").title()
     return f"{base_title} — SongketMail :: LAB"
 
+
 def make_sidebar(active_filename):
-    """
-    Orchestrates left-hand sidebar navigation list showing the active menu item.
+    """Orchestrates left-hand sidebar navigation list showing the active menu item.
+
+    Iterates over sidebar configurations to build navigation lists with
+    highlighted active anchor tags.
 
     Args:
         active_filename (str): The name of the currently compiled file.
@@ -298,9 +334,11 @@ def make_sidebar(active_filename):
                     </a>""")
     return "\n".join(sidebar_html)
 
+
 def build_unified_html(filename, fm, center_content, right_sidebar_inner):
-    """
-    Combines the unified three-column layout wrapping around center and right content.
+    """Combines the unified three-column layout wrapping around center and right content.
+
+    Assembles top bar, left navigation, main content, dynamic TOC, and metadata footers.
 
     Args:
         filename (str): Filename of target page.
@@ -453,9 +491,9 @@ def build_unified_html(filename, fm, center_content, right_sidebar_inner):
 </body>
 </html>"""
 
+
 def clean_content(content):
-    """
-    Substitutes obsolete and legacy CMSForNerd branding keywords with SongketMail.
+    """Substitutes obsolete and legacy CMSForNerd branding keywords with SongketMail.
 
     Args:
         content (str): Inner HTML layout string.
@@ -468,8 +506,17 @@ def clean_content(content):
     content = re.sub(r'CmsForNerd Infrastructure', 'SongketMail Infrastructure', content, flags=re.IGNORECASE)
     return content
 
+
 def main():
-    """Main execution block to scan all .html pages and rebuild them cleanly."""
+    """Main execution block to scan all .html pages and rebuild them cleanly.
+
+    Scans the docs/ directory, parses existing file content layouts, extracts
+    meaningful center main panels, updates titles and navigation parameters,
+    and overwrites unified templates cleanly.
+
+    Raises:
+        OSError: If files scanning or writing encounters resource issues.
+    """
     docs_dir = "docs"
     html_files = [f for f in os.listdir(docs_dir) if f.endswith(".html")]
 
@@ -538,6 +585,7 @@ def main():
             f.write(new_html)
 
     print("Done! All templates unified successfully!")
+
 
 if __name__ == "__main__":
     main()

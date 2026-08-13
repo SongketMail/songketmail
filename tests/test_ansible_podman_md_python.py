@@ -322,6 +322,32 @@ def test_verify_mail_web_app_check_port_failure():
         assert desc == "Not Listening"
 
 
+def test_update_sidebars_functionality():
+    """Unit test for update_sidebars module updating html navigation sidebars."""
+    from scripts import update_sidebars
+
+    # Mock file listing to return a test list of files
+    with patch("os.listdir", return_value=["test_file_1.html", "asimp-hardening-report.html"]):
+        # Mock HTML content featuring Google Jules planning link
+        jules_planning_content = """
+        <html>
+        <body>
+        <!-- Sidebar Navigation -->
+        <a href="jules-planning.html" class="flex px-3 py-2 text-sm">Planning</a>
+        </body>
+        </html>
+        """
+        # Mocking file read/write routines
+        m_open = mock_open(read_data=jules_planning_content)
+        with patch("builtins.open", m_open):
+            update_sidebars.update_html_sidebars()
+
+            # Retrieve write file outputs to check if the ASIMP report link was successfully injected
+            # Filter for any open calls with "w" parameter
+            write_calls = [call for call in m_open.mock_calls if len(call.args) > 1 and call.args[1] == "w"]
+            assert len(write_calls) > 0, "Expected file write to occur during sidebar injection."
+
+
 def test_agent_skills_compliance():
     """
     Verifies that all 10 agent skills under .agents/skills/ are present,

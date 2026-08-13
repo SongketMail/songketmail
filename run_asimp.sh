@@ -1,18 +1,31 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# run_asimp.sh - Automated OS Auditing, Hardening, and Verification with ASIMP
-# Aligned with OKF v0.1 and DSOM AI Protocol standards.
-# Enhanced with privilege auto-detection and remediation safety validation gates.
+# AUTOMATED OS AUDITING, HARDENING, AND VERIFICATION ENGINE WITH ASIMP
+# ==============================================================================
+# Requirements:
+#   - Bash 4.0+
+#   - Ansible Core and Galaxy installed
+#   - Python 3.x with xml parser dependencies (for OpenSCAP result processing)
+#   - Git (for cloning downstream ASIMP modules)
+#   - Lynis (or curls/tars to download portable fallback version)
+#
+# Usage Instructions:
+#   $ ./run_asimp.sh
 # ==============================================================================
 
+# Enable strict error-handling configurations:
+# -e: Abort if any statement returns a non-zero exit status.
+# -u: Abort if referencing any undeclared variable.
+# -o pipefail: Pipeline exit status matches that of the last command to exit with a non-zero status.
 set -euo pipefail
 
-# Define variables
+# Declare configuration parameters
 ASIMP_REPO="https://github.com/linuxmalaysia/ASIMP"
 ASIMP_DIR="asimp"
 PLAYBOOK="asimp_hardening_playbook.yml"
 
 echo "=== [1/6] Ensuring ASIMP repository is cloned and integrated ==="
+# Check if ASIMP subfolder already exists, otherwise clone from official Git repository
 if [ ! -d "${ASIMP_DIR}" ]; then
     echo "Cloning ASIMP from ${ASIMP_REPO}..."
     git clone "${ASIMP_REPO}" "${ASIMP_DIR}"
@@ -21,7 +34,7 @@ else
 fi
 
 echo "=== [2/6] Patching ASIMP playbooks syntax parser errors ==="
-# Fix the failed_when syntax parser error on Ansible block
+# Fix the failed_when syntax parser error on Ansible block elements to prevent compile crashes
 if grep -q "failed_when: false" "${ASIMP_DIR}/play-localhost.yml" 2>/dev/null; then
     echo "Patching play-localhost.yml block failed_when to ignore_errors..."
     sed -i '/delegate_to: localhost/{N;N;s/failed_when: false/ignore_errors: true/}' "${ASIMP_DIR}/play-localhost.yml"
@@ -32,12 +45,12 @@ if grep -q "failed_when: false" "${ASIMP_DIR}/play.yml" 2>/dev/null; then
     sed -i '/delegate_to: localhost/{N;N;s/failed_when: false/ignore_errors: true/}' "${ASIMP_DIR}/play.yml"
 fi
 
-# Apply the dynamic privilege model to ASIMP playbooks
+# Apply the dynamic privilege model to ASIMP playbooks to support dual-environments
 echo "Patching playbook become parameters for dual-environment support..."
 sed -i 's/become: true/become: "{{ not (is_limited_environment | default(false) | bool) }}"/g' "${ASIMP_DIR}/play-localhost.yml"
 sed -i 's/become: true/become: "{{ not (is_limited_environment | default(false) | bool) }}"/g' "${ASIMP_DIR}/play.yml"
 
-# Patch role inclusion with conditional remediation skip
+# Patch role inclusion with conditional remediation skip logic on-the-fly
 echo "Injecting conditional remediation skip on-the-fly..."
 python3 -c "
 with open('${ASIMP_DIR}/play-localhost.yml', 'r') as f:
@@ -67,10 +80,12 @@ print('Applied conditional skip patches to play-localhost.yml')
 "
 
 echo "=== [3/6] Installing Ansible galaxy dependencies ==="
+# Enforce standard callback outputs instead of community community.general yaml formatting
 export ANSIBLE_STDOUT_CALLBACK=default
 ansible-galaxy role install -r "${ASIMP_DIR}/requirements.yml" --ignore-errors
 
 echo "=== [4/6] Applying on-the-fly compatibility patches to external roles and tasks ==="
+# Inline Python script patches community-authored ansible configurations for modern core compatibility
 cat << 'EOF' > patch_all_run.py
 import os
 import re
@@ -142,6 +157,7 @@ EOF
 python3 patch_all_run.py
 rm -f patch_all_run.py
 
+# Auto-inject ignore_errors on system service tasks when running under unprivileged virtual/container targets
 cat << 'EOF' > patch_services_run.py
 import os
 
@@ -197,9 +213,10 @@ rm -f patch_services_run.py
 
 
 echo "=== [5/6] Executing Privilege and Remediation Safety Gate checks ==="
+# Launch python verification check script to classify privileges and safety hazards
 python3 scripts/privilege_and_safety_test.py
 
-# Extract values from report JSON
+# Extract values from generated report JSON
 ASIMP_PRIV_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['privileges']['asimp_privilege_level'])")
 RISK_LEVEL=$(python3 -c "import json; print(json.load(open('data/privilege_and_safety_report.json'))['safety']['risk_level'])")
 
@@ -215,6 +232,7 @@ echo "Detected Safety Risk: ${RISK_LEVEL}"
 
 echo "=== [6/6] Branching Execution Based on Privilege and Safety Status ==="
 
+# BRANCH A: Sandbox/Container Mode (Enforces Rule 31 constraints)
 if [ "${ASIMP_PRIV_LEVEL}" = "limited_sandbox" ]; then
     echo "=============================================================================="
     echo "🚨 MODE: UNPRIVILEGED SANDBOX DETECTED"
@@ -233,7 +251,7 @@ if [ "${ASIMP_PRIV_LEVEL}" = "limited_sandbox" ]; then
         echo "  [INFO] sysctl (Kernel Tuning Tool) is missing/restricted."
     fi
 
-    # 2. Check and configure portable Lynis if missing
+    # 2. Check and configure portable Lynis if missing from the host environment
     echo "Configuring real unprivileged scanner tools..."
     LYNIS_BIN="lynis"
     if ! command -v lynis &>/dev/null; then
@@ -250,22 +268,22 @@ if [ "${ASIMP_PRIV_LEVEL}" = "limited_sandbox" ]; then
         echo "  - System Lynis found."
     fi
 
-    # 3. Setup user writeable reporting directories
+    # 3. Setup user writeable reporting directories under unprivileged paths
     mkdir -p data/asimp_mock/var/log
     mkdir -p data/asimp_mock/opt/report/openscap
 
-    # 4. Execute Real Auditing for unprivileged scoring
+    # 4. Execute Real Auditing for unprivileged scoring using portable Lynis bin
     echo "Executing real unprivileged Lynis audit..."
     ${LYNIS_BIN} audit system --quick --report-file data/asimp_mock/var/log/lynis-report.dat --log-file data/asimp_mock/var/log/lynis.log || true
 
-    # Extract score or fallback
+    # Extract score or fallback safely
     LYNIS_SCORE=$(grep -E "^hardening_index=" data/asimp_mock/var/log/lynis-report.dat 2>/dev/null | cut -d'=' -f2 || echo "62")
     if [ -z "${LYNIS_SCORE}" ] || [ "${LYNIS_SCORE}" = "0" ]; then
         LYNIS_SCORE="62"
     fi
     echo "Real Lynis Hardening Index: ${LYNIS_SCORE}"
 
-    # OpenSCAP scan if available
+    # OpenSCAP scan if available on host path
     OSCAP_SCORE="58.4"
     if command -v oscap &>/dev/null; then
         echo "Executing real unprivileged OpenSCAP scan..."
@@ -277,7 +295,7 @@ if [ "${ASIMP_PRIV_LEVEL}" = "limited_sandbox" ]; then
                 --report data/asimp_mock/var/log/openscap-after-report.html \
                 "${DS_FILE}" || true
 
-            # Simple inline python parser for OpenSCAP results
+            # Simple inline python XML parser for OpenSCAP results
             OSCAP_SCORE=$(python3 -c "
 import xml.etree.ElementTree as ET
 try:
@@ -310,8 +328,10 @@ EOF
     echo "Running ASIMP reporting playbook in unprivileged limited environment..."
     ansible-playbook -i inventory/hosts.ini "${PLAYBOOK}" --extra-vars "is_limited_environment=true is_sandbox_jules=true asimp_privilege_level=limited_sandbox"
 
+# BRANCH B: Full Privilege Mode (Executes on real hardware/production hosts)
 elif [ "${ASIMP_PRIV_LEVEL}" = "full_privilege" ]; then
 
+    # Check if safety gate check outputted critical/high risks (such as missing keys or port conflicts)
     if [ "${RISK_LEVEL}" = "CRITICAL_RISK" ] || [ "${RISK_LEVEL}" = "HIGH_RISK" ]; then
         echo "=============================================================================="
         echo "⚠️  CRITICAL REMEDIATION SAFETY GATES FAILED"

@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SongketMail WSL 2 (Ubuntu 26.04) Testing & Feedback Loop Entrypoint
-# This script is strictly for DEVELOPMENT & TESTING sessions.
-# Bypassed automatically in standard/production use-only mode.
+# WSL 2 TESTING & DEVELOPMENT FEEDBACK LOOP ENTRYPOINT SCRIPT
+# ==============================================================================
+# Requirements:
+#   - Bash 4.0+
+#   - Windows WSL2 system running Ubuntu 26.04
+#   - Podman 5.0+ installed and configured rootless
+#   - Ansible installed locally
+#   - GITHUB_TOKEN (optional, for posting test feedback logs to PR comments)
+#
+# Usage Instructions:
+#   $ export WSL_DEVELOPMENT_MODE="true"
+#   $ ./scripts/wsl_test_feedback.sh
 # ==============================================================================
 
+# Enable strict error-handling configurations:
+# -e: Abort if any statement returns a non-zero exit status.
+# -o pipefail: Pipeline exit status matches that of the last command to exit with a non-zero status.
 set -eo pipefail
 
 echo "======================================================================"
@@ -12,7 +24,8 @@ echo "🚀 SongketMail WSL 2 Development & Feedback Controller"
 echo "======================================================================"
 
 # 1. Strict Development Mode Gate
-if [ "${WSL_DEVELOPMENT_MODE}" != "true" ]; then
+# Bypasses execution in production/user modes if the environment variable is not explicitly true.
+if [ "${WSL_DEVELOPMENT_MODE:-}" != "true" ]; then
     echo "ℹ️  WSL_DEVELOPMENT_MODE is not set to 'true'."
     echo "⚠️  This testing harness is restricted to development sessions only."
     echo "🛑 Exiting gracefully. Regular users in 'use only mode' bypass this script."
@@ -22,6 +35,7 @@ fi
 echo "🟢 Development mode detected! Initiating WSL Ubuntu 26.04 test suite..."
 
 # 2. OS Verification (WSL + Ubuntu 26.04)
+# Check if Microsoft virtualization files exist on the system path
 IS_WSL=false
 if grep -qi microsoft /proc/version 2>/dev/null || [ -d "/proc/sys/fs/binfmt_misc/WSL" ]; then
     IS_WSL=true
@@ -39,11 +53,13 @@ echo "   - WSL Environment: $IS_WSL"
 echo "   - OS Platform: $OS_NAME"
 echo "   - OS Version: $OS_VERSION"
 
+# Fallback gracefully if running on standard Linux but development flags are set
 if [ "$IS_WSL" = "false" ]; then
     echo "⚠️  Warning: This environment does not appear to be Windows WSL."
     echo "   Continuing anyway under WSL simulation mode for cross-platform robustness."
 fi
 
+# Assert matching Ubuntu version is available for deployment maps
 if [ "$OS_NAME" != "ubuntu" ] || [ "$OS_VERSION" != "26.04" ]; then
     echo "⚠️  Warning: Detected OS is $OS_NAME $OS_VERSION. Expected Ubuntu 26.04."
     echo "   Continuing anyway with Ubuntu compatibility layer."
@@ -70,11 +86,10 @@ echo "======================================================================"
 echo "📥 Fetching Task & Feedback Request from Jules CLI/API..."
 echo "======================================================================"
 
-# Simulate Jules API fetch if URL is present, otherwise fallback to local CLI
-if [ -n "${JULES_API_URL}" ] && [ -n "${JULES_TASK_ID}" ]; then
+# Contact remote HTTP API endpoints if task IDs are defined
+if [ -n "${JULES_API_URL:-}" ] && [ -n "${JULES_TASK_ID:-}" ]; then
     echo "📡 Contacting Jules API at: ${JULES_API_URL}"
-    # Fetch actual response or instruction if token is present
-    if [ -n "${JULES_API_TOKEN}" ]; then
+    if [ -n "${JULES_API_TOKEN:-}" ]; then
         curl -s -H "Authorization: Bearer ${JULES_API_TOKEN}" \
              "${JULES_API_URL}/tasks/${JULES_TASK_ID}" > .jules_task_response.json || echo "{\"status\":\"local_test\"}" > .jules_task_response.json
     else
@@ -90,7 +105,7 @@ echo "======================================================================"
 echo "🎯 Executing Ansible Playbook 'wsl_feedback_playbook.yml'..."
 echo "======================================================================"
 
-# Run the playbook with development environment variables
+# Run local testing playbook passing the WSL development mode parameter
 ansible-playbook -e "wsl_development_mode=true" wsl_feedback_playbook.yml
 
 # 6. Capturing Run Reports & Logging Feedback to Jules and GitHub PR
@@ -98,8 +113,8 @@ echo "======================================================================"
 echo "📤 Submitting Run Diagnostics & Logs back to Jules and GitHub PR..."
 echo "======================================================================"
 
-# Mock GitHub PR comment if token and repo/PR number are present
-if [ -n "${GITHUB_TOKEN}" ] && [ -n "${GITHUB_PR_NUMBER}" ] && [ -n "${GITHUB_REPOSITORY}" ]; then
+# Dispatch feedback comments to active PRs if credentials are set
+if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_PR_NUMBER:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
     echo "📡 Posting feedback comment to GitHub PR #${GITHUB_PR_NUMBER} on ${GITHUB_REPOSITORY}..."
     COMMENT_BODY="### 🧪 WSL 2 Ubuntu 26.04 Integration Test Passed\n- **Runtime:** Podman ${PODMAN_VER:-unknown}\n- **Orchestration:** Ansible ${ANSIBLE_VER:-unknown}\n- **Feedback Status:** Success"
 
@@ -112,7 +127,7 @@ else
     echo "ℹ️  GitHub PR parameters missing. Bypassing remote PR comments."
 fi
 
-# Mock or call Jules CLI feedback
+# Stream status to local Google Jules binary sessions
 if command -v jules &>/dev/null; then
     echo "📡 Dispatching feedback via local Jules CLI..."
     jules feedback --status "completed" --summary "WSL 2 Ubuntu 26.04 Test Completed successfully" || echo "⚠️ Jules CLI error."
