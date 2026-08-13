@@ -1,6 +1,6 @@
 ---
 # ceph_deploy/group_vars/all.yml
-# FQCN-compliant variables for Ceph Tentacle on Ubuntu 26.04 LTS & Proxmox VE 9
+# FQCN-compliant variables for Ceph Tentacle on Ubuntu 26.04 LTS & AlmaLinux 9.6
 
 # Cluster Global Config
 ceph_cluster_name: "ceph-prod"
@@ -38,7 +38,7 @@ pve_storage_id: "external-ceph-prod"
 pve_rbd_pool: "pve-rbd-pool"
 pve_keyring_dest: "/etc/pve/priv/ceph/{{ pve_storage_id }}.keyring"
 
-# OS Prep packages & kernels
+# OS Prep packages & kernels (supported across Debian & RedHat families)
 cephadm_required_packages:
   - "python3"
   - "podman"

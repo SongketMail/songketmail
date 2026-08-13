@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ceph Native Deployment on Ubuntu 26.04 Server LTS — SongketMail :: LAB</title>
+    <title>Ceph Native Deployment on Ubuntu 26.04 & AlmaLinux 9.6 — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -213,11 +213,11 @@
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
 <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-        📦 Ceph Native Deployment on Ubuntu 26.04 Server LTS
+        📦 Ceph Native Deployment on Ubuntu 26.04 &amp; AlmaLinux 9.6
     </h1>
 
     <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-        This documentation details the architecture, design, and end-to-end automation of a 3-node independent Ceph storage cluster running <strong>Ubuntu 26.04 LTS (Noble Numbat)</strong> and the <strong>Ceph Tentacle</strong> release, fully integrated as an external storage provider for a 4-node <strong>Proxmox Virtual Environment (PVE) 9</strong> compute cluster.
+        This documentation details the architecture, design, and end-to-end automation of a 3-node independent Ceph storage cluster running <strong>Ubuntu 26.04 LTS (Noble Numbat)</strong> or <strong>AlmaLinux 9.6</strong> and the <strong>Ceph Tentacle</strong> release, fully integrated as an external storage provider for a 4-node <strong>Proxmox Virtual Environment (PVE) 9</strong> compute cluster.
     </p>
 
     <hr class="border-slate-200 dark:border-slate-800" />
@@ -373,7 +373,7 @@ pvecm add 10.10.10.21 --link0 10.10.10.24  # From pve-node4</pre>
     </h2>
 
     <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-        This stage uses Ansible to prepare the minimal Ubuntu 26.04 Server hosts and deploy containerized Ceph daemons via the native <strong>cephadm</strong> orchestrator.
+        This stage uses Ansible to prepare the minimal hosts (supporting both <strong>Ubuntu 26.04 LTS</strong> and <strong>AlmaLinux 9.6</strong>) and deploy containerized Ceph daemons via the native <strong>cephadm</strong> orchestrator.
     </p>
 
     <h3 id="31-ansible-automated-roles" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
@@ -383,8 +383,14 @@ pvecm add 10.10.10.21 --link0 10.10.10.24  # From pve-node4</pre>
     <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
         Our standalone Ansible Playbook structures deployment into five modular phases:
     </p>
-    <ul class="list-disc list-inside space-y-1 text-base text-slate-600 dark:text-slate-300 pl-4">
-        <li><strong>ceph_prep</strong>: Installs podman, configures kernel requirements (file max, netfilter modules), and synchronizes Chrony NTP clocks.</li>
+    <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+        <li><strong>ceph_prep</strong>: Prepares base nodes dynamically based on OS family:
+            <ul class="list-circle list-inside space-y-1 pl-4 mt-1">
+                <li>On <strong>Debian/Ubuntu</strong> (Ubuntu 26.04): Updates apt cache, configures official apt keys, runs system packages upgrade, and installs required baseline packages along with <code>cephadm</code>.</li>
+                <li>On <strong>RedHat/AlmaLinux</strong> (AlmaLinux 9.6): Installs EPEL repository, runs dnf upgrade, configures the native Ceph repository via <code>cephadm add-repo</code>, and installs prerequisite packages and <code>cephadm</code> using <code>dnf</code>.</li>
+                <li>On both families: Sets kernel sysctl parameter <code>fs.file-max=2097152</code>, enables container modules (<code>br_netfilter</code>, <code>overlay</code>), and deploys synchronized Chrony NTP config with dynamic service daemon names (<code>chronyd</code> on RedHat/AlmaLinux vs <code>chrony</code> on Debian/Ubuntu).</li>
+            </ul>
+        </li>
         <li><strong>ceph_bootstrap</strong>: Downloads cephadm, bootstraps the active MON/MGR, clusters the storage nodes, and spins up OSDs across nvme target drives.</li>
         <li><strong>security_hardening</strong>: Hardens storage nodes using precise network isolation rules.</li>
         <li><strong>pve_integration</strong>: Handles keyring transfer, storage.cfg distribution, and VM storage verification.</li>

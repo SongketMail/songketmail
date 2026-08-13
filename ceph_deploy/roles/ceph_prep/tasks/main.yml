@@ -1,18 +1,60 @@
 ---
 # ceph_deploy/roles/ceph_prep/tasks/main.yml
-# Prepares minimal Ubuntu 26.04 LTS servers for containerized cephadm deployment
+# Prepares base hosts (Ubuntu 26.04 LTS and AlmaLinux 9.6) for containerized cephadm deployment
 
-- name: Update apt cache and upgrade base OS packages
+- name: Download standalone cephadm orchestrator CLI
+  ansible.builtin.get_url:
+    url: "https://bootstrap.ceph.com/cephadm"
+    dest: /usr/sbin/cephadm
+    owner: root
+    group: root
+    mode: '0755'
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Add official Ceph repository via cephadm
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cephadm add-repo --release {{ ceph_release | default('tentacle') }}"
+  when: not (is_limited_environment | default(false) | bool)
+
+- name: Install EPEL repository on RedHat family
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: Update apt cache and upgrade base OS packages on Debian family
   ansible.builtin.apt:
     update_cache: yes
     upgrade: dist
-  when: not (is_limited_environment | default(false) | bool)
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - ansible_facts['os_family'] == 'Debian'
 
-- name: Install required baseline packages
+- name: Install required baseline packages on Debian family
   ansible.builtin.apt:
-    name: "{{ cephadm_required_packages }}"
+    name: "{{ cephadm_required_packages + ['cephadm'] }}"
     state: present
-  when: not (is_limited_environment | default(false) | bool)
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - ansible_facts['os_family'] == 'Debian'
+
+- name: Upgrade base OS packages on RedHat family
+  ansible.builtin.dnf:
+    update_cache: yes
+    upgrade: yes
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: Install required baseline packages on RedHat family
+  ansible.builtin.dnf:
+    name: "{{ cephadm_required_packages + ['cephadm'] }}"
+    state: present
+  when:
+    - not (is_limited_environment | default(false) | bool)
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Configure sysctl parameter for file descriptor limits
   ansible.posix.sysctl:
@@ -38,7 +80,7 @@
       driftfile /var/lib/chrony/drift
       makestep 1.0 3
       rtcsync
-    dest: /etc/chrony/chrony.conf
+    dest: "{{ '/etc/chrony.conf' if (ansible_facts['os_family'] | default('Debian') == 'RedHat') else '/etc/chrony/chrony.conf' }}"
     owner: root
     group: root
     mode: '0644'
