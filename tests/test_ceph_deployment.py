@@ -3,7 +3,7 @@
 This module contains comprehensive test cases to verify the integrity,
 formatting, YAML syntax, and FQCN compliance of the Ansible playbooks,
 inventory, variables, and documentation files introduced in this session
-for independent Ceph native deployment on Ubuntu 26.04.
+for independent Ceph native deployment on Ubuntu 26.04 and AlmaLinux 9.6.
 """
 
 import os
@@ -218,6 +218,11 @@ def test_new_documentation_okf_frontmatter():
     assert "timestamp" in metadata, "Missing 'timestamp' field"
     assert "topics" in metadata, "Missing 'topics' field"
 
+    # Assert new multi-OS topics and titles are in the frontmatter
+    assert "almalinux" in metadata["topics"], "Expected 'almalinux' to be in topics"
+    assert "ubuntu" in metadata["topics"], "Expected 'ubuntu' to be in topics"
+    assert "AlmaLinux 9.6" in metadata["title"], "Expected 'AlmaLinux 9.6' to be in title"
+
 
 def test_new_documentation_footer_standards():
     """Ensures that the new markdown file contains proper licensing and project footer.
@@ -231,3 +236,48 @@ def test_new_documentation_footer_standards():
     assert "Harisfazillah Jamel" in content, "Missing author name 'Harisfazillah Jamel' in footer"
     assert "LinuxMalaysia" in content, "Missing brand name 'LinuxMalaysia' in footer"
     assert "DSOM" in content, "Missing constitution signature 'DSOM' in footer"
+
+
+def test_ceph_prep_multi_os_tasks():
+    """Verifies that the ceph_prep role main.yml tasks dynamically target both RedHat and Debian.
+
+    Ensures that apt and dnf modules are conditionally called based on ansible_facts['os_family']
+    and the standalone cephadm add-repo command is structured correctly.
+    """
+    prep_tasks_path = os.path.join(CEPH_DEPLOY_DIR, "roles", "ceph_prep", "tasks", "main.yml")
+    assert os.path.exists(prep_tasks_path), f"File {prep_tasks_path} does not exist"
+
+    with open(prep_tasks_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Check that OS family conditionals exist
+    assert "ansible_facts['os_family'] == 'Debian'" in content
+    assert "ansible_facts['os_family'] == 'RedHat'" in content
+
+    # Check modules use FQCN
+    assert "ansible.builtin.apt:" in content
+    assert "ansible.builtin.dnf:" in content
+    assert "ansible.builtin.get_url:" in content
+    assert "ansible.builtin.command:" in content
+
+    # Check epel-release is installed on RedHat family
+    assert "name: epel-release" in content
+
+    # Check dynamic Chrony destination setup
+    assert "dest: \"{{ '/etc/chrony.conf' if (ansible_facts['os_family'] | default('Debian') == 'RedHat') else '/etc/chrony/chrony.conf' }}\"" in content
+
+
+def test_ceph_prep_multi_os_handlers():
+    """Verifies that the ceph_prep handlers restart Chrony dynamically.
+
+    Ensures the service name dynamically maps to chronyd on RedHat and chrony on Debian.
+    """
+    prep_handlers_path = os.path.join(CEPH_DEPLOY_DIR, "roles", "ceph_prep", "handlers", "main.yml")
+    assert os.path.exists(prep_handlers_path), f"File {prep_handlers_path} does not exist"
+
+    with open(prep_handlers_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Check FQCN and dynamic service mapping
+    assert "ansible.builtin.systemd:" in content
+    assert "name: \"{{ 'chronyd' if (ansible_facts['os_family'] | default('Debian') == 'RedHat') else 'chrony' }}\"" in content
