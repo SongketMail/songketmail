@@ -1,29 +1,38 @@
 #!/usr/bin/env python3
-"""
-check_links.py - Scan all documentation files and verify that all relative links resolve correctly.
-Exits with a non-zero code if any broken link is detected.
+"""Recursive relative link check validation on local files.
+
+This module scans both Markdown (`.md`) and HTML (`.html`) files inside the
+`docs/` folder to recursively parse, extract, and verify that all internal
+references (excluding external schemas like http/https or mailto addresses)
+correctly resolve to valid files or paths on the filesystem. It guarantees
+0 broken navigation linkages across compiled project books.
+
+Typical usage example:
+    $ python3 scripts/check_links.py
 """
 
 import os
 import re
 import sys
 
+# Directory containing target files for link validation checks
 docs_dir = "docs"
 
-# Regex patterns
+# Regex pattern targeting href attributes in HTML layout
 html_href_pattern = re.compile(r'href=["\']([^"\']+)["\']')
+
+# Regex pattern targeting reference parenthesis in Markdown files
 markdown_link_pattern = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 
 
 def is_external_or_special(link):
-    """
-    Returns True if the link is external, mailto, anchor-only, or system link.
+    """Determines if a parsed link is external, mailto, or special.
 
     Args:
-        link (str): The raw link text from HTML/Markdown file.
+        link (str): The raw link text extracted from target file.
 
     Returns:
-        bool: True if external or special, False otherwise.
+        bool: True if external, mailto, anchor-only, or system link; False otherwise.
     """
     link_lower = link.strip().lower()
     if not link_lower:
@@ -40,11 +49,16 @@ def is_external_or_special(link):
 
 
 def check_all_links():
-    """
-    Scans the docs/ folder and verifies all local references resolve successfully on the filesystem.
+    """Scans the docs/ folder and verifies all local references resolve successfully.
+
+    Recursively walks through target folders, parses all anchor lines, computes relative
+    resolutions, and flags any non-existent reference targets.
 
     Returns:
-        bool: True if no broken links are found, False if any broken links exist.
+        bool: True if zero broken relative links are detected; False otherwise.
+
+    Raises:
+        OSError: If opening files for scanning encounters filesystem issues.
     """
     broken_links = []
     total_checked = 0

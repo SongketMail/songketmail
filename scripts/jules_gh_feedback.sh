@@ -1,12 +1,29 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Bidirectional Jules CLI & GitHub Pull Request Diagnostic Bridge Script
-# Idempotent, robust, POSIX-compliant, and secure.
+# JULES CLI & GITHUB PULL REQUEST DIAGNOSTIC FEEDBACK BRIDGE SCRIPT
+# ==============================================================================
+# Requirements:
+#   - Bash 4.0+ (utilises advanced array and associative arrays constructs)
+#   - jq (JSON parser CLI binary)
+#   - curl (HTTP command-line agent)
+#   - gh CLI (optional, falls back to direct REST endpoints using GITHUB_TOKEN)
+#
+# Usage Instructions:
+#   $ export EXECUTION_MODE="dev"
+#   $ export TELEMETRY_FILE_PATH="/tmp/jules_telemetry.json"
+#   $ export GITHUB_TOKEN="ghp_xxxx"
+#   $ export GITHUB_REPOSITORY="user/repo"
+#   $ export GITHUB_PR_NUMBER="22"
+#   $ ./scripts/jules_gh_feedback.sh
 # ==============================================================================
 
+# Enable strict error-handling configurations:
+# -e: Abort if any statement returns a non-zero exit status.
+# -u: Abort if referencing any undeclared variable.
+# -o pipefail: Pipeline exit status matches that of the last command to exit with a non-zero status.
 set -euo pipefail
 
-# Set strict umask to restrict telemetry artifacts to the owner
+# Configure tight umask permission values so created temp files remain hidden from other users.
 umask 077
 
 # Define helper functions for terminal logging
@@ -22,18 +39,20 @@ log_error() {
     echo -e "\033[1;31m[ERROR]\033[0m $*" >&2
 }
 
-# Define cleanup trap to ensure transient files are handled safely
+# Define cleanup handler executed upon script termination or unexpected signal crashes.
 cleanup() {
     log_info "Cleaning up session..."
+    # If PAYLOAD_FILE variable is initialized and references an existing file, delete it.
     if [[ -n "${PAYLOAD_FILE:-}" && -f "${PAYLOAD_FILE}" ]]; then
         rm -f "${PAYLOAD_FILE}"
     fi
 }
+# Register trap bindings for EXIT, SIGINT (130), and SIGTERM (143)
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-# Helper function to invoke GitHub API with deduplicated parameters
+# Helper function to invoke GitHub API requests safely without string argument-splitting bugs.
 github_api_request() {
     local method="$1"
     local path_or_url="$2"
@@ -45,6 +64,7 @@ github_api_request() {
         url="https://api.github.com/${url}"
     fi
 
+    # Declare curly arguments as array members to prevent word-splitting failures
     local -a curl_opts=(
         "-s"
         "-X" "${method}"
@@ -54,6 +74,7 @@ github_api_request() {
         "--max-time" "30"
     )
 
+    # Append JSON payload if parameter payload is passed
     if [[ -n "${data_payload}" ]]; then
         curl_opts+=(
             "-H" "Content-Type: application/json"
@@ -61,12 +82,13 @@ github_api_request() {
         )
     fi
 
+    # Trigger curl request
     curl "${curl_opts[@]}" "${url}"
 }
 
 log_info "Starting Jules CLI & GitHub PR Feedback Dispatcher"
 
-# 1. Strict Mode Separation Gate
+# 1. Strict Mode Separation Gate (Telemetry is blocked in standard production runs)
 EXECUTION_MODE="${EXECUTION_MODE:-user}"
 if [[ "${EXECUTION_MODE}" != "dev" ]]; then
     log_warn "EXECUTION_MODE is not set to 'dev' (Current: ${EXECUTION_MODE})."
@@ -85,13 +107,13 @@ fi
 
 log_info "Parsing telemetry reports from ${TELEMETRY_FILE}..."
 
-# Ensure jq is installed
+# Verify that jq is installed
 if ! command -v jq &>/dev/null; then
     log_error "Missing dependency 'jq'. Please install jq to parse telemetry data."
     exit 1
 fi
 
-# Validate telemetry file content before parsing
+# Validate telemetry file content syntax before parsing
 if ! jq empty "${TELEMETRY_FILE}" 2>/dev/null; then
     log_error "Telemetry file contains invalid JSON or is empty."
     exit 1
