@@ -320,3 +320,66 @@ def test_verify_mail_web_app_check_port_failure():
         is_active, desc = verify_mail_web_app.check_port(80)
         assert is_active is False
         assert desc == "Not Listening"
+
+
+def test_agent_skills_compliance():
+    """
+    Verifies that all 10 agent skills under .agents/skills/ are present,
+    comply with combined OKF/Antigravity metadata, and contain the DSOM footer.
+    """
+    skills_dir = ".agents/skills"
+    assert os.path.exists(skills_dir), "Skills directory does not exist."
+
+    expected_skills = [
+        "dockpod-integration",
+        "jekyll-gh-pages",
+        "jules-agent-protocol",
+        "jules-sandbox-mode",
+        "songketmail-architecture",
+        "songketmail-deployment",
+        "ceph-deployment",
+        "wsl-development-feedback",
+        "s3-storage-integration",
+        "template-unification"
+    ]
+
+    for skill in expected_skills:
+        skill_path = os.path.join(skills_dir, skill)
+        assert os.path.isdir(skill_path), f"Expected skill directory '{skill}' not found."
+
+        skill_md_path = os.path.join(skill_path, "SKILL.md")
+        assert os.path.exists(skill_md_path), f"SKILL.md not found for skill '{skill}'."
+
+        with open(skill_md_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+
+        # Check frontmatter
+        assert content.startswith("---"), f"SKILL.md for '{skill}' does not start with frontmatter marker '---'."
+        parts = content.split("---", 2)
+        assert len(parts) >= 3, f"SKILL.md for '{skill}' has incomplete frontmatter block."
+
+        fm_text = parts[1]
+        metadata = {}
+        for line in fm_text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if ":" in line:
+                k, v = line.split(":", 1)
+                metadata[k.strip()] = v.strip().strip('"').strip("'")
+
+        # Antigravity required fields
+        assert "name" in metadata, f"SKILL.md for '{skill}' is missing 'name' metadata."
+        assert metadata["name"] == skill, f"SKILL.md for '{skill}' has mismatched 'name' metadata. Expected '{skill}', got '{metadata['name']}'."
+        assert "description" in metadata, f"SKILL.md for '{skill}' is missing 'description' metadata."
+
+        # OKF required fields
+        assert "okf_version" in metadata, f"SKILL.md for '{skill}' is missing 'okf_version' metadata."
+        assert "type" in metadata, f"SKILL.md for '{skill}' is missing 'type' metadata."
+        assert "title" in metadata, f"SKILL.md for '{skill}' is missing 'title' metadata."
+        assert "timestamp" in metadata, f"SKILL.md for '{skill}' is missing 'timestamp' metadata."
+        assert "topics" in metadata, f"SKILL.md for '{skill}' is missing 'topics' metadata."
+
+        # Footer check
+        assert "Harisfazillah Jamel" in content, f"SKILL.md for '{skill}' is missing author reference in footer."
+        assert "LinuxMalaysia" in content or "DSOM" in content, f"SKILL.md for '{skill}' lacks DSOM AI Protocol or LinuxMalaysia constitution in footer."
