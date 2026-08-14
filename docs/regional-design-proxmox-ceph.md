@@ -8,243 +8,339 @@ timestamp: 2026-08-14T12:00:00Z
 topics: [proxmox, ceph, regional, geolocation, almalinux, architecture]
 ---
 
-# 🌐 Geolocated Regional Data Center Design
-
-This document details the technical design, architectural patterns, and systemic improvements for the **SongketMail Regional Data Center Infrastructure**. To achieve absolute business continuity, fault tolerance, and data sovereignty, the design specifies a geodistributed multi-region topology spanning at least three distinct regions with active-active and active-passive geolocation redundancy.
+# Geolocated Regional Data Center Infrastructure Specification
 
 ---
 
 ## 🗺️ 1. Multi-Region Geodistributed Topology
 
-The core architecture consists of three geographically isolated regional data centers communicating over secure, dedicated low-latency Wide Area Networks (WAN) utilizing IPsec VPN meshes or dark fiber links.
+By establishing three geographically isolated regional nodes, this architecture enforces cross-border fault isolation, regulatory data residency, and deterministic low-latency edge delivery.
 
 ```
-                  +-----------------------------------+
-                  |      GEOLOCATED WAN BACKBONE      |
-                  +-----------------+-----------------+
-                                    |
-            +-----------------------+-----------------------+
-            |                       |                       |
-+-----------v-----------+   +-------v-------+   +-----------v-----------+
-|     REGION ALPHA      |   |  REGION BETA  |   |     REGION GAMMA      |
-|  (Primary Production)  |   | (Secondary/DR) |   | (Geo-Redundant/Edge)  |
-|                       |   |               |   |                       |
-|  3x Proxmox HCI Nodes |   | 3x PVE Nodes  |   | 3x Proxmox HCI Nodes  |
-|  3x AlmaLinux Ceph    |   | 3x AlmaCeph   |   | 3x AlmaLinux Ceph     |
-+-----------------------+   +---------------+   +-----------------------+
+       [ Region Alpha (Main/KUL) ]
+             /               \
+       IPsec Mesh         IPsec Mesh
+           /                   \
+[ Region Beta (JHB) ] ===== [ Region Gamma (PEN) ]
+                    IPsec Mesh
+
 ```
 
 ### 1.1 Regional Characteristics
-*   **Region Alpha (Primary Production)**: Hosts the primary active mail service instances, webmail gateways, and real-time transaction stores.
-*   **Region Beta (Secondary / Disaster Recovery)**: Hosts mirrored virtual environments and acts as the immediate failover site for Region Alpha with hot-standby services.
-*   **Region Gamma (Geo-Redundant / Edge Archive)**: Functions as a third quorum voter and offsite cold archival storage, preventing split-brain states and providing geolocated access for remote mail clients.
+
+```
++------------------+-----------------------+---------------------------------------+-----------------------------+
+| Region           | Geographic Role       | Primary Functional Workloads          | Interconnect Routing        |
++------------------+-----------------------+---------------------------------------+-----------------------------+
+| Region Alpha     | Primary Ingestion &   | Core SongketMail MTA, Percona Patroni | Dual 10GbE dark fibre,      |
+| (Central - KUL)  | Control Plane         | Master, Elastic Stack Hot Nodes       | FRR BGP with IPsec mesh     |
++------------------+-----------------------+---------------------------------------+-----------------------------+
+| Region Beta      | Active-Active Replica | Read-replica MTAs, Patroni Standby,   | Redundant 10GbE WAN transit,|
+| (Southern - JHB) | & Real-Time DR Target | Ceph Tier-2 Mirror, PBS Pull Target   | WireGuard/StrongSwan backup |
++------------------+-----------------------+---------------------------------------+-----------------------------+
+| Region Gamma     | Edge Proxy, Analytics | GeoServer GIS workloads, Elastic Warm | Carrier-diverse MPLS/IPsec, |
+| (Northern - PEN) | & Archival Target     | /Cold Nodes, PBS Offsite Cold Vault   | BGP EVPN fabric extension   |
++------------------+-----------------------+---------------------------------------+-----------------------------+
+
+```
+
+* **WAN Mesh Configuration:** Mesh networks operate across dynamic routing fabrics managed via [FRRouting (FRR)](https://frrouting.org/) utilising BGP over routed IPsec/WireGuard tunnels.
+* **Consensus & State Isolation:** Quorum across distributed components (e.g., Patroni Distributed Configuration Stores via `etcd`, Ceph MON quorums) prevents split-brain by maintaining independent regional clusters federated at the application layer or using an offsite tie-breaker node.
 
 ---
 
 ## 🏛️ 2. Generalized Node Architecture (Per Region)
 
-Each regional node abstracts physical hardware dependencies into standardized, enterprise-grade compute, security, and storage building blocks.
+Each regional node implements a standardised, modular bare-metal specification designed for scale-out horizontal expansion, Day 2 operational simplicity, and zero vendor lock-in.
+
+### 2.1 Hardware Sizing & Subsystem Specifications
 
 ```
-+---------------------------------------------------------------------------------------------------+
-|                                   GENERALIZED REGIONAL NODE                                       |
-+---------------------------------------------------------------------------------------------------+
-|  [ INGRESS ]                                                                                      |
-|    Router / WAN CPE                                                                               |
-|       |                                                                                           |
-|    Active-Active GSLB & Next-Generation Enterprise Firewalls (HA NGFW)                            |
-|       |                                                                                           |
-|  [ CORE NETWORK ]                                                                                 |
-|    Redundant Layer-3 Core Spine-Leaf Switches (10G/25G/100G Fabric)                               |
-|       |                                                                                           |
-|  [ COMPUTE LAYER ]                                                                                |
-|    Min. 3x Multi-Core Enterprise Compute Hosts running Proxmox VE 9                               |
-|    -> Running Local Hyper-Converged Ceph Cluster (Tier-1 Hot Storage)                             |
-|       |                                                                                           |
-|  [ STORAGE LAYER ]                                                                                |
-|    Min. 3x Enterprise Storage Nodes running AlmaLinux 9.6                                         |
-|    -> Running Independent External Ceph Cluster (Tier-2 Mailbox Object Storage)                   |
-|       |                                                                                           |
-|  [ COMPANION SERVICES ]                                                                           |
-|    - High-Capacity Dedicated Backup Server (PBS) Appliance                                        |
-|    - Specialized AI Inference Accelerator Nodes (GPU-backed)                                      |
-+---------------------------------------------------------------------------------------------------+
-```
++-------------------+---------------------------------------------------------+------------------------------------+
+| Subsystem         | Hardware / Component Profile                            | Workload Target & Orchestration    |
++-------------------+---------------------------------------------------------+------------------------------------+
+| Compute Fabric    | Dual AMD EPYC 9004 series (64C/128T per node), 512GB    | Proxmox VE 8.x / RKE2 K8s Nodes;   |
+|                   | DDR5 ECC Registered RAM per hypervisor                  | Podman container runtimes          |
++-------------------+---------------------------------------------------------+------------------------------------+
+| Security Layer    | Dedicated 1U appliances running Wazuh Agents,           | Layer 7 WAF, zero-trust mTLS,      |
+|                   | [BunkerWeb WAF](https://www.bunkerweb.io/), OpenSCAP, Smallstep PKI  | automated PCI-DSS / ISO27001 scan  |
++-------------------+---------------------------------------------------------+------------------------------------+
+| Networking        | Dual 25GbE Mellanox ConnectX-5 NICs (LACP bonded),      | RoCEv2 Ceph fabric, isolated VXLAN |
+|                   | 100GbE QSFP28 Spine-Leaf Arista/Open Network switches   | / VLAN overlays for tenant traffic |
++-------------------+---------------------------------------------------------+------------------------------------+
+| Storage Baseline  | Tier 1: NVMe U.2 Enterprise SSDs (PCIe Gen5, ZFS/Ceph); | Ultra-low latency IOPS (databases);|
+|                   | Tier 2: High-density SATA/SAS Enterprise HDDs (18TB+)   | S3 Object / Maildir cold storage   |
++-------------------+---------------------------------------------------------+------------------------------------+
+| Backup / Vault    | Dedicated 2U bare-metal chassis running Proxmox Backup  | PBS chunk storage, LTO-8/9 SAS tape|
+|                   | Server with direct SAS HBA tape library interconnect    | autoloader connectivity ([PMTX](https://pbs.proxmox.com/docs/tape-backup.html)) |
++-------------------+---------------------------------------------------------+------------------------------------+
+| AI / Vector Subsys| 2x NVIDIA L40S / A100 PCIe (or Sovereign Open GPUs),    | Local LLM inferencing, DSOM vector |
+|                   | host-passthrough via VFIO to AI worker VMs              | search (`pg_vector`), Anti-Spam APM|
++-------------------+---------------------------------------------------------+------------------------------------+
 
-### 2.1 Hardware Sizing & Refinement
-*   **Compute Nodes**: Enterprise multi-core processor hosts (AMD/Intel) running Proxmox VE 9, equipped with redundant power supplies, multi-port high-speed NICs, and enterprise SAS/NVMe drives.
-*   **Security Gateway**: Next-Generation Enterprise Firewalls (NGFW) in High-Availability active-passive pairs, providing deep packet inspection, IDS/IPS, and IPsec VPN termination.
-*   **Fabric Networking**: High-performance, dual-spine, multi-leaf switching topology running at 25 Gbps for intra-rack storage traffic and 10 Gbps for public access.
-*   **Backup Server**: High-density dedicated backup appliance running Proxmox Backup Server (PBS) for localized incremental, deduplicated backups.
-*   **AI Accelerators**: Dedicated compute servers outfitted with Enterprise GPU hardware for accelerated spam analysis, natural language model validation, and malware quarantine analytics.
+```
 
 ---
 
 ## 🗄️ 3. Dual-Tier Ceph Storage Strategy
 
-To balance low-latency virtual machine operational requirements with high-capacity object and mailbox storage, this design enforces a **dual-tier Ceph storage strategy**.
+Storage workloads are partitioned to separate latency-sensitive transactional operations from high-volume sequential archival tiers.
 
 ```
-+---------------------------------------------------------------------------------------------------+
-|                                      DUAL-TIER CEPH FLOW                                          |
-+---------------------------------------------------------------------------------------------------+
-|                                                                                                   |
-|  [ TIER 1: PVE Local Hyper-Converged Ceph ] <---> Low-Latency VM Boot Disks & System Volumes      |
-|    - Managed natively via Proxmox VE (pveceph)                                                    |
-|    - 3x Nodes minimum with local enterprise SSDs                                                  |
-|                                                                                                   |
-|  [ TIER 2: AlmaLinux Independent Ceph ]     <---> High-Capacity Mailbox Objects, RGW & S3 Stores    |
-|    - Running on external AlmaLinux 9.6 nodes via cephadm                                          |
-|    - Packages sourced from CentOS Storage SIG repositories                                        |
-|                                                                                                   |
-+---------------------------------------------------------------------------------------------------+
+       [ Proxmox VE Hypervisor Compute Fabric ]
+             /                                \
+   (Native Mesh / NVMe)               (10/25GbE Ceph Public Net)
+           /                                    \
+[ Tier 1: Hyper-Converged Ceph ]      [ Tier 2: AlmaLinux Ceph Storage SIG ]
+  - BlueStore on NVMe (PCIe Gen5)       - High-Density OSDs (Enterprise HDDs)
+  - VM Root Disks, WAL / DB Journals    - S3 RGW (Maildir, Attachments, Logs)
+  - Managed via 'pveceph'               - RBD / CephFS Archival Pools
+
 ```
 
 ### 3.1 Tier 1: Local Hyper-Converged Ceph (Proxmox-Managed)
-*   **Deployment**: Bootstrapped natively on the Proxmox VE 9 compute cluster according to the [Proxmox VE Ceph Guide](https://pve.proxmox.com/pve-docs/chapter-pveceph.html#chapter_pveceph) and [Hyper-converged Infrastructure Wiki](https://pve.proxmox.com/wiki/Hyper-converged_Infrastructure).
-*   **Use Case**: Holds high-IOPS VM boot drives, transactional database writes, and active state runtimes.
-*   **Benefits**: Lowest latency path, direct integration with Proxmox VE High Availability (HA) stack, and simple GUI orchestration.
+
+* **Underlying Engine:** Deployed directly onto Proxmox VE hypervisors using native `pveceph` tooling running the latest stable Ceph (Reef/Squid) releases.
+* **Storage Medium:** Pure NVMe U.2/U.3 SSDs running Ceph BlueStore directly on raw block devices.
+* **Target Workloads:** Virtual Machine boot drives, Patroni PostgreSQL write-ahead logs (`WAL`), Patroni base data directories, and Redis caching layers.
+* **Documentation & Reference:** [Proxmox VE Ceph Server Administration](https://pve.proxmox.com/pve-docs/chapter-pveceph.html).
 
 ### 3.2 Tier 2: External Independent Ceph (AlmaLinux-Managed)
-*   **Deployment**: Running on dedicated AlmaLinux 9.6 minimal nodes managed via `cephadm` and containerized Daemons.
-*   **Repository Sourcing**: Sourced from the official **CentOS Storage SIG Repository** to guarantee stable enterprise-grade RedHat-compatible Ceph builds:
-    ```bash
-    # Enable the CentOS Storage SIG release package on AlmaLinux
-    sudo dnf install -y centos-release-storage-common
-    # Configure the Ceph repository release target (e.g., Reef or Tentacle)
-    sudo dnf install -y centos-release-ceph-reef
-    ```
-    For more details, reference [AlmaLinux Repository Guidelines](https://wiki.almalinux.org/repos/CentOS.html#storage-sig).
-*   **Use Case**: Houses massive mailbox object blocks, Dovecot Obox S3 stores, and cold/compressed document vaults.
-*   **Benefits**: Decoupled lifecycle management, hardware optimized purely for high-capacity drives (HDDs/NVMe mixes), and zero CPU/Memory contention with the hypervisor layer.
+
+* **Underlying Engine:** Dedicated storage nodes running AlmaLinux 9 Enterprise, consuming upstream RPM packages maintained by the [CentOS Storage SIG Ceph Repository](https://sigs.centos.org/storage/).
+* **Deployment & Lifecycle:** Automated deployment via `cephadm` or Ansible [Ceph-Ansible](https://docs.ceph.com/en/latest/cephadm/).
+* **Target Workloads:** Object storage backing for SongketMail MIME attachments, Apache Kafka offloaded topics, Elastic cold indices, and GIS spatial assets.
+* **Reference Guide:** [CentOS Storage SIG Documentation](https://sigs.centos.org/storage/) and [Ceph Deployment Documentation](https://docs.ceph.com/en/latest/cephadm/).
 
 ---
 
 ## 🔗 4. External Ceph Visibility Inside Proxmox VMs
 
-One of the critical design questions for the SongketMail data center is: **Can the external Ceph cluster be seen and consumed directly by a Virtual Machine running inside Proxmox?**
-
-The answer is **Yes**. Depending on security, performance, and operational constraints, there are three architectural approaches to make external Ceph visible inside virtual guests.
+Mapping storage from the external Tier 2 Ceph cluster into compute VMs running on Proxmox VE is achieved via three standard architectural approaches:
 
 ```
-+---------------------------------------------------------------------------------------------------+
-|                                 VM-TO-CEPH VISIBILITY APPROACHES                                  |
-+---------------------------------------------------------------------------------------------------+
-|                                                                                                   |
-|  APPROACH A: Hypervisor-Mediated Virtualization (Recommended for VM System Disks)                 |
-|    External Ceph Pool  --->  Proxmox VE Storage  --->  VirtIO Block (Raw/VMDK)  --->  Guest VM     |
-|                                                                                                   |
-|  APPROACH B: Guest-Native Direct Storage Protocol (Recommended for High-Performance Mail Stores)  |
-|    External Ceph Cluster (RBD / CephFS)  =====[ Dedicated Storage VLAN ]=====>  Guest Client OS    |
-|                                                                                                   |
-|  APPROACH C: S3-Compatible Object Storage Gateway (Recommended for Decoupled Web Applications)     |
-|    External Ceph RGW (S3 API)  --------------[ Standard TCP/IP Network ]------------->  Guest App  |
-|                                                                                                   |
-+---------------------------------------------------------------------------------------------------+
+                                  [ External AlmaLinux Ceph Cluster ]
+                                                  |
+                    +-----------------------------+-----------------------------+
+                    |                             |                             |
+             (Approach A: KRBD)            (Approach B: Direct)          (Approach C: S3 API)
+                    |                             |                             |
+         [ PVE storage.cfg Client ]    [ Guest OS Driver / Mount ]     [ Application S3 SDK ]
+                    |                             |                             |
+             [ VM VirtIO SCSI ]                   |                             |
+                    \                             |                             /
+                     +---------------------> [ Guest VM ] <--------------------+
+
 ```
 
-### Approach A: Hypervisor-Mediated Virtualization (Storage.cfg)
-*   **How it works**: Proxmox VE maps the external Ceph cluster as a native storage pool in `/etc/pve/storage.cfg` using `librbd` (admin or client keyrings). PVE then provisions virtual disks (`.raw` volumes) on this pool and presents them to the virtual machine as standard **VirtIO Block** or **SCSI** controllers.
-*   **VM Visibility**: The VM sees a standard physical-like block device (e.g., `/dev/vdb` or `/dev/sdb`) and remains completely unaware that the underlying storage is Ceph.
-*   **Pros**: Supports Proxmox snapshots, thin provisioning, VM live-migration across hypervisors, and simple central backup policies.
-*   **Cons**: Introduces minor CPU overhead at the hypervisor mapping layer.
+### Approach A: Hypervisor-Mediated Virtualization (`storage.cfg`)
+
+Proxmox acts as the native Ceph client, mapping RBD images or CephFS exports directly to VMs as virtual disks (`VirtIO SCSI`).
+
+* **Implementation:** The external Ceph keyring and `ceph.conf` are integrated into `/etc/pve/priv/ceph/<cluster>.keyring` and configured in `/etc/pve/storage.cfg`.
+* **Proxmox Storage Configuration:**
+
+```ini
+rbd: external-ceph-tier2
+        monhost 10.200.10.11:6789,10.200.10.12:6789,10.200.10.13:6789
+        pool songketmail-vm-disks
+        user admin
+        keyring /etc/pve/priv/ceph/external-ceph-tier2.keyring
+        content images
+
+```
+
+* **Pros:** Native hypervisor snapshots, live migration across PVE nodes without persistent guest mounts, zero guest-level storage configuration.
+* **Reference:** [Proxmox VE External Ceph RBD Configuration](https://pve.proxmox.com/wiki/Storage:_RBD).
 
 ### Approach B: Guest-Native Direct Storage Protocol Access
-*   **How it works**: The virtual machine is configured with a dedicated network interface mapped directly to the Ceph Public network segment (e.g., via VLAN tag). Inside the guest operating system, Ceph client packages are installed. The VM is granted its own unique Ceph keyring (`client.vm-mailstore`) with restrictive pool privileges.
-*   **VM Visibility**:
-    - **RADOS Block Device (RBD)**: The guest kernel maps the RBD block directly:
-      ```bash
-      sudo rbd map mypool/vm-mail-volume --name client.vm-mailstore
-      ```
-      This exposes the device directly as `/dev/rbd0` inside the VM.
-    - **CephFS POSIX Mount**: The guest mounts CephFS using the kernel driver:
-      ```bash
-      sudo mount -t ceph 10.10.20.11:6789:/ /mnt/mailshares -o name=vm-mailstore,secretfile=/etc/ceph/vm-mailstore.key
-      ```
-*   **Pros**: Ultimate bare-metal read/write performance; bypasses any hypervisor virtual disk layer bottlenecks.
-*   **Cons**: Increased administrative complexity; VMs must manage storage credentials; limits Proxmox-native snapshots/live migrations for that volume.
+
+Virtual Machines bypass the hypervisor storage abstraction entirely by establishing network routes directly to the Ceph Public Network.
+
+* **Implementation:** The guest OS contains `librbd`, `ceph-common`, and kernel drivers for direct RBD mapping (`rbd map`) or POSIX-compliant CephFS mounts using `/etc/fstab`.
+* **Mount Definition (`/etc/fstab` inside VM):**
+
+```bash
+admin@cluster-fs-id.cephfs=/ /mnt/songketmail-archive ceph name=admin,secretfile=/etc/ceph/admin.secret,_netdev,noatime 0 2
+
+```
+
+* **Pros:** VM-level multi-attach capabilities (`ReadWriteMany` volumes across multiple guest workers), POSIX compliance for legacy mail spool directories.
+* **Reference:** [CephFS Kernel Mount Documentation](https://docs.ceph.com/en/latest/cephfs/mount-using-kernel-driver/).
 
 ### Approach C: S3-Compatible Object Storage Gateway (Ceph RGW)
-*   **How it works**: The external Ceph cluster runs **RADOS Gateway (RGW)** daemons, exposing an S3-compatible HTTP/HTTPS endpoint. Virtual machines communicate with the storage cluster purely through RESTful web requests (S3 APIs).
-*   **VM Visibility**: The VM does not mount any block or filesystem storage. Instead, local application services (such as Dovecot Obox or Nextcloud) query and read/write object files directly using standard S3 client libraries.
-*   **Pros**: Complete network decoupled architecture; no client storage drivers needed in the guest; easily scales across different regions.
-*   **Cons**: Best suited for object/file-blob payloads (e.g., raw email files), not suitable for system boot disks.
+
+Applications inside the VM consume storage over HTTPS via RESTful S3 APIs provided by Ceph RADOS Gateway (RGW).
+
+* **Implementation:** Expose load-balanced RGW endpoints via HAProxy/Nginx. Applications use standard S3 SDKs (`aws-sdk`, `boto3`, MinIO Client).
+* **Pros:** Complete decoupling from kernel storage drivers, built-in multi-tenancy, cross-region asynchronous bucket replication via Ceph Multisite Sync.
+* **Reference:** [Ceph RADOS Gateway Guide](https://docs.ceph.com/en/latest/radosgw/).
 
 ---
 
 ## 🚀 5. Architectural Improvements & Hardening Recommendations
 
-To optimize this design for the SongketMail production deployment, we suggest implementing the following improvements:
+### 5.1 Time Synchronization: Chrony Geolocation Hardening
 
-1.  **Chrony Geolocation Synchronization**: Ensure all regional clusters synchronize their system clocks using geographically localized, high-stratum NTP servers. Ceph relies on accurate timestamps; any clock drift exceeding 0.05 seconds between OSDs can trigger clock skew alerts and corrupt transaction order.
-2.  **IPsec Low-Latency MTU Tuning**: Since replication and WAN mirroring packets cross geo-regions via IPsec tunnels, adjust the MTU of Ceph-bound virtual interfaces to **1400 bytes** to prevent packet fragmentation at security gateways.
-3.  **Strict Storage Network Ring Fencing**: Do not expose the Ceph Cluster Network or public storage ports on any internet-facing router. All storage replication must transit through isolated IPsec or dedicated MPLS circuits.
-4.  **LACP Bond Interfaces on Compute Nodes**: Implement 802.3ad LACP bonding (e.g., `bond0` consisting of dual 25G SFP28 interfaces) to guarantee both load balancing and failover capability for Tier-1 and Tier-2 storage operations.
+To prevent clock skew failures in distributed systems (which cause Ceph MON elections to fail and break Patroni consensus), deploy a geolocated, multi-source Chrony topology.
+
+* **NTP Stratum Alignment:** Each region hosts local Stratum-1/Stratum-2 NTP servers synchronized to national metrology clocks (e.g., National Metrology Institute of Malaysia - NMIM).
+* **Hardened Configuration (`/etc/chrony.conf`):**
+
+```ini
+# Regional Upstream Pools
+server 0.my.pool.ntp.org iburst minpoll 4 maxpoll 8
+server 1.my.pool.ntp.org iburst minpoll 4 maxpoll 8
+# Cross-Region Inter-Node Peering
+peer 10.100.0.10 maxpoll 6
+peer 10.200.0.10 maxpoll 6
+
+# Panic threshold: step clock if offset > 0.1s during boot; refuse large jumps at runtime
+makestep 0.1 3
+maxupdateskew 100.0
+minsources 3
+
+```
+
+* **Reference:** [Chrony Security & Optimization Guide](https://chrony-project.org/doc/4.5/chrony.conf.html).
+
+### 5.2 Network Tuning: MTU 9000 (Jumbo Frames)
+
+Enable end-to-end Jumbo Frames across the storage switching matrix and inter-node links to reduce CPU interrupt overhead during high-throughput replication.
+
+* **Interface Configuration (`/etc/network/interfaces` on Debian/PVE):**
+
+```ini
+auto bond0
+iface bond0 inet manual
+        bond-slaves eno1 eno2
+        bond-miimon 100
+        bond-mode 802.3ad
+        bond-xmit-hash-policy layer2+3
+        mtu 9000
+
+auto vmbr10
+iface vmbr10 inet static
+        address 10.10.20.50/24
+        bridge-ports bond0
+        bridge-stp off
+        bridge-fd 0
+        mtu 9000
+
+```
+
+* **Reference:** [Proxmox Network Configuration Models](https://www.google.com/search?q=https://pve.proxmox.com/pve-docs/chapter-sysadmin.html%23sysadmin_network_configuration).
+
+### 5.3 Network Ring-Fencing & Dynamic Routing Architecture
+
+* **Interface Ring-Fencing:** Strictly separate management (`corosync`, SSH), storage (`Ceph Public/Cluster`), VM public traffic, and cross-DC WAN fabrics using isolated 802.1Q VLANs and physical NIC isolation.
+* **Corosync Redundancy:** Corosync requires dedicated low-latency physical links. Configure two separate Corosync rings (`ring0_addr` and `ring1_addr`) over distinct networks to prevent split-brain fencing loops.
+* **Reference:** [Corosync Cluster Engine Documentation](https://corosync.github.io/corosync/).
 
 ---
 
 ## 💾 6. Multi-Region Backup Architecture via Proxmox Backup Server (PBS)
 
-To satisfy the **Backup 3-2-1 rule** (3 copies of data, 2 different media, 1 offsite location) across a geodistributed topology, this design implements **Proxmox Backup Server (PBS)** as the core regional and cross-regional backup engine. PBS is a dedicated, enterprise-grade, client-server backup solution written in **Rust** to provide memory safety, high execution speed, and high resource efficiency without garbage collection overheads.
+To satisfy the **Backup 3-2-1 Rule** across a distributed layout, [Proxmox Backup Server (PBS)](https://www.proxmox.com/en/proxmox-backup-server) provides deduplication, client-side encryption, and WAN-optimised replication.
+
+```
+[ Region Alpha: PVE Nodes ]
+        |
+   (Local QEMU Dirty Bitmaps Backup)
+        v
+[ Region Alpha: PBS Local (ZFS Pool) ]
+        |
+   (Cross-Region Pull Sync Job over IPsec)
+        v
+[ Region Beta: PBS Remote Node ]  ======> [ Offsite Cold Tape Vault: LTO-9 / PMTX ]
+
+```
 
 ### 6.1 Core Architectural Pillars of PBS
 
-#### A. Client-Server Architecture & High Performance (Rust-Powered)
-PBS separates backup storage from virtual guests using a secure client-server framework. The entire stack is written in **Rust**, offering thread safety, memory safety, and high-performance throughput.
-*   **Compression**: Backups utilize ultra-fast **Zstandard (ZSTD)** compression, capable of compressing several gigabytes of data per second with exceptional compression ratios, reducing storage footprints.
-*   **Dirty Bitmaps Integration**: For virtual machines running in Proxmox VE, PBS interfaces directly with QEMU dirty bitmaps. This allows the hypervisor to track write operations in real-time, executing **incremental-only backups** by reading and transmitting only modified blocks since the previous run. This reduces backup windows from hours to seconds and lowers WAN utilization.
+#### A. High-Performance Client-Server Engine (Rust-Powered)
 
-#### B. Chunk-Level Deduplication (Variable vs. Fixed Size)
-To eliminate duplicate data produced by recurring daily backups and identical OS templates:
-*   Incoming data streams are split into chunks. PBS supports both **fixed-sized chunking** (ideal for block devices and VM disks) and **variable-sized chunking** (ideal for file archives and directory backups).
-*   Chunks are indexed by their **SHA-256 hash**, and only unique chunks are written to the datastore. Identical blocks across different virtual machines or historical snapshots reference the same physical chunks on disk. This results in massive storage cost reductions.
+* **Zstandard (ZSTD) Compression:** Data blocks are compressed on the hypervisor client using multi-threaded [ZSTD compression](https://facebook.github.io/zstd/), reducing network payload sizes before transfer.
+* **QEMU Dirty Bitmaps Integration:** Hypervisor-native dirty bitmaps track modified storage sectors dynamically. Scheduled backups avoid re-reading unmodified disk areas, shortening backup windows.
+* **Reference:** [Proxmox VE Backup Modes & Bitmaps](https://pve.proxmox.com/pve-docs/chapter-vzdump.html).
+
+#### B. Chunk-Level Deduplication Engine
+
+* **Fixed vs. Variable Chunking:** VM block storage devices are split into uniform fixed-size chunks (typically 4 MiB), while container archives (LXC/file-level) use variable-sized chunking algorithms to preserve alignment across shifted file streams.
+* **Content-Addressable Storage:** Every chunk is assigned an ID based on its SHA-256 cryptographic digest. Repeated chunks across historical snapshots or multiple base VMs are written to disk only once.
+* **Reference:** [PBS Technical Overview & Deduplication](https://pbs.proxmox.com/docs/introduction.html).
 
 #### C. End-to-End Client-Side Encryption
-To maintain absolute privacy and satisfy data sovereignty regulations in multi-tenant or leased environments, PBS enforces **client-side encryption**:
-*   **Galois/Counter Mode (AES-256 GCM)**: Data is encrypted and authenticated *on the client-side* (within the Proxmox VE hypervisor) before it is transmitted over the network. If the backup server's physical storage or the WAN link is compromised, the payload remains unreadable.
-*   **Key Management & Recovery**: Encryption keys are stored securely on the PVE host. Additionally, PVE can configure a <strong>Master Key</strong> (an RSA public/private key pair). The public key is stored alongside the backup and used to securely envelope the encryption key. If a node suffers a total hardware failure, administrators can recover the encryption key using the printed secret key or the private master key.
+
+* **Cryptographic Protocol:** Enforces AES-256 in Galois/Counter Mode (GCM) for combined confidentiality and data authenticity.
+* **Key Architecture & Master Key Escrow:**
+* Hypervisors encrypt chunks locally prior to network transmission.
+* An asymmetric RSA Master Key pair can be used to escrow client keys. The public key encrypts the active backup encryption key alongside the manifest, enabling disaster recovery of backup volumes if a local node is destroyed.
+
+
+* **Reference:** [PBS Encryption & Key Management](https://www.google.com/search?q=https://pbs.proxmox.com/docs/backup-client.html%23encryption).
 
 ### 6.2 Geolocated WAN Synchronization (Remotes & Sync Jobs)
 
-To ensure geographical redundancy and survival of a total site disaster:
-1.  **Local Datastore Execution**: Each region schedules localized daily backups of active VMs, LXC containers, and critical host paths to its on-site PBS appliance (Tier-3 storage backed by local ZFS pools or SSD/HDD arrays).
-2.  **Cross-Region Synchronization**:
-    *   **Remotes Configuration**: PBS Beta is registered as a "Remote" target inside PBS Alpha.
-    *   **Sync Jobs (Pull Strategy)**: On a recurring schedule, PBS Beta initiates a **Sync Job** to pull backup snapshots from PBS Alpha over the low-latency IPsec VPN mesh.
-    *   **Incremental WAN Transfer**: Due to chunk-level hash comparison, only newly created unique chunks that do not exist in the destination datastore are transferred across the WAN. Syncing multi-terabyte virtual environments requires minimal bandwidth.
-    *   **Namespaces**: PBS utilizes **Namespaces** to hierarchically group, isolate, and organize backups. Administrators can mirror namespaces across regions or migrate them cleanly without file collisions.
+```
++---------------------+-------------------------------+--------------------------------------------+
+| Configuration Item  | Parameter Target              | Operational Function                       |
++---------------------+-------------------------------+--------------------------------------------+
+| Remote Endpoint     | `pbs-alpha-remote`            | Connects PBS Beta to PBS Alpha API         |
+| Pull Direction      | PBS Beta (Downstream Pull)    | Destination initiates sync over WAN       |
+| Sync Interval       | Cron: `0 02 * * *` (Daily)    | Synchronises off-peak delta chunks         |
+| Namespace Isolation | `ns/songketmail-core`         | Hierarchical segregation per tenant        |
++---------------------+-------------------------------+--------------------------------------------+
+
+```
+
+* **WAN-Optimised Pull Architecture:** The downstream regional backup appliance (Region Beta or Gamma) pulls newly written chunks from Region Alpha. The pull client matches existing SHA-256 chunk manifests and only transfers missing content over the WAN tunnel.
+* **Namespaces:** Logical partitioning within a single PBS datastore allows tenant isolation and granular retention policies across multi-region boundaries.
+* **Reference:** [PBS Remote Management & Sync Jobs](https://pbs.proxmox.com/docs/managing-remotes.html).
 
 ### 6.3 Anti-Ransomware, Integrity Verification, & Archival
 
 #### A. Ransomware Defense & Datastore Hardening
-*   **Access Control & Realms**: PBS integrates with multiple authentication realms including **Linux PAM** for system users, **OpenID Connect (OIDC)** for centralized Single Sign-On (SSO), and native **Proxmox Backup Server authentication**.
-*   **Fine-Grained Permissions**: Strict Role-Based Access Control (RBAC) ensures backup clients (such as specific PVE clusters) are restricted to API tokens with write-only/append-only permissions (`PVETemplate` or `PBSBackup` roles) and are blocked from deleting historical backups.
-*   **Garbage Collection (GC)**: Instead of immediate deletion, deleted snapshot references are unlinked, and actual disk space is freed later via scheduled Garbage Collection jobs, preventing accidental or malicious data loss.
-*   **Immutable Datastores & Removable Media**: PBS supports removable datastores (e.g., hot-swap external storage) and namespace isolation, allowing physical air-gapping of critical email archives.
+
+* **Append-Only / Granular RBAC API Tokens:** PVE hypervisors access PBS using API tokens bound to restricted roles (`Datastore.Backup` or `Datastore.Audit`), preventing compromised hypervisors from pruning or destroying historical snapshots.
+* **Decoupled Garbage Collection:** Two-phase deletion (phase 1: unmark index; phase 2: sweep sweep unreferenced chunks) prevents race conditions and accidental data purges.
+* **Reference:** [PBS User Access & Permission Management](https://pbs.proxmox.com/docs/user-management.html).
 
 #### B. Silent Data Corruption (Bit Rot) Detection
-*   PBS utilizes a **built-in SHA-256 checksumming verification engine**.
-*   Within each backup snapshot, a manifest file (`index.json`) catalogs all chunk files with their sizes and cryptographic hashes.
-*   Administrators can schedule automatic, recurring **Verification Jobs** to read chunks from the physical disks, recompute their SHA-256 hashes, and compare them against the manifest. This detects bit rot, disk degradation, or silent data corruption early.
+
+* **Automated Verification Jobs:** Background jobs compute read-verifications of chunk pools against manifest checksums (`index.json`) to detect underlying bit rot or silent media degradation.
+* **Reference:** [PBS Verification Jobs](https://www.google.com/search?q=https://pbs.proxmox.com/docs/maintenance.html%23verification).
 
 #### C. Enterprise Tape Backup Integration (LTO)
-For long-term cold archival and compliant offsite storage:
-*   PBS includes a native, modern **Tape Backup System** written in Rust, replacing traditional legacy utilities.
-*   **Hardware Encryption**: Supports standard Linear Tape-Open (LTO-5 or later) drives, media-set cataloging, and automated hardware tape encryption.
-*   **Autoloader Support**: Interoperates with tape autoloaders and tape libraries via the specialized `pmtx` tool.
-*   **LTO Barcode Generator**: Includes an integrated web-based LTO barcode generator to print standard label cartridges for physical vault inventory tracking.
+
+* **Native Rust Tape Subsystem:** Direct support for Linear Tape-Open (LTO-5 through LTO-9) devices without third-party backup layers.
+* **Library Management (`pmtx`):** Integrated autoloader control tool (`pmtx`) handles cartridge swapping, media-set allocation, and hardware encryption workflows.
+* **Reference:** [PBS Tape Backup & Autoloader Integration](https://pbs.proxmox.com/docs/tape-backup.html).
 
 ### 6.4 Low RTO/RPO Disaster Recovery & Restore Stack
 
-When a regional disaster hits Region Alpha, recovering services in Region Beta or Gamma must be near-instantaneous. PBS delivers via two critical mechanisms:
-1.  **Granular File-Level Recovery**:
-    *   Administrators can navigate the catalog file system of any VM or container backup directly from the Proxmox VE web interface.
-    *   Single files, specific directories, or database tables can be restored in a flash without rebuilding or restoring the entire multi-gigabyte virtual disk.
-    *   Interactive recovery shell allows recovery of individual files directly inside the running guest OS.
-2.  **Live-Restore (Instant VM Recovery)**:
-    *   To achieve near-zero **Recovery Time Objective (RTO)**, Proxmox VE can start a virtual machine *immediately* after triggering the restore job.
-    *   The VM boots instantly, and QEMU streams required sectors from the PBS server in real-time as the operating system requests them.
-    *   The remaining disk image is copied in the background. If a sector has not been copied yet but is read by the VM, it gets prioritized and fetched instantly. Users experience zero interruption, even for massive email databases.
+#### A. Granular Single-File Level Recovery
+
+* **Single-File Restore Engine:** Mounts VM image file allocation tables safely within a micro-VM/FUSE environment directly through the PVE GUI/CLI, allowing individual file extraction without restoring entire storage volumes.
+* **Reference:** [PBS File-Level Restore](https://www.google.com/search?q=https://pbs.proxmox.com/docs/backup-client.html%23restore-single-files).
+
+#### B. Live-Restore (Instant VM Boot)
+
+* **Underlying Mechanism:** When triggered via `qmrestore --live-restore 1`, QEMU boots the guest immediately while blocks are continuously streamed in the background.
+* **On-Demand Prioritisation:** If the guest operating system requests an uncopied disk sector, the live-restore block driver prioritises that request in real-time to avoid boot stalls, enabling low RTO recoveries for large database servers.
+* **Reference:** [Proxmox VE Live-Restore Feature Documentation](https://pve.proxmox.com/pve-docs/chapter-vzdump.html#_live_restore).
+
+---
+
+## 📚 Reference Architecture Documentation Index
+
+1. **Hypervisor & Cluster Management:** [Proxmox VE Official Documentation](https://pve.proxmox.com/pve-docs/)
+2. **Enterprise Backup Systems:** [Proxmox Backup Server Documentation](https://pbs.proxmox.com/docs/)
+3. **Enterprise Storage Fabric:** [Ceph Upstream Documentation](https://docs.ceph.com/en/latest/)
+4. **CentOS Storage SIG:** [CentOS SIG Ceph Packaging](https://sigs.centos.org/storage/)
+5. **Database High Availability:** [Percona Distribution for PostgreSQL (Patroni HA)](https://www.google.com/search?q=https://docs.percona.com/postgresql/index.html)
+6. **Network Security & Dynamic Routing:** [FRRouting (FRR) User Manual](https://docs.frrouting.org/en/latest/)
+7. **Security Baseline & WAF:** [BunkerWeb WAF Documentation](https://docs.bunkerweb.io/) & [OpenSCAP Compliance Suite](https://www.open-scap.org/)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-14*
