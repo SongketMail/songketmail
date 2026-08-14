@@ -7,7 +7,6 @@ OKF v0.1, constitution footer, and link standards.
 """
 
 import os
-import re
 import pytest
 
 # --- Test Constants ---
