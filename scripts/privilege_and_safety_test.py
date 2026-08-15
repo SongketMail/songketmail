@@ -381,13 +381,7 @@ def check_safety(priv_info):
     _check_podman_safety(priv_info, issues, warnings, passed)
 
     # Summarize Risk Status
-    risk_level = "LOW_RISK"
-    if any(i["severity"] == "CRITICAL_RISK" for i in issues):
-        risk_level = "CRITICAL_RISK"
-    elif any(i["severity"] == "HIGH_RISK" for i in issues):
-        risk_level = "HIGH_RISK"
-    elif any(i["severity"] == "MEDIUM_RISK" for i in issues):
-        risk_level = "MEDIUM_RISK"
+    risk_level = check_safety_calc_risk(issues)
 
     return {
         "risk_level": risk_level,
@@ -395,6 +389,43 @@ def check_safety(priv_info):
         "warnings": warnings,
         "passed": passed
     }
+
+
+# Mapping of risk severities to numeric ranks for single-pass evaluation
+_SEVERITY_ORDER = {
+    "CRITICAL_RISK": 3,
+    "HIGH_RISK": 2,
+    "MEDIUM_RISK": 1,
+    "LOW_RISK": 0,
+}
+_SEVERITY_NAME = {
+    3: "CRITICAL_RISK",
+    2: "HIGH_RISK",
+    1: "MEDIUM_RISK",
+    0: "LOW_RISK",
+}
+
+
+def check_safety_calc_risk(issues):
+    """Calculates the maximum risk level from a list of issue dictionaries.
+
+    Performs a single-pass traversal over issues with early termination upon
+    encountering a CRITICAL_RISK issue.
+
+    Args:
+        issues (list): List of detected risk issue dicts containing a 'severity' key.
+
+    Returns:
+        str: Maximum risk level ('CRITICAL_RISK', 'HIGH_RISK', 'MEDIUM_RISK', or 'LOW_RISK').
+    """
+    max_rank = 0
+    for issue in issues:
+        rank = _SEVERITY_ORDER.get(issue.get("severity"), 0)
+        if rank > max_rank:
+            max_rank = rank
+            if max_rank == 3:
+                break
+    return _SEVERITY_NAME[max_rank]
 
 
 def print_text_report(priv, safety):
