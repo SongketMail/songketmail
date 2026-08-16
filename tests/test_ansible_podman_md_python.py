@@ -199,6 +199,29 @@ def test_podman_quadlet_keep_id_mapping():
         "skm_pod.pod UserNS should declare explicit UID/GID parameter maps."
 
 
+def test_podman_quadlet_no_hardcoded_passwords():
+    """
+    Verifies that Podman Quadlet container templates do not contain plain-text hardcoded passwords
+    and instead utilize Jinja2 templating variables.
+    """
+    quadlet_files = get_quadlet_files()
+    assert len(quadlet_files) > 0, "No Podman Quadlet template files found."
+
+    password_env_pattern = re.compile(r'Environment=.*PASSWORD=(?!\{\{)(.+)', re.IGNORECASE)
+
+    violations = []
+    for filepath in quadlet_files:
+        if not filepath.endswith('.container'):
+            continue
+        with open(filepath, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                m = password_env_pattern.search(line)
+                if m:
+                    violations.append((filepath, line_num, line.strip()))
+
+    assert len(violations) == 0, f"Found hardcoded passwords in Quadlet container templates: {violations}"
+
+
 # --- 3. Markdown Files (OKF and Footer standards) ---
 
 def test_markdown_okf_standard():
