@@ -9,9 +9,9 @@ Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/postgres/data:/var/lib/postgresql/data:Z
 Environment=TZ=UTC
-Environment=POSTGRES_USER=mail_admin
-Environment=POSTGRES_PASSWORD=super_secure_db_pass
-Environment=POSTGRES_DB=mailserver
+Environment=POSTGRES_USER={{ postgres_user }}
+Environment=POSTGRES_PASSWORD={{ postgres_password }}
+Environment=POSTGRES_DB={{ postgres_db }}
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=db
 
