@@ -37,7 +37,7 @@ topics: [proxmox, ceph, architecture, songketmail, datacentre, security]
 |                                                                                                    |
 |  +-------------------------------------+          +---------------------------------------------+  |
 |  | 100GbE High-Throughput Data Plane   |          | 10GbE Out-of-Band Management Fabric         |  |
-|  | (VM/LXC & Ceph Public/Cluster)      |          | (Proxmox Cluster API, BMC/IPMI, Telemetry)  |  |
+|  | (VM/LXC & Ceph Public/Cluster)      |          | (Proxmox Corosync, BMC/IPMI, Telemetry)     |  |
 |  +-------------------------------------+          +---------------------------------------------+  |
 |                                                                                                    |
 |  +--------------------------- PROXMOX VE HYPERVISOR CLUSTER (PVE) ------------------------------+  |
