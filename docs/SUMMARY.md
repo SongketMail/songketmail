@@ -34,6 +34,7 @@ topics: [summary, index, navigation]
 * [Part 20: Proxmox & Ceph Hyper-Converged Integration](proxmox-ceph-hci.md)
 * [Part 21: Ceph Native Deployment on Ubuntu 26.04 Server LTS](ceph-ubuntu-deployment.md)
 * [Part 22: Geolocated Regional Data Center Design](regional-design-proxmox-ceph.md)
+* [Part 23: Enterprise Kubernetes & Distributed Ceph Architecture](k8s-ceph-design.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*

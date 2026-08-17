@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Kubernetes & Distributed Ceph Architecture Specification — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 23: Enterprise Kubernetes & Distributed Ceph Architecture
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+                    <a href="ceph-ubuntu-deployment.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>21. Ceph Native Deployment</span>
+                    </a>
+                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>22. Geolocated Regional DC</span>
+                    </a>
+                    <a href="k8s-ceph-design.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>☸️</span>
+                        <span>23. Enterprise K8s & Ceph</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight border-b border-slate-100 dark:border-slate-700 pb-4">
+                    Enterprise Kubernetes & Distributed Ceph Architecture Specification
+                </h1>
+
+                <!-- Topology Diagram -->
+                <h2 id="system-topology-data-flow" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                    🗺️ System Topology & Data Flow
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    The following architectural diagram illustrates the end-to-end data flow, ingress traffic control, network segmentation, compute node tiering, distributed Ceph storage pools, and disaster recovery replication links for the SongketMail Enterprise Kubernetes environment.
+                </p>
+
+                <div class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-xs font-mono leading-snug">
+<pre>
++----------------------------------------------------------------------------------------------------+
+|                                    EXTERNAL SYSTEMS INTEGRATION                                    |
+|  +--------------------+  +--------------------+  +---------------------+  +---------------------+  |
+|  | Inbound / Outbound |  | Threat Intel &     |  | Domain Identity &   |  | Cross-Sector IOC   |  |
+|  | SMTP Mail Streams  |  | Reputation Feeds   |  | PKI Registries      |  | & Incident Feeds    |  |
+|  +---------┬----------+  +---------┬----------+  +----------┬----------+  +----------┬----------+  |
++------------│-----------------------│------------------------│------------------------│-------------+
+             └───────────────────────┼────────────────────────┴────────────────────────┘
+                                     │ (mTLS / Encrypted Ingress Stream)
+                                     ▼
++----------------------------------------------------------------------------------------------------+
+|                                   PERIMETER SECURITY & INGRESS                                     |
+|                       [ Boundary Next-Generation Firewall (NGFW) / IPS ]                           |
+|                       [ Redundant Layer 4 / Layer 7 Load Balancers ]                               |
++--------------------------------------------┬-------------------------------------------------------+
+                                             │
+                                             ▼
++----------------------------------------------------------------------------------------------------+
+|                               PRIMARY PRODUCTION DATACENTRE                                        |
+|                                                                                                    |
+|  +-------------------------------------+          +---------------------------------------------+  |
+|  | 100GbE High-Throughput Data Plane   |          | 10GbE Out-of-Band Management Fabric         |  |
+|  | (East-West Container & Ceph Fabric) |          | (Control Plane, BMC/IPMI, Telemetry)        |  |
+|  +-------------------------------------+          +---------------------------------------------+  |
+|                                                                                                    |
+|  +-------------------------------- KUBERNETES COMPUTE FABRIC ---------------------------------+  |
+|  |                                                                                              |  |
+|  |  +---------------------------+  +---------------------------+  +--------------------------+  |  |
+|  |  |   AI / GPU Compute Tier   |  |     Application Tier      |  |    Database / Data Tier  |  |  |
+|  |  | (4x High-Density Nodes)   |  | (4x Microservices Nodes)  |  | (3x Clustered HA Nodes)  |  |  |
+|  |  |  - Deep NLP & BEC Models  |  |  - Mail Routing & Proxies |  |  - Clustered Relational  |  |  |
+|  |  |  - Embedding / Vector DB  |  |  - Microservices Engine   |  |  - Quarantine Metadata   |  |  |
+|  |  |  - Multimodal Attachment  |  |  - Message Queues/Streams |  |  - Audit & Policy Logs   |  |  |
+|  |  |    & Heuristic Inspection |  |  - API Gateway / Ingress  |  |  - State Persistence     |  |  |
+|  |  +-------------┬-------------+  +-------------┬-------------+  +------------┬-------------+  |  |
+|  +----------------│------------------------------│-----------------------------│----------------+  |
+|                   │                              │                             │                   |
+|  +----------------▼------------------------------▼-----------------------------▼----------------+  |
+|  |                          DISTRIBUTED SOFTWARE-DEFINED STORAGE (CEPH)                         |  |
+|  |   [ High-IOPS Vector/Model Pool ]    [ App / Spool Storage Pool ]   [ DB Persistence & Staging ] |  |
+|  +-----------------------------------------------------------------------------┬----------------+  |
+|                                                                                │                   |
+|  +-------------------------------- DATACENTRE INFRASTRUCTURE -----------------│-----------------+  |
+|  |  [ N+1 Modular UPS Fabric ]     [ Automated Backup / Archive ]     [ Security Monitoring ]   |  |
+|  +-----------------------------------------------------------------------------│-----------------+  |
++--------------------------------------------------------------------------------│-------------------+
+                                                                                 │ Dedicated WAN Link
+                                                                                 ▼ (Storage + DB Sync)
++----------------------------------------------------------------------------------------------------+
+|                                  DISASTER RECOVERY (DR) DATACENTRE                                 |
+|  [ 2x AI Compute Nodes ]   [ 2x Application Nodes ]   [ 1x Database Replica ]   [ Ceph Mirror Pool ]|
++----------------------------------------------------------------------------------------------------+
+</pre>
+                </div>
+
+                <!-- Section 1 -->
+                <h2 id="1-ingress-external-integration-perimeter" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    📥 1. Ingress & External Integration Perimeter
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>Inbound & Outbound SMTP Mail Streams:</strong> Ingests real-time ESMTP connection streams, envelope metadata, and raw multi-part MIME payloads across edge Mail Transfer Agents (MTAs). Captures transport-layer telemetry, connection pacing, sender IP addresses, and real-time handshake properties.</li>
+                    <li><strong>Threat Intelligence & Network Reputation Feeds:</strong> Executes synchronous lookups against DNS-based Blackhole Lists (DNSBL/RBL) and custom real-time blocklists. Resolves Forward-Confirmed Reverse DNS (FCrDNS / PTR verification) and correlates Autonomous System Numbers (ASN), BGP route origins, and GeoIP datasets to identify suspicious relays, open proxies, and bulletproof hosting environments.</li>
+                    <li><strong>Domain Identity & PKI Cryptographic Registries:</strong> Queries and validates domain-level authentication frameworks including SPF record flattening/macro evaluation, DKIM cryptographic signature verification (RSA/Ed25519), DMARC policy alignment, and ARC (Authenticated Received Chain) validation. Inspects TLS certificate chains, Certificate Authority (CA) trust hierarchies, CRL/OCSP stapling status, Certificate Transparency (CT) log history, and cryptographic validation via DANE (TLSA) and MTA-STS. Analyses domain metadata for registration age (WHOIS), suspicious nameserver clustering, and lookalike homoglyph/typosquatting mutations.</li>
+                    <li><strong>Cross-Sector IOC & Regulatory Data Feeds:</strong> Pulls automated Indicators of Compromise (IOCs), malicious URL blacklists, known phishing hashes, and compliance blacklists via authenticated REST/gRPC interfaces secured with mutual TLS (mTLS 1.3).</li>
+                </ul>
+
+                <!-- Section 2 -->
+                <h2 id="2-perimeter-security-traffic-routing" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    🛡️ 2. Perimeter Security & Traffic Routing
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>Boundary Firewall & Threat Mitigation:</strong> Upstream edge traffic is filtered through redundant Next-Generation Firewalls (NGFW) executing stateful packet filtering, Intrusion Prevention (IPS), and DDoS volumetric rate limiting.</li>
+                    <li><strong>Load Balancing & TLS Termination:</strong> Redundant Layer 4 / Layer 7 Load Balancers distribute ingress traffic evenly across upstream gateway proxies, managing external TLS termination, rate control, and health probing before routing to internal aggregation switches.</li>
+                </ul>
+
+                <!-- Section 3 -->
+                <h2 id="3-dual-plane-network-fabric" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    🔌 3. Dual-Plane Network Fabric
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>100GbE High-Throughput Data Plane:</strong> High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers.</li>
+                    <li><strong>10GbE Out-of-Band (OOB) Management Plane:</strong> An isolated physical and logical network reserved for control plane communications, IPMI/iDRAC bare-metal orchestration, monitoring telemetry, and administrative access.</li>
+                </ul>
+
+                <!-- Section 4 -->
+                <h2 id="4-clustered-compute-orchestration-tier" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    ⚙️ 4. Clustered Compute & Orchestration Tier
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>AI Accelerator Compute Tier (4 Nodes):</strong>
+                        <ul class="list-circle pl-5 mt-1 space-y-1">
+                            <li><em>Hardware Configuration:</em> Dual enterprise multi-core CPUs, 8x High-Performance Datacentre GPUs, 2TB System RAM per node.</li>
+                            <li><em>Workload Responsibilities:</em> Real-time text tokenisation, dense vector embedding generation, NLP-based Business Email Compromise (BEC) detection, deep semantic intention scoring, attachment heuristic unpacking, and multimodal visual analysis of embedded imagery/PDFs.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Application Services Tier (4 Nodes):</strong>
+                        <ul class="list-circle pl-5 mt-1 space-y-1">
+                            <li><em>Hardware Configuration:</em> Dual multi-core CPUs, 1TB System RAM per node.</li>
+                            <li><em>Workload Responsibilities:</em> Hosts Kubernetes master and worker control planes, core API gateways, SMTP protocol engines, message queue brokers (e.g., Kafka/RabbitMQ), mail policy microservices, and management interfaces.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Database & Stateful Tier (3 Nodes):</strong>
+                        <ul class="list-circle pl-5 mt-1 space-y-1">
+                            <li><em>Hardware Configuration:</em> Dual multi-core CPUs, 512GB System RAM per node.</li>
+                            <li><em>Workload Responsibilities:</em> High-availability relational database cluster (e.g., PostgreSQL with Patroni) and distributed metadata stores. Manages message disposition states, quarantine indices, system configuration matrices, forensic audit logs, and integration metadata.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Section 5 -->
+                <h2 id="5-distributed-software-defined-storage-ceph-sds" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    🗄️ 5. Distributed Software-Defined Storage (Ceph SDS)
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>High-Performance AI Model & Vector Storage Pool:</strong> NVMe-backed low-latency block (RBD) and object pools provisioned for rapid loading of neural network checkpoints, vector indices, and real-time inference scratchpads.</li>
+                    <li><strong>Application Persistent Volume Pool:</strong> Block and CephFS storage pools supplying resilient Persistent Volume Claims (PVCs) for container state, queue spooling, and application configuration caches.</li>
+                    <li><strong>Database & Quarantine Staging Pool:</strong> Dedicated, high-durability storage pools handling relational database write-ahead logs (WAL), transactional tablespaces, and encrypted quarantine staging for suspicious payloads.</li>
+                </ul>
+
+                <!-- Section 6 -->
+                <h2 id="6-datacentre-supporting-infrastructure" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    🏢 6. Datacentre Supporting Infrastructure
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>Uninterruptible Power Supply (UPS):</strong> N+1 redundant modular power architecture ensuring uninterrupted operation and clean power distribution across all compute, storage, and networking chassis.</li>
+                    <li><strong>Backup & Archival Subsystem:</strong> Dedicated backup appliances executing automated, air-gapped, and deduplicated point-in-time snapshots of databases, persistent state, and system configurations.</li>
+                    <li><strong>Integrated Security Monitoring:</strong> Centrally collects host metrics, audit logs, flow records, and network telemetry for comprehensive observability, anomaly alerting, and automated root cause analysis (RCA).</li>
+                </ul>
+
+                <!-- Section 7 -->
+                <h2 id="7-disaster-recovery-dr-site-continuity" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
+                    🔄 7. Disaster Recovery (DR) & Site Continuity
+                </h2>
+                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li><strong>Warm-Standby Target Footprint:</strong> Sized at half capacity (2x AI Nodes, 2x Application Nodes, 1x Database Replica) to sustain essential security filtering and mail stream processing during a primary datacentre outage.</li>
+                    <li><strong>Cross-Site Replication Fabric:</strong> Employs asynchronous block-level Ceph RBD Mirroring over dedicated WAN links alongside database streaming replication to maintain minimal Recovery Point Objectives (RPO) and low Recovery Time Objectives (RTO).</li>
+                </ul>
+
+            </div>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#system-topology-data-flow" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🗺️ System Topology & Data Flow
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#1-ingress-external-integration-perimeter" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📥 1. Ingress & External Integration Perimeter
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-perimeter-security-traffic-routing" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛡️ 2. Perimeter Security & Traffic Routing
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-dual-plane-network-fabric" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔌 3. Dual-Plane Network Fabric
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-clustered-compute-orchestration-tier" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚙️ 4. Clustered Compute & Orchestration Tier
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#5-distributed-software-defined-storage-ceph-sds" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🗄️ 5. Distributed Software-Defined Storage (Ceph SDS)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#6-datacentre-supporting-infrastructure" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏢 6. Datacentre Supporting Infrastructure
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#7-disaster-recovery-dr-site-continuity" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔄 7. Disaster Recovery (DR) & Site Continuity
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 23 ]</span>
+            <span>|</span>
+            <span>[ ORCH: KUBERNETES ]</span>
+            <span>|</span>
+            <span>[ SDS: CEPH_RBD_FS_S3 ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>
