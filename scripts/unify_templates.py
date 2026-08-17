@@ -45,6 +45,7 @@ SIDEBAR_ITEMS = [
     { "href": "ceph-ubuntu-deployment.html", "icon": "📦", "label": "21. Ceph Native Deployment", "section": "research" },
     { "href": "regional-design-proxmox-ceph.html", "icon": "🌐", "label": "22. Geolocated Regional DC", "section": "research" },
     { "href": "k8s-ceph-design.html", "icon": "☸️", "label": "23. Enterprise K8s & Ceph", "section": "research" },
+    { "href": "proxmox-datacenter-architecture.html", "icon": "🖥️", "label": "24. Proxmox VE Datacentre", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -76,6 +77,7 @@ TOPIC_MAP = {
     "ceph-ubuntu-deployment.html": ("[ TOPIC: 21 ]", "[ STORAGE: CEPH_UBUNTU ]", "[ ENG: CEPHADM_TENTACLE ]"),
     "regional-design-proxmox-ceph.html": ("[ TOPIC: 22 ]", "[ ARCH: GEOLOCATED_DC ]", "[ OS: ALMALINUX_9 ]"),
     "k8s-ceph-design.html": ("[ TOPIC: 23 ]", "[ ORCH: KUBERNETES ]", "[ SDS: CEPH_RBD_FS_S3 ]"),
+    "proxmox-datacenter-architecture.html": ("[ TOPIC: 24 ]", "[ ORCH: PROXMOX_VE ]", "[ SDS: CEPH_HCI ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -105,6 +107,7 @@ SUBTITLE_MAP = {
     "ceph-ubuntu-deployment.html": "Deep Research // Topic 21: Ceph Native Deployment on Ubuntu 26.04 Server LTS",
     "regional-design-proxmox-ceph.html": "Deep Research // Topic 22: Geolocated Regional Proxmox & Ceph Data Center Design",
     "k8s-ceph-design.html": "Deep Research // Topic 23: Enterprise Kubernetes & Distributed Ceph Architecture",
+    "proxmox-datacenter-architecture.html": "Deep Research // Topic 24: Proxmox VE Enterprise Datacentre Architecture",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
