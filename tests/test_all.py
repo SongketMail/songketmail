@@ -669,3 +669,196 @@ def test_proxmox_datacenter_architecture_html_content():
 
     # Verify TOC sidebar link
     assert 'href="#1-ingress-external-integration-perimeter"' in content
+
+
+# --- Test Group 11: Topic 24 (Proxmox VE Datacentre) Navigation Rollout Verification ---
+
+@pytest.mark.parametrize("html_filepath", get_all_html_files())
+def test_topic_24_nav_link_present_in_all_html_pages(html_filepath):
+    """Verifies that every HTML page's left sidebar links to the new Topic 24 page.
+
+    This PR rolled out a new sidebar entry ("24. Proxmox VE Datacentre") across
+    every unified page in docs/, so every HTML file must reference it.
+    """
+    with open(html_filepath, "r", encoding="utf-8", errors="ignore") as f:
+        content = f.read()
+
+    assert 'href="proxmox-datacenter-architecture.html"' in content, (
+        f"{html_filepath} is missing the sidebar link to proxmox-datacenter-architecture.html"
+    )
+    assert "24. Proxmox VE Datacentre" in content, (
+        f"{html_filepath} is missing the '24. Proxmox VE Datacentre' sidebar label"
+    )
+    assert "🖥️" in content, f"{html_filepath} is missing the Topic 24 sidebar icon"
+
+
+def test_topic_24_nav_link_self_highlighted_only_on_own_page():
+    """Verifies the Topic 24 sidebar entry is only rendered as 'active' on its own page.
+
+    Every other page must render the Topic 24 link using the standard (non-highlighted)
+    hover styling, matching the existing convention used by prior topics.
+    """
+    active_snippet = (
+        'href="proxmox-datacenter-architecture.html" class="flex items-center '
+        'space-x-2 px-3 py-2 rounded-lg bg-violet-50'
+    )
+    inactive_snippet = (
+        'href="proxmox-datacenter-architecture.html" class="flex items-center '
+        'space-x-2 px-3 py-2 rounded-lg text-slate-600'
+    )
+
+    for html_filepath in get_all_html_files():
+        with open(html_filepath, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+
+        if os.path.basename(html_filepath) == "proxmox-datacenter-architecture.html":
+            assert active_snippet in content, (
+                f"{html_filepath} should render its own Topic 24 nav entry as active"
+            )
+            assert inactive_snippet not in content
+        else:
+            assert inactive_snippet in content, (
+                f"{html_filepath} should render the Topic 24 nav entry with standard styling"
+            )
+            assert active_snippet not in content, (
+                f"{html_filepath} incorrectly highlights the Topic 24 nav entry as active"
+            )
+
+
+def test_summary_md_lists_part_24():
+    """Verifies docs/SUMMARY.md references Part 24 with the correct title and link target,
+    positioned immediately after Part 23."""
+    summary_file = "docs/SUMMARY.md"
+    assert os.path.exists(summary_file), f"File {summary_file} must exist."
+
+    with open(summary_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    expected_line = "* [Part 24: Proxmox VE Enterprise Datacentre Architecture](proxmox-datacenter-architecture.md)"
+    assert expected_line in content
+
+    idx_23 = content.index("Part 23")
+    idx_24 = content.index("Part 24")
+    assert idx_23 < idx_24, "Part 24 should be listed after Part 23 in docs/SUMMARY.md"
+
+
+def test_index_md_lists_item_24():
+    """Verifies docs/index.md references item 24 with the correct title and link target,
+    positioned immediately after item 23."""
+    index_file = "docs/index.md"
+    assert os.path.exists(index_file), f"File {index_file} must exist."
+
+    with open(index_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    expected_line = "24. [Proxmox VE Enterprise Datacentre Architecture](proxmox-datacenter-architecture.md)"
+    assert expected_line in content
+
+    idx_23 = content.index("23. [Enterprise Kubernetes")
+    idx_24 = content.index("24. [Proxmox VE Enterprise Datacentre")
+    assert idx_23 < idx_24, "Item 24 should be listed after item 23 in docs/index.md"
+
+
+# --- Test Group 12: scripts/unify_templates.py Topic 24 Registration Verification ---
+
+def test_unify_templates_sidebar_items_contains_proxmox_datacenter_entry():
+    """Verifies the SIDEBAR_ITEMS registry contains exactly one Topic 24 entry with the
+    expected icon, label, and section, positioned immediately after Topic 23."""
+    from scripts import unify_templates
+
+    matches = [
+        item for item in unify_templates.SIDEBAR_ITEMS
+        if item.get("href") == "proxmox-datacenter-architecture.html"
+    ]
+    assert len(matches) == 1, "Expected exactly one Topic 24 SIDEBAR_ITEMS entry"
+
+    entry = matches[0]
+    assert entry["icon"] == "🖥️"
+    assert entry["label"] == "24. Proxmox VE Datacentre"
+    assert entry["section"] == "research"
+
+    hrefs = [item["href"] for item in unify_templates.SIDEBAR_ITEMS if "href" in item]
+    assert hrefs.index("proxmox-datacenter-architecture.html") == hrefs.index("k8s-ceph-design.html") + 1, (
+        "Topic 24 sidebar entry should immediately follow Topic 23 (k8s-ceph-design.html)"
+    )
+
+
+def test_unify_templates_topic_map_registration():
+    """Verifies TOPIC_MAP registers the correct footer badge pills for Topic 24."""
+    from scripts import unify_templates
+
+    assert unify_templates.TOPIC_MAP["proxmox-datacenter-architecture.html"] == (
+        "[ TOPIC: 24 ]", "[ ORCH: PROXMOX_VE ]", "[ SDS: CEPH_HCI ]"
+    )
+
+
+def test_unify_templates_subtitle_map_registration():
+    """Verifies SUBTITLE_MAP registers the correct header subtitle string for Topic 24."""
+    from scripts import unify_templates
+
+    assert unify_templates.SUBTITLE_MAP["proxmox-datacenter-architecture.html"] == (
+        "Deep Research // Topic 24: Proxmox VE Enterprise Datacentre Architecture"
+    )
+
+
+def test_make_sidebar_highlights_active_proxmox_datacenter_page():
+    """Verifies make_sidebar() renders exactly one highlighted (active) entry when
+    proxmox-datacenter-architecture.html is the active page, and that it is the
+    Topic 24 entry itself."""
+    from scripts import unify_templates
+
+    sidebar_html = unify_templates.make_sidebar("proxmox-datacenter-architecture.html")
+
+    assert (
+        'href="proxmox-datacenter-architecture.html" class="flex items-center '
+        'space-x-2 px-3 py-2 rounded-lg bg-violet-50'
+    ) in sidebar_html
+    assert sidebar_html.count("bg-violet-50") == 1, "Exactly one sidebar entry should be highlighted as active"
+
+
+def test_make_sidebar_does_not_highlight_proxmox_datacenter_on_other_pages():
+    """Verifies make_sidebar() renders the Topic 24 entry with standard (non-active)
+    styling whenever a different page is active."""
+    from scripts import unify_templates
+
+    sidebar_html = unify_templates.make_sidebar("index.html")
+
+    assert (
+        'href="proxmox-datacenter-architecture.html" class="flex items-center '
+        'space-x-2 px-3 py-2 rounded-lg text-slate-600'
+    ) in sidebar_html
+    assert (
+        'href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50'
+    ) in sidebar_html
+    assert sidebar_html.count("bg-violet-50") == 1, "Exactly one sidebar entry should be highlighted as active"
+
+
+def test_build_unified_html_embeds_topic_24_footer_pills_and_subtitle():
+    """Verifies build_unified_html() correctly wires the new Topic 24 registrations
+    (TOPIC_MAP footer pills and SUBTITLE_MAP header subtitle) into the final page."""
+    from scripts import unify_templates
+
+    html_output = unify_templates.build_unified_html(
+        "proxmox-datacenter-architecture.html", {}, "<article></article>", ""
+    )
+
+    assert "[ TOPIC: 24 ]" in html_output
+    assert "[ ORCH: PROXMOX_VE ]" in html_output
+    assert "[ SDS: CEPH_HCI ]" in html_output
+    assert "Deep Research // Topic 24: Proxmox VE Enterprise Datacentre Architecture" in html_output
+
+
+def test_build_unified_html_falls_back_for_unregistered_filename():
+    """Regression/negative check: build_unified_html() must fall back to the default
+    footer pills and subtitle for a filename that is not registered in TOPIC_MAP or
+    SUBTITLE_MAP, rather than raising a KeyError or leaking Topic 24 content."""
+    from scripts import unify_templates
+
+    html_output = unify_templates.build_unified_html(
+        "some-unregistered-page.html", {}, "<article></article>", ""
+    )
+
+    assert "[ TOPIC: 24 ]" not in html_output
+    assert "Deep Research // Topic 24" not in html_output
+    assert "[ REL: 5.0.0 ]" in html_output
+    assert "SECURE EMAIL SERVER FABRIC // PODMAN 5+ & SYSTEMD QUADLET" in html_output
