@@ -18,7 +18,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 44 Markdown (.md) files in the repository."""
+    """
+    Collects Markdown files from the repository.
+    
+    Returns:
+        list[str]: Sorted, deduplicated paths to the 44 Markdown files.
+    """
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -32,7 +37,12 @@ def get_all_markdown_files():
 
 
 def get_all_html_files():
-    """Retrieves all 26 HTML (.html) files in the docs/ directory."""
+    """
+    Collect all unique HTML files in the repository.
+    
+    Returns:
+        list[str]: Sorted paths to the 26 HTML files found.
+    """
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
