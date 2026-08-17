@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 42 Markdown (.md) files in the repository."""
+    """Retrieves all 43 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 42, f"Expected 42 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 43, f"Expected 43 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 24 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 25 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +41,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 24, f"Expected 24 HTML files, found {len(html_files)}"
+    assert len(html_files) == 25, f"Expected 25 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -557,3 +557,54 @@ def test_proxmox_ceph_hci_deployment_flow_html_content():
     assert 'id="stage-4-cross-cluster-integration"' in content
     assert 'id="stage-5-rigorous-validation-stress-testing"' in content
     assert 'id="stage-6-documentation-uat-handover"' in content
+
+
+# --- Test Group 9: Kubernetes & Distributed Ceph Architecture Content Verification ---
+
+def test_k8s_ceph_design_markdown_content():
+    """Verifies that docs/k8s-ceph-design.md exists and contains all required architectural sections."""
+    md_file = "docs/k8s-ceph-design.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    with open(md_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify OKF frontmatter
+    assert content.startswith("---")
+    assert "okf_version: 0.1" in content or "okf_version: '0.1'" in content or 'okf_version: "0.1"' in content
+    assert "kubernetes" in content.lower()
+    assert "ceph" in content.lower()
+
+    # Verify required 7 architectural tiers and sections
+    assert "System Topology & Data Flow" in content
+    assert "1. Ingress & External Integration Perimeter" in content
+    assert "2. Perimeter Security & Traffic Routing" in content
+    assert "3. Dual-Plane Network Fabric" in content
+    assert "4. Clustered Compute & Orchestration Tier" in content
+    assert "5. Distributed Software-Defined Storage (Ceph SDS)" in content
+    assert "6. Datacentre Supporting Infrastructure" in content
+    assert "7. Disaster Recovery (DR) & Site Continuity" in content
+
+    # Verify DSOM footer
+    assert "Harisfazillah Jamel" in content
+    assert "LinuxMalaysia" in content
+    assert "DSOM" in content
+
+
+def test_k8s_ceph_design_html_content():
+    """Verifies that docs/k8s-ceph-design.html exists and is unified with Table of Contents and anchors."""
+    html_file = "docs/k8s-ceph-design.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Verify unified template center column marker and anchors
+    assert "<!-- Column 2: Center Main Content Area" in content
+    assert 'id="1-ingress-external-integration-perimeter"' in content
+    assert 'id="4-clustered-compute-orchestration-tier"' in content
+    assert 'id="5-distributed-software-defined-storage-ceph-sds"' in content
+    assert 'id="7-disaster-recovery-dr-site-continuity"' in content
+
+    # Verify TOC sidebar link
+    assert 'href="#1-ingress-external-integration-perimeter"' in content

@@ -70,6 +70,10 @@ Explore our interactive and interconnected deep research topics:
 16. [Ansible Configuration Review and Adoption Assessment](ANSIBLE-ADOPTION-REVIEW.md)
 17. [Mail Web Application Ingress Verification](mail-web-app-verification.md)
 18. [Ansible Playbook and Related Documents Map](ansible-playbook-map.md)
+20. [Proxmox and Ceph Hyper-Converged Integration](proxmox-ceph-hci.md)
+21. [Ceph Native Deployment on Ubuntu 26.04 Server LTS](ceph-ubuntu-deployment.md)
+22. [Geolocated Regional Data Center Design](regional-design-proxmox-ceph.md)
+23. [Enterprise Kubernetes & Distributed Ceph Architecture](k8s-ceph-design.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
