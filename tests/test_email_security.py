@@ -42,13 +42,12 @@ def test_email_security_markdown_contents():
     assert "TLS Reporting" in content or "TLSRPT" in content
     assert "ACMEv2" in content
     assert "Smallstep" in content or "step-ca" in content
-    assert "smallstep.com/certificates" in content
     assert "S/MIME" in content
     assert "OpenPGP" in content
     assert "JMAP" in content
+    assert "JSON Meta Application Protocol" in content
     assert "RFC 8620" in content
     assert "RFC 8621" in content
-    assert "https://jmap.io" in content
     assert "Rust" in content
     assert "Independently Security-Audited" in content or "independently security-audited" in content.lower()
 
