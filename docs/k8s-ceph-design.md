@@ -271,7 +271,7 @@ Before deploying cluster nodes, generate cryptographically secure 256-bit secret
 ```bash
 openssl rand -hex 32
 ```
-Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories. If a token is exposed or compromised prior to deployment, rotate the token immediately using `rke2 token rotate` or updating `/etc/rancher/k3s/config.yaml`.
+Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories. If a token is exposed or compromised prior to or during deployment, rotate the token immediately using `rke2 token rotate` or `k3s token rotate`, followed by reconfiguring and restarting all affected nodes (`systemctl restart rke2-server` / `systemctl restart k3s`).
 
 #### A. Installing & Configuring RKE2 Production Cluster
 
@@ -327,7 +327,7 @@ Create `/etc/rancher/rke2/config.yaml` on agent nodes:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
 server: "https://10.200.10.10:9345"
-token: "<GENERATE_SECURE_RKE2_TOKEN>"
+token: "<GENERATE_SECURE_RKE2_AGENT_TOKEN>"
 node-label:
   - "songketmail.io/tier=ai-compute"  # (Adjust label per tier: application / database)
 ```
@@ -371,6 +371,9 @@ Create `/etc/rancher/k3s/config.yaml` on `k3s-mgmt-02` and `k3s-mgmt-03`:
 # /etc/rancher/k3s/config.yaml (Join HA Control Plane)
 server: "https://10.200.20.10:6443"
 token: "<GENERATE_SECURE_K3S_TOKEN>"
+tls-san:
+  - "10.200.20.10"
+  - "k3s-mgmt.songketmail.internal"
 write-kubeconfig-mode: "0600"
 disable:
   - servicelb
@@ -386,7 +389,7 @@ sudo systemctl enable --now k3s.service
 ##### Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)
 Execute agent registration CLI command on `k3s-worker-01` and `k3s-worker-02`:
 ```bash
-curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="<GENERATE_SECURE_K3S_TOKEN>" sh -
+curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="<GENERATE_SECURE_K3S_AGENT_TOKEN>" sh -
 sudo systemctl enable --now k3s-agent.service
 ```
 
