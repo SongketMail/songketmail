@@ -2,10 +2,10 @@
 okf_version: 0.1
 type: documentation
 title: "Enterprise Kubernetes & Distributed Ceph Architecture Specification"
-description: "A comprehensive technical specification for SongketMail Kubernetes compute fabric integrated with distributed software-defined storage (Ceph)."
+description: "A comprehensive technical specification for SongketMail Kubernetes compute fabric (RKE2 & K3s) integrated with distributed software-defined storage (Ceph)."
 resource: "file:///docs/k8s-ceph-design.md"
 timestamp: 2026-08-20T12:00:00Z
-topics: [kubernetes, ceph, architecture, container, songketmail]
+topics: [kubernetes, rke2, k3s, ceph, architecture, container, songketmail]
 ---
 
 # Enterprise Kubernetes & Distributed Ceph Architecture Specification
@@ -43,18 +43,24 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 |  +-------------------------------------+          +---------------------------------------------+  |
 |                                                                                                    |
 |  +-------------------------------- KUBERNETES COMPUTE FABRIC ---------------------------------+  |
-|  |                                                                                              |  |
-|  |  +---------------------------+  +---------------------------+  +--------------------------+  |  |
-|  |  |   AI / GPU Compute Tier   |  |     Application Tier      |  |    Database / Data Tier  |  |  |
-|  |  | (4x High-Density Nodes)   |  | (4x Microservices Nodes)  |  | (3x Clustered HA Nodes)  |  |  |
-|  |  |  - Deep NLP & BEC Models  |  |  - Mail Routing & Proxies |  |  - Clustered Relational  |  |  |
-|  |  |  - Embedding / Vector DB  |  |  - Microservices Engine   |  |  - Quarantine Metadata   |  |  |
-|  |  |  - Multimodal Attachment  |  |  - Message Queues/Streams |  |  - Audit & Policy Logs   |  |  |
-|  |  |    & Heuristic Inspection |  |  - API Gateway / Ingress  |  |  - State Persistence     |  |  |
-|  |  +-------------┬-------------+  +-------------┬-------------+  +------------┬-------------+  |  |
-|  +----------------│------------------------------│-----------------------------│----------------+  |
-|                   │                              │                             │                   |
-|  +----------------▼------------------------------▼-----------------------------▼----------------+  |
+|  |  [ MAIN PRODUCTION RKE2 CLUSTER ]               [ SUPPORTING SERVICES K3S CLUSTER ]          |  |
+|  |  +---------------------------+                  +------------------------------------------+  |  |
+|  |  |   AI / GPU Compute Tier   |                  |   Management / Observability Stack       |  |  |
+|  |  | (4x High-Density Nodes)   |                  |   (3x HA Control Plane, 2x Worker Nodes)  |  |  |
+|  |  |  - Deep NLP & BEC Models  |                  |  - Prometheus & Grafana Monitoring       |  |  |
+|  |  |  - Embedding / Vector DB  |                  |  - Loki Log Aggregation Engine            |  |  |
+|  |  |  - Multimodal Inspection  |                  |  - HashiCorp Vault Secret Management     |  |  |
+|  |  +-------------┬-------------+                  |  - CI/CD Deployment & Admin Dashboards   |  |  |
+|  |  +-------------┴-------------+                  +------------------------------------------+  |  |
+|  |  |     Application Tier      |                                                                |  |
+|  |  | (4x Microservices Nodes)  |                  +------------------------------------------+  |  |
+|  |  |  - Mail Routing & Proxies |                  |    Database / Data Persistence Tier      |  |  |
+|  |  |  - Microservices Engine   |                  |    (3x Clustered HA PostgreSQL Nodes)     |  |  |
+|  |  |  - Message Queues/Streams |                  |  - Clustered Relational & Spool Metadata  |  |  |
+|  |  +-------------┬-------------+                  +---------------------+--------------------+  |  |
+|  +----------------│-----------------------------------------------------│---------------------+  |
+|                   │                                                     │                        |
+|  +----------------▼-----------------------------------------------------▼---------------------+  |
 |  |                          DISTRIBUTED SOFTWARE-DEFINED STORAGE (CEPH)                         |  |
 |  |   [ High-IOPS Vector/Model Pool ]    [ App / Spool Storage Pool ]   [ DB Persistence & Staging ] |  |
 |  +-----------------------------------------------------------------------------┬----------------+  |
@@ -103,7 +109,7 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 ## 🔌 3. Dual-Plane Network Fabric
 
 * **100GbE High-Throughput Data Plane:** High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers.
-* **10GbE Out-of-Band (OOB) Management Plane:** An isolated physical and logical network reserved for control plane communications, IPMI/iDRAC bare-metal orchestration, monitoring telemetry, and administrative access.
+* **100GbE / 10GbE Out-of-Band (OOB) Management Fabric:** An isolated physical and logical network reserved for control plane communications, IPMI/iDRAC bare-metal orchestration, monitoring telemetry, and administrative access.
 
 ---
 
@@ -143,6 +149,257 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 
 * **Warm-Standby Target Footprint:** Sized at half capacity (2x AI Nodes, 2x Application Nodes, 1x Database Replica) to sustain essential security filtering and mail stream processing during a primary datacentre outage.
 * **Cross-Site Replication Fabric:** Employs asynchronous block-level Ceph RBD Mirroring over dedicated WAN links alongside database streaming replication to maintain minimal Recovery Point Objectives (RPO) and low Recovery Time Objectives (RTO).
+
+---
+
+## ☸️ 8. Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)
+
+To guarantee zero vendor lock-in, complete operational autonomy, and strict enterprise security standards, SongketMail divides its container orchestration into **two distinct open-source Kubernetes clusters**:
+
+1. **Main Production Cluster (Very Big):** Built using **RKE2 (Rancher Kubernetes Engine 2)** — a CNCF-certified, security-hardened enterprise Kubernetes distribution that combines `k3s` operational simplicity with `MKE/RKE` enterprise compliance (FIPS 140-2, CIS Benchmark compliance, containerd runtime, and SELinux/AppArmor enforcement).
+2. **Supporting Services Cluster (Small):** Built using **K3s** — a lightweight, CNCF-certified Kubernetes distribution optimized for low-resource footprints, edge operations, and management utilities.
+
+```
++-------------------------------------------------------------------------------------------------------------+
+|                                    SONGKETMAIL DUAL KUBERNETES FABRIC                                       |
++----------------------------------------------------+--------------------------------------------------------+
+|  CLUSTER 1: RKE2 MAIN PRODUCTION (14 NODES)        |  CLUSTER 2: K3S SUPPORTING SERVICES (5 NODES)          |
++----------------------------------------------------+--------------------------------------------------------+
+|  - 3x Control Plane / Server Nodes (HA etcd)       |  - 3x Control Plane / Server Nodes (HA embedded etcd)  |
+|  - 4x AI / GPU Acceleration Compute Worker Nodes   |  - 2x Dedicated Worker / Agent Nodes                   |
+|  - 4x Application / Microservices Worker Nodes     |  - Core Observability: Prometheus, Grafana, Loki       |
+|  - 3x Database & High-IOPS Stateful Worker Nodes   |  - Centralized Vault Secrets & Internal DNS/CI-CD      |
++----------------------------------------------------+--------------------------------------------------------+
+```
+
+---
+
+### 8.1 Cluster Topology & Node Allocation Matrix
+
+#### Cluster A: RKE2 Main Production Cluster (14 Nodes - Very Big)
+
+| Hostname | Role | IP Address (Data Plane) | OS Target | Hardware Specs | Configuration File Path | Primary Workload |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `rke2-cp-01` | Server / CP 1 | `10.200.10.11` | Ubuntu 26.04 LTS / Alma 9.6 | 16 vCPU, 64GB RAM, 200GB NVMe | `/etc/rancher/rke2/config.yaml` | Kubernetes Control Plane, etcd Member 1 |
+| `rke2-cp-02` | Server / CP 2 | `10.200.10.12` | Ubuntu 26.04 LTS / Alma 9.6 | 16 vCPU, 64GB RAM, 200GB NVMe | `/etc/rancher/rke2/config.yaml` | Kubernetes Control Plane, etcd Member 2 |
+| `rke2-cp-03` | Server / CP 3 | `10.200.10.13` | Ubuntu 26.04 LTS / Alma 9.6 | 16 vCPU, 64GB RAM, 200GB NVMe | `/etc/rancher/rke2/config.yaml` | Kubernetes Control Plane, etcd Member 3 |
+| `rke2-worker-ai-01` | Worker / AI 1 | `10.200.10.21` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Real-Time NLP, BEC Embedding & Inspection |
+| `rke2-worker-ai-02` | Worker / AI 2 | `10.200.10.22` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Real-Time NLP, BEC Embedding & Inspection |
+| `rke2-worker-ai-03` | Worker / AI 3 | `10.200.10.23` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Multimodal OCR, Attachment Heuristics |
+| `rke2-worker-ai-04` | Worker / AI 4 | `10.200.10.24` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Multimodal OCR, Attachment Heuristics |
+| `rke2-worker-app-01`| Worker / App 1| `10.200.10.31` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | SMTP Ingress Proxies, Ingress-Nginx |
+| `rke2-worker-app-02`| Worker / App 2| `10.200.10.32` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | SMTP Outbound Engine, Queue Processing |
+| `rke2-worker-app-03`| Worker / App 3| `10.200.10.33` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | Mail Policy Microservices, Webmail API |
+| `rke2-worker-app-04`| Worker / App 4| `10.200.10.34` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | Kafka / RabbitMQ Streams, Redis Cache |
+| `rke2-worker-db-01` | Worker / DB 1 | `10.200.10.41` | Ubuntu 26.04 LTS / Alma 9.6 | 32 vCPU, 512GB RAM, 4x 3.2TB NVMe | `/etc/rancher/rke2/config.yaml` | PostgreSQL Patroni Node 1, Ceph OSD |
+| `rke2-worker-db-02` | Worker / DB 2 | `10.200.10.42` | Ubuntu 26.04 LTS / Alma 9.6 | 32 vCPU, 512GB RAM, 4x 3.2TB NVMe | `/etc/rancher/rke2/config.yaml` | PostgreSQL Patroni Node 2, Ceph OSD |
+| `rke2-worker-db-03` | Worker / DB 3 | `10.200.10.43` | Ubuntu 26.04 LTS / Alma 9.6 | 32 vCPU, 512GB RAM, 4x 3.2TB NVMe | `/etc/rancher/rke2/config.yaml` | PostgreSQL Patroni Node 3, Ceph OSD |
+
+#### Cluster B: K3s Supporting Services Cluster (5 Nodes - Small)
+
+| Hostname | Role | IP Address (Management) | OS Target | Hardware Specs | Configuration File Path | Primary Workload |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `k3s-mgmt-01` | Server / CP 1 | `10.200.20.11` | Ubuntu 26.04 LTS / Alma 9.6 | 8 vCPU, 32GB RAM, 100GB SSD | `/etc/rancher/k3s/config.yaml` | K3s Control Plane, Embedded etcd |
+| `k3s-mgmt-02` | Server / CP 2 | `10.200.20.12` | Ubuntu 26.04 LTS / Alma 9.6 | 8 vCPU, 32GB RAM, 100GB SSD | `/etc/rancher/k3s/config.yaml` | K3s Control Plane, Embedded etcd |
+| `k3s-mgmt-03` | Server / CP 3 | `10.200.20.13` | Ubuntu 26.04 LTS / Alma 9.6 | 8 vCPU, 32GB RAM, 100GB SSD | `/etc/rancher/k3s/config.yaml` | K3s Control Plane, Embedded etcd |
+| `k3s-worker-01` | Agent / Worker| `10.200.20.21` | Ubuntu 26.04 LTS / Alma 9.6 | 16 vCPU, 64GB RAM, 500GB SSD | `/etc/rancher/k3s/config.yaml` | Prometheus, Grafana, Loki Stack |
+| `k3s-worker-02` | Agent / Worker| `10.200.20.22` | Ubuntu 26.04 LTS / Alma 9.6 | 16 vCPU, 64GB RAM, 500GB SSD | `/etc/rancher/k3s/config.yaml` | HashiCorp Vault, CI/CD Runners, DNS |
+
+---
+
+### 8.2 Open-Source Core Software Stack
+
+To eliminate proprietary dependencies and avoid vendor lock-in, the entire orchestration ecosystem leverages standard, CNCF-maintained open-source software:
+
+* **Kubernetes Engines:**
+  * **RKE2 (v1.30+):** Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.
+  * **K3s (v1.30+):** High-efficiency distribution for management cluster workloads.
+* **Container Network Interface (CNI):**
+  * **Cilium (v1.15+):** eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead.
+* **Container Storage Interface (CSI):**
+  * **Ceph CSI (v3.10+):** Direct block (`rbd.csi.ceph.com`) and filesystem (`cephfs.csi.ceph.com`) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.
+  * **Longhorn (v1.6+):** Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.
+* **Ingress & Edge Traffic Management:**
+  * **Ingress-Nginx Controller (v1.10+):** Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination.
+  * **MetalLB (v0.14+):** Bare-metal load balancer providing `LoadBalancer` type IP allocation over Layer 2 ARP / BGP.
+* **Certificate & Secret Management:**
+  * **Cert-Manager (v1.14+):** Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.
+  * **HashiCorp Vault (Open Source Edition):** Centralized secrets engine with K8s Service Account auth.
+
+---
+
+### 8.3 Node System Prerequisites & Host Preparation
+
+Before installing RKE2 or K3s, all Linux nodes must execute the following kernel and sysctl tuning configuration:
+
+#### 1. Load Required Kernel Modules (`/etc/modules-load.d/k8s.conf`)
+```bash
+sudo tee /etc/modules-load.d/k8s.conf <<EOF
+overlay
+br_netfilter
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+nf_conntrack
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+```
+
+#### 2. Configure System Control Parameters (`/etc/sysctl.d/99-kubernetes.conf`)
+```bash
+sudo tee /etc/sysctl.d/99-kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+net.ipv4.ip_unprivileged_port_start = 25
+vm.max_map_count                    = 262144
+fs.file-max                         = 2097152
+EOF
+
+sudo sysctl --system
+```
+
+---
+
+### 8.4 Step-by-Step Installation & Configuration Guide
+
+#### A. Installing & Configuring RKE2 Production Cluster
+
+##### Step 1: Configure Primary Control Plane Node (`rke2-cp-01`)
+Create `/etc/rancher/rke2/config.yaml`:
+```yaml
+# /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
+token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+tls-san:
+  - "10.200.10.10"
+  - "rke2-cp-01.songketmail.internal"
+  - "rke2-vip.songketmail.internal"
+cni:
+  - cilium
+write-kubeconfig-mode: "0600"
+etcd-expose-metrics: true
+disable:
+  - rke2-ingress-nginx
+```
+
+Execute installation CLI commands on `rke2-cp-01`:
+```bash
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-server.service
+```
+
+##### Step 2: Configure Additional Control Plane Nodes (`rke2-cp-02` & `rke2-cp-03`)
+Create `/etc/rancher/rke2/config.yaml` on `rke2-cp-02` and `rke2-cp-03`:
+```yaml
+# /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
+server: "https://10.200.10.11:9345"
+token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+tls-san:
+  - "10.200.10.10"
+  - "rke2-vip.songketmail.internal"
+cni:
+  - cilium
+write-kubeconfig-mode: "0600"
+disable:
+  - rke2-ingress-nginx
+```
+
+Enable systemd service on `rke2-cp-02` and `rke2-cp-03`:
+```bash
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-server.service
+```
+
+##### Step 3: Configure Worker / Agent Nodes (`rke2-worker-ai-*`, `rke2-worker-app-*`, `rke2-worker-db-*`)
+Create `/etc/rancher/rke2/config.yaml` on agent nodes:
+```yaml
+# /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
+server: "https://10.200.10.11:9345"
+token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+node-label:
+  - "songketmail.io/tier=ai-compute"  # (Adjust label per tier: application / database)
+```
+
+Enable systemd agent service on worker nodes:
+```bash
+curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-agent.service
+```
+
+---
+
+#### B. Installing & Configuring K3s Supporting Services Cluster
+
+##### Step 1: Configure Primary K3s Control Plane Node (`k3s-mgmt-01`)
+Create `/etc/rancher/k3s/config.yaml`:
+```yaml
+# /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
+cluster-init: true
+token: "SongketMail-K3s-MgmtToken-2026-Secret"
+tls-san:
+  - "10.200.20.10"
+  - "k3s-mgmt.songketmail.internal"
+write-kubeconfig-mode: "0600"
+disable:
+  - servicelb
+  - traefik
+```
+
+Execute installation CLI commands on `k3s-mgmt-01`:
+```bash
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.30" sh -
+sudo systemctl enable --now k3s.service
+```
+
+##### Step 2: Join Additional K3s Control Plane Nodes (`k3s-mgmt-02` & `k3s-mgmt-03`)
+Create `/etc/rancher/k3s/config.yaml` on `k3s-mgmt-02` and `k3s-mgmt-03`:
+```yaml
+# /etc/rancher/k3s/config.yaml (Join HA Control Plane)
+server: "https://10.200.20.11:6443"
+token: "SongketMail-K3s-MgmtToken-2026-Secret"
+write-kubeconfig-mode: "0600"
+disable:
+  - servicelb
+  - traefik
+```
+
+Enable systemd service:
+```bash
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.30" sh -
+sudo systemctl enable --now k3s.service
+```
+
+##### Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)
+Execute agent registration CLI command on `k3s-worker-01` and `k3s-worker-02`:
+```bash
+curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.11:6443" K3S_TOKEN="SongketMail-K3s-MgmtToken-2026-Secret" sh -
+sudo systemctl enable --now k3s-agent.service
+```
+
+---
+
+### 8.5 Verification & Operational Handover Checklist
+
+1. **RKE2 Cluster Node Status Verification:**
+   ```bash
+   sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide
+   ```
+   *Expected Output:* 14 nodes listed in `Ready` status with containerd runtime.
+
+2. **K3s Cluster Node Status Verification:**
+   ```bash
+   sudo k3s kubectl get nodes -o wide
+   ```
+   *Expected Output:* 5 nodes listed in `Ready` status.
+
+3. **Ceph Storage CSI Integration Verification:**
+   ```bash
+   sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass
+   ```
+   *Expected Output:* `ceph-rbd` and `cephfs` provisioners available and set as persistent volume backends.
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-20*
