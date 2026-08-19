@@ -659,3 +659,271 @@ def test_proxmox_datacenter_architecture_html_content():
 
     # Verify TOC sidebar link
     assert 'href="#1-ingress-external-integration-perimeter"' in content
+
+
+# --- Test Group 11: Dual-Cluster RKE2 & K3s Kubernetes Architecture Content Verification ---
+#
+# These tests cover only the content newly introduced/modified in the PR that added
+# Section 8 ("Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)") and
+# updated the OKF frontmatter, the System Topology diagram, and the Dual-Plane
+# Network Fabric section of docs/k8s-ceph-design.md / docs/k8s-ceph-design.html.
+
+def _read(path):
+    assert os.path.exists(path), f"File {path} must exist."
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def test_k8s_ceph_design_frontmatter_mentions_rke2_k3s():
+    """Verifies the OKF frontmatter of k8s-ceph-design.md was updated for RKE2/K3s coverage."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    # Frontmatter block is delimited by the first two '---' markers.
+    parts = content.split("---", 2)
+    assert len(parts) >= 3, "docs/k8s-ceph-design.md has incomplete frontmatter block"
+    frontmatter = parts[1]
+
+    assert "RKE2 & K3s" in frontmatter or "RKE2 &amp; K3s" in frontmatter
+    assert "topics:" in frontmatter
+    topics_line = next((l for l in frontmatter.splitlines() if l.strip().startswith("topics:")), "")
+    assert "rke2" in topics_line
+    assert "k3s" in topics_line
+    assert "kubernetes" in topics_line
+    assert "ceph" in topics_line
+
+
+def test_k8s_ceph_design_network_fabric_updated_markdown():
+    """Verifies Section 3 (Dual-Plane Network Fabric) reflects the 100GbE/10GbE OOB fabric update."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "## 🔌 3. Dual-Plane Network Fabric" in content
+    assert "**100GbE / 10GbE Out-of-Band (OOB) Management Fabric:**" in content
+    # The old, narrower "10GbE Out-of-Band (OOB) Management Plane" bullet must be gone.
+    assert "10GbE Out-of-Band (OOB) Management Plane" not in content
+
+
+def test_k8s_ceph_design_network_fabric_updated_html():
+    """Verifies the HTML rendering of Section 3 matches the updated Markdown bullet text."""
+    content = _read("docs/k8s-ceph-design.html")
+
+    assert 'id="3-dual-plane-network-fabric"' in content
+    assert "100GbE / 10GbE Out-of-Band (OOB) Management Fabric" in content
+    assert "10GbE Out-of-Band (OOB) Management Plane" not in content
+
+
+def test_k8s_ceph_design_topology_diagram_dual_cluster_markdown():
+    """Verifies the System Topology diagram was updated to depict the RKE2/K3s split."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "[ MAIN PRODUCTION RKE2 CLUSTER ]" in content
+    assert "[ SUPPORTING SERVICES K3S CLUSTER ]" in content
+    assert "Management / Observability Stack" in content
+    assert "Prometheus & Grafana Monitoring" in content
+    assert "Loki Log Aggregation Engine" in content
+    assert "HashiCorp Vault Secret Management" in content
+    assert "CI/CD Deployment & Admin Dashboards" in content
+    # Application tier must remain solely on the RKE2 side of the diagram.
+    assert "Database / Data Persistence Tier" in content
+    assert "3x Clustered HA PostgreSQL Nodes" in content
+
+
+def test_k8s_ceph_design_topology_diagram_dual_cluster_html():
+    """Verifies the HTML topology diagram (<pre><code>) mirrors the Markdown dual-cluster update."""
+    content = _read("docs/k8s-ceph-design.html")
+
+    assert "[ MAIN PRODUCTION RKE2 CLUSTER ]" in content
+    assert "[ SUPPORTING SERVICES K3S CLUSTER ]" in content
+    assert "Management / Observability Stack" in content
+    assert "Loki Log Aggregation Engine" in content
+    assert "HashiCorp Vault Secret Management" in content
+    # The diagram is wrapped in a <pre><code> block (HTML-escaped ampersands).
+    assert "<pre" in content and "<code>" in content
+
+
+def test_k8s_ceph_design_section8_markdown_headings():
+    """Verifies Section 8 and all of its subsections (8.1-8.5) exist in the Markdown source."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "## ☸️ 8. Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)" in content
+    assert "### 8.1 Cluster Topology & Node Allocation Matrix" in content
+    assert "### 8.2 Open-Source Core Software Stack" in content
+    assert "### 8.3 Node System Prerequisites & Host Preparation" in content
+    assert "### 8.4 Step-by-Step Installation & Configuration Guide" in content
+    assert "### 8.5 Verification & Operational Handover Checklist" in content
+
+    # Two distinct clusters must be explicitly called out.
+    assert "Main Production Cluster (Very Big)" in content
+    assert "Supporting Services Cluster (Small)" in content
+    assert "RKE2 (Rancher Kubernetes Engine 2)" in content
+
+
+def test_k8s_ceph_design_section8_html_anchors_and_toc():
+    """Verifies Section 8 HTML anchors exist and are linked from the right-hand Table of Contents."""
+    content = _read("docs/k8s-ceph-design.html")
+
+    section_ids = [
+        "8-open-source-dual-cluster-kubernetes-architecture-rke2-k3s",
+        "81-cluster-topology-node-allocation-matrix",
+        "82-open-source-core-software-stack",
+        "83-node-system-prerequisites-host-preparation",
+        "84-step-by-step-installation-configuration-guide",
+        "85-verification-operational-handover-checklist",
+    ]
+    for section_id in section_ids:
+        assert f'id="{section_id}"' in content, f"Missing heading anchor id={section_id}"
+        assert f'href="#{section_id}"' in content, f"Missing TOC link href=#{section_id}"
+
+
+def test_k8s_ceph_design_cluster_topology_tables_markdown():
+    """Verifies both node allocation matrices (RKE2 14-node, K3s 5-node) are present with correct data."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "#### Cluster A: RKE2 Main Production Cluster (14 Nodes - Very Big)" in content
+    assert "#### Cluster B: K3s Supporting Services Cluster (5 Nodes - Small)" in content
+
+    # Spot-check representative rows from each table (hostname, IP, config path).
+    rke2_rows = [
+        ("`rke2-cp-01`", "`10.200.10.11`", "etcd Member 1"),
+        ("`rke2-worker-ai-01`", "`10.200.10.21`", "Real-Time NLP"),
+        ("`rke2-worker-db-03`", "`10.200.10.43`", "PostgreSQL Patroni Node 3, Ceph OSD"),
+    ]
+    for hostname, ip, workload in rke2_rows:
+        assert hostname in content
+        assert ip in content
+        assert workload in content
+        assert "/etc/rancher/rke2/config.yaml" in content
+
+    k3s_rows = [
+        ("`k3s-mgmt-01`", "`10.200.20.11`", "K3s Control Plane, Embedded etcd"),
+        ("`k3s-worker-02`", "`10.200.20.22`", "HashiCorp Vault, CI/CD Runners, DNS"),
+    ]
+    for hostname, ip, workload in k3s_rows:
+        assert hostname in content
+        assert ip in content
+        assert workload in content
+        assert "/etc/rancher/k3s/config.yaml" in content
+
+
+def test_k8s_ceph_design_cluster_topology_tables_html():
+    """Verifies the HTML <table> markup for both cluster node allocation matrices is present."""
+    content = _read("docs/k8s-ceph-design.html")
+
+    assert content.count("<table") >= 2, "Expected at least 2 HTML tables for the two cluster matrices"
+    assert "rke2-cp-01" in content
+    assert "10.200.10.11" in content
+    assert "k3s-mgmt-01" in content
+    assert "10.200.20.11" in content
+    assert "PostgreSQL Patroni Node 1, Ceph OSD" in content
+    assert "Prometheus, Grafana, Loki Stack" in content
+
+
+def test_k8s_ceph_design_ascii_dual_fabric_diagram():
+    """Verifies the standalone ASCII 'SONGKETMAIL DUAL KUBERNETES FABRIC' summary diagram in both formats."""
+    md_content = _read("docs/k8s-ceph-design.md")
+    html_content = _read("docs/k8s-ceph-design.html")
+
+    for content in (md_content, html_content):
+        assert "SONGKETMAIL DUAL KUBERNETES FABRIC" in content
+        assert "CLUSTER 1: RKE2 MAIN PRODUCTION (14 NODES)" in content
+        assert "CLUSTER 2: K3S SUPPORTING SERVICES (5 NODES)" in content
+
+
+def test_k8s_ceph_design_software_stack_content_markdown():
+    """Verifies Section 8.2's open-source software stack lists the expected CNCF projects."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    for term in [
+        "RKE2 (v1.30+)",
+        "K3s (v1.30+)",
+        "Cilium (v1.15+)",
+        "Ceph CSI (v3.10+)",
+        "rbd.csi.ceph.com",
+        "cephfs.csi.ceph.com",
+        "Longhorn (v1.6+)",
+        "Ingress-Nginx Controller (v1.10+)",
+        "MetalLB (v0.14+)",
+        "Cert-Manager (v1.14+)",
+        "HashiCorp Vault (Open Source Edition)",
+    ]:
+        assert term in content, f"Missing expected software stack term: {term}"
+
+
+def test_k8s_ceph_design_node_prerequisites_and_install_commands_markdown():
+    """Verifies Sections 8.3 and 8.4 contain the expected kernel prep and install shell commands."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    # 8.3 kernel/sysctl prerequisites
+    assert "/etc/modules-load.d/k8s.conf" in content
+    assert "br_netfilter" in content
+    assert "/etc/sysctl.d/99-kubernetes.conf" in content
+    assert "net.bridge.bridge-nf-call-iptables  = 1" in content
+    assert "vm.max_map_count                    = 262144" in content
+
+    # 8.4 RKE2 install commands
+    assert "curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=\"v1.30\" sh -" in content
+    assert "sudo systemctl enable --now rke2-server.service" in content
+    assert "INSTALL_RKE2_TYPE=\"agent\"" in content
+    assert "sudo systemctl enable --now rke2-agent.service" in content
+
+    # 8.4 K3s install commands
+    assert "curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=\"v1.30\" sh -" in content
+    assert "sudo systemctl enable --now k3s.service" in content
+    assert 'K3S_URL="https://10.200.20.11:6443"' in content
+    assert "sudo systemctl enable --now k3s-agent.service" in content
+
+
+def test_k8s_ceph_design_rke2_config_yaml_snippets_markdown():
+    """Verifies the RKE2 config.yaml snippets contain expected keys for control plane and agent nodes."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert 'token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"' in content
+    assert "tls-san:" in content
+    assert '"rke2-vip.songketmail.internal"' in content
+    assert "cni:\n  - cilium" in content
+    assert "disable:\n  - rke2-ingress-nginx" in content
+    assert 'server: "https://10.200.10.11:9345"' in content
+    assert '"songketmail.io/tier=ai-compute"' in content
+
+
+def test_k8s_ceph_design_k3s_config_yaml_snippets_markdown():
+    """Verifies the K3s config.yaml snippets contain expected keys for control plane and agent nodes."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "cluster-init: true" in content
+    assert 'token: "SongketMail-K3s-MgmtToken-2026-Secret"' in content
+    assert 'server: "https://10.200.20.11:6443"' in content
+    assert "disable:\n  - servicelb\n  - traefik" in content
+
+
+def test_k8s_ceph_design_verification_checklist_markdown():
+    """Verifies Section 8.5's verification checklist includes expected kubectl commands and outcomes."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    assert "sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide" in content
+    assert "14 nodes listed in `Ready` status with containerd runtime." in content
+    assert "sudo k3s kubectl get nodes -o wide" in content
+    assert "5 nodes listed in `Ready` status." in content
+    assert "sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass" in content
+    assert "`ceph-rbd` and `cephfs` provisioners available" in content
+
+
+def test_k8s_ceph_design_verification_checklist_html():
+    """Verifies Section 8.5's verification checklist content is present in the HTML rendering."""
+    content = _read("docs/k8s-ceph-design.html")
+
+    assert 'id="85-verification-operational-handover-checklist"' in content
+    assert "get nodes -o wide" in content
+    assert "get storageclass" in content
+    assert "ceph-rbd" in content
+    assert "cephfs" in content
+
+
+def test_k8s_ceph_design_section8_word_count_and_ordering():
+    """Ensures Section 8 appears after Section 7 and before the DSOM footer (structural regression check)."""
+    content = _read("docs/k8s-ceph-design.md")
+
+    idx_section7 = content.index("## 🔄 7. Disaster Recovery (DR) & Site Continuity")
+    idx_section8 = content.index("## ☸️ 8. Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+
+    assert idx_section7 < idx_section8 < idx_footer, "Section 8 must be ordered between Section 7 and the DSOM footer"
