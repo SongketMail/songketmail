@@ -224,34 +224,23 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-<div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
-
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight border-b border-slate-100 dark:border-slate-700 pb-4">
-                    Enterprise Kubernetes & Distributed Ceph Architecture Specification
-                </h1>
-
-                <!-- Topology Diagram -->
-                <h2 id="system-topology-data-flow" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                    🗺️ System Topology & Data Flow
-                </h2>
-                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                    The following architectural diagram illustrates the end-to-end data flow, ingress traffic control, network segmentation, compute node tiering, distributed Ceph storage pools, and disaster recovery replication links for the SongketMail Enterprise Kubernetes environment.
-                </p>
-
-                <div class="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-xs font-mono leading-snug">
-<pre>
-+----------------------------------------------------------------------------------------------------+
+<div class="space-y-8">
+<h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight my-6">Enterprise Kubernetes & Distributed Ceph Architecture Specification</h1>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="system-topology-data-flow" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🗺️ System Topology & Data Flow</h2>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">The following architectural diagram illustrates the end-to-end data flow, ingress traffic control, network segmentation, compute node tiering, distributed Ceph storage pools, and disaster recovery replication links for the SongketMail Enterprise Kubernetes environment.</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>+----------------------------------------------------------------------------------------------------+
 |                                    EXTERNAL SYSTEMS INTEGRATION                                    |
 |  +--------------------+  +--------------------+  +---------------------+  +---------------------+  |
-|  | Inbound / Outbound |  | Threat Intel &     |  | Domain Identity &   |  | Cross-Sector IOC   |  |
-|  | SMTP Mail Streams  |  | Reputation Feeds   |  | PKI Registries      |  | & Incident Feeds    |  |
+|  | Inbound / Outbound |  | Threat Intel &amp;     |  | Domain Identity &amp;   |  | Cross-Sector IOC   |  |
+|  | SMTP Mail Streams  |  | Reputation Feeds   |  | PKI Registries      |  | &amp; Incident Feeds    |  |
 |  +---------┬----------+  +---------┬----------+  +----------┬----------+  +----------┬----------+  |
 +------------│-----------------------│------------------------│------------------------│-------------+
              └───────────────────────┼────────────────────────┴────────────────────────┘
                                      │ (mTLS / Encrypted Ingress Stream)
                                      ▼
 +----------------------------------------------------------------------------------------------------+
-|                                   PERIMETER SECURITY & INGRESS                                     |
+|                                   PERIMETER SECURITY &amp; INGRESS                                     |
 |                       [ Boundary Next-Generation Firewall (NGFW) / IPS ]                           |
 |                       [ Redundant Layer 4 / Layer 7 Load Balancers ]                               |
 +--------------------------------------------┬-------------------------------------------------------+
@@ -262,24 +251,30 @@
 |                                                                                                    |
 |  +-------------------------------------+          +---------------------------------------------+  |
 |  | 100GbE High-Throughput Data Plane   |          | 10GbE Out-of-Band Management Fabric         |  |
-|  | (East-West Container & Ceph Fabric) |          | (Control Plane, BMC/IPMI, Telemetry)        |  |
+|  | (East-West Container &amp; Ceph Fabric) |          | (Control Plane, BMC/IPMI, Telemetry)        |  |
 |  +-------------------------------------+          +---------------------------------------------+  |
 |                                                                                                    |
 |  +-------------------------------- KUBERNETES COMPUTE FABRIC ---------------------------------+  |
-|  |                                                                                              |  |
-|  |  +---------------------------+  +---------------------------+  +--------------------------+  |  |
-|  |  |   AI / GPU Compute Tier   |  |     Application Tier      |  |    Database / Data Tier  |  |  |
-|  |  | (4x High-Density Nodes)   |  | (4x Microservices Nodes)  |  | (3x Clustered HA Nodes)  |  |  |
-|  |  |  - Deep NLP & BEC Models  |  |  - Mail Routing & Proxies |  |  - Clustered Relational  |  |  |
-|  |  |  - Embedding / Vector DB  |  |  - Microservices Engine   |  |  - Quarantine Metadata   |  |  |
-|  |  |  - Multimodal Attachment  |  |  - Message Queues/Streams |  |  - Audit & Policy Logs   |  |  |
-|  |  |    & Heuristic Inspection |  |  - API Gateway / Ingress  |  |  - State Persistence     |  |  |
-|  |  +-------------┬-------------+  +-------------┬-------------+  +------------┬-------------+  |  |
-|  +----------------│------------------------------│-----------------------------│----------------+  |
-|                   │                              │                             │                   |
-|  +----------------▼------------------------------▼-----------------------------▼----------------+  |
+|  |  [ MAIN PRODUCTION RKE2 CLUSTER ]               [ SUPPORTING SERVICES K3S CLUSTER ]          |  |
+|  |  +---------------------------+                  +------------------------------------------+  |  |
+|  |  |   AI / GPU Compute Tier   |                  |   Management / Observability Stack       |  |  |
+|  |  | (4x High-Density Nodes)   |                  |   (3x HA Control Plane, 2x Worker Nodes)  |  |  |
+|  |  |  - Deep NLP &amp; BEC Models  |                  |  - Prometheus &amp; Grafana Monitoring       |  |  |
+|  |  |  - Embedding / Vector DB  |                  |  - Loki Log Aggregation Engine            |  |  |
+|  |  |  - Multimodal Inspection  |                  |  - HashiCorp Vault Secret Management     |  |  |
+|  |  +-------------┬-------------+                  |  - CI/CD Deployment &amp; Admin Dashboards   |  |  |
+|  |  +-------------┴-------------+                  +------------------------------------------+  |  |
+|  |  |     Application Tier      |                                                                |  |
+|  |  | (4x Microservices Nodes)  |                  +------------------------------------------+  |  |
+|  |  |  - Mail Routing &amp; Proxies |                  |    Database / Data Persistence Tier      |  |  |
+|  |  |  - Microservices Engine   |                  |    (3x Clustered HA PostgreSQL Nodes)     |  |  |
+|  |  |  - Message Queues/Streams |                  |  - Clustered Relational &amp; Spool Metadata  |  |  |
+|  |  +-------------┬-------------+                  +---------------------+--------------------+  |  |
+|  +----------------│-----------------------------------------------------│---------------------+  |
+|                   │                                                     │                        |
+|  +----------------▼-----------------------------------------------------▼---------------------+  |
 |  |                          DISTRIBUTED SOFTWARE-DEFINED STORAGE (CEPH)                         |  |
-|  |   [ High-IOPS Vector/Model Pool ]    [ App / Spool Storage Pool ]   [ DB Persistence & Staging ] |  |
+|  |   [ High-IOPS Vector/Model Pool ]    [ App / Spool Storage Pool ]   [ DB Persistence &amp; Staging ] |  |
 |  +-----------------------------------------------------------------------------┬----------------+  |
 |                                                                                │                   |
 |  +-------------------------------- DATACENTRE INFRASTRUCTURE -----------------│-----------------+  |
@@ -292,93 +287,239 @@
 |                                  DISASTER RECOVERY (DR) DATACENTRE                                 |
 |  [ 2x AI Compute Nodes ]   [ 2x Application Nodes ]   [ 1x Database Replica ]   [ Ceph Mirror Pool ]|
 +----------------------------------------------------------------------------------------------------+
-</pre>
-                </div>
+</code></pre>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="1-ingress-external-integration-perimeter" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">📥 1. Ingress & External Integration Perimeter</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Inbound & Outbound SMTP Mail Streams:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Ingests real-time ESMTP connection streams, envelope metadata, and raw multi-part MIME payloads across edge Mail Transfer Agents (MTAs).</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Captures transport-layer telemetry, connection pacing, sender IP addresses, and real-time handshake properties.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Threat Intelligence & Network Reputation Feeds:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Executes synchronous lookups against DNS-based Blackhole Lists (DNSBL/RBL) and custom real-time blocklists.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Resolves Forward-Confirmed Reverse DNS (FCrDNS / PTR verification) and correlates Autonomous System Numbers (ASN), BGP route origins, and GeoIP datasets to identify suspicious relays, open proxies, and bulletproof hosting environments.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Domain Identity & PKI Cryptographic Registries:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Queries and validates domain-level authentication frameworks including SPF record flattening/macro evaluation, DKIM cryptographic signature verification (RSA/Ed25519), DMARC policy alignment, and ARC (Authenticated Received Chain) validation.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Inspects TLS certificate chains, Certificate Authority (CA) trust hierarchies, CRL/OCSP stapling status, Certificate Transparency (CT) log history, and cryptographic validation via DANE (TLSA) and MTA-STS.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Analyses domain metadata for registration age (WHOIS), suspicious nameserver clustering, and lookalike homoglyph/typosquatting mutations.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Cross-Sector IOC & Regulatory Data Feeds:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* Pulls automated Indicators of Compromise (IOCs), malicious URL blacklists, known phishing hashes, and compliance blacklists via authenticated REST/gRPC interfaces secured with mutual TLS (mTLS 1.3).</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="2-perimeter-security-traffic-routing" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🛡️ 2. Perimeter Security & Traffic Routing</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Boundary Firewall & Threat Mitigation:</strong> Upstream edge traffic is filtered through redundant Next-Generation Firewalls (NGFW) executing stateful packet filtering, Intrusion Prevention (IPS), and DDoS volumetric rate limiting.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Load Balancing & TLS Termination:</strong> Redundant Layer 4 / Layer 7 Load Balancers distribute ingress traffic evenly across upstream gateway proxies, managing external TLS termination, rate control, and health probing before routing to internal aggregation switches.</li></ul>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="3-dual-plane-network-fabric" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🔌 3. Dual-Plane Network Fabric</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">100GbE High-Throughput Data Plane:</strong> High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers over dedicated SFP28/QSFP28 interfaces.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Out-of-Band (OOB) Management Fabric:</strong> Dedicated physical 1GbE / 10GbE RJ45 OOB interfaces connected to isolated out-of-band switches strictly reserved for IPMI/iDRAC bare-metal orchestration, BMC telemetry, control plane management, and administrative console access. These are physically separated from the 10GbE / 100GbE data plane and Ceph public network interfaces.</li></ul>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="4-clustered-compute-orchestration-tier" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">⚙️ 4. Clustered Compute & Orchestration Tier</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">AI Accelerator Compute Tier (4 Nodes):</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Hardware Configuration:* Dual enterprise multi-core CPUs, 8x High-Performance Datacentre GPUs, 2TB System RAM per node.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Workload Responsibilities:* Real-time text tokenisation, dense vector embedding generation, NLP-based Business Email Compromise (BEC) detection, deep semantic intention scoring, attachment heuristic unpacking, and multimodal visual analysis of embedded imagery/PDFs.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Application Services Tier (4 Nodes):</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Hardware Configuration:* Dual multi-core CPUs, 1TB System RAM per node.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Workload Responsibilities:* Hosts Kubernetes master and worker control planes, core API gateways, SMTP protocol engines, message queue brokers (e.g., Kafka/RabbitMQ), mail policy microservices, and management interfaces.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Database & Stateful Tier (3 Nodes):</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Hardware Configuration:* Dual multi-core CPUs, 512GB System RAM per node.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic"> </em>Workload Responsibilities:* High-availability relational database cluster (e.g., PostgreSQL with Patroni) and distributed metadata stores. Manages message disposition states, quarantine indices, system configuration matrices, forensic audit logs, and integration metadata.</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="5-distributed-software-defined-storage-ceph-sds" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🗄️ 5. Distributed Software-Defined Storage (Ceph SDS)</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">High-Performance AI Model & Vector Storage Pool:</strong> NVMe-backed low-latency block (RBD) and object pools provisioned for rapid loading of neural network checkpoints, vector indices, and real-time inference scratchpads.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Application Persistent Volume Pool:</strong> Block and CephFS storage pools supplying resilient Persistent Volume Claims (PVCs) for container state, queue spooling, and application configuration caches.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Database & Quarantine Staging Pool:</strong> Dedicated, high-durability storage pools handling relational database write-ahead logs (WAL), transactional tablespaces, and encrypted quarantine staging for suspicious payloads.</li></ul>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="6-datacentre-supporting-infrastructure" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🏢 6. Datacentre Supporting Infrastructure</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Uninterruptible Power Supply (UPS):</strong> N+1 redundant modular power architecture ensuring uninterrupted operation and clean power distribution across all compute, storage, and networking chassis.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Backup & Archival Subsystem:</strong> Dedicated backup appliances executing automated, air-gapped, and deduplicated point-in-time snapshots of databases, persistent state, and system configurations.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Integrated Security Monitoring:</strong> Centrally collects host metrics, audit logs, flow records, and network telemetry for comprehensive observability, anomaly alerting, and automated root cause analysis (RCA).</li></ul>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="7-disaster-recovery-dr-site-continuity" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">🔄 7. Disaster Recovery (DR) & Site Continuity</h2>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Warm-Standby Target Footprint:</strong> Sized at half capacity (2x AI Nodes, 2x Application Nodes, 1x Database Replica) to sustain essential security filtering and mail stream processing during a primary datacentre outage.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Cross-Site Replication Fabric:</strong> Employs asynchronous block-level Ceph RBD Mirroring over dedicated WAN links alongside database streaming replication to maintain minimal Recovery Point Objectives (RPO) and low Recovery Time Objectives (RTO).</li></ul>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h2 id="8-open-source-dual-cluster-kubernetes-architecture-rke2-k3s" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-10 mb-4 pb-2 border-b border-slate-200 dark:border-slate-800">☸️ 8. Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)</h2>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">To guarantee zero vendor lock-in, complete operational autonomy, and strict enterprise security standards, SongketMail divides its container orchestration into <strong class="font-semibold text-slate-900 dark:text-white">two distinct open-source Kubernetes clusters</strong>:</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">Main Production Cluster (Very Big):</strong> Built using <strong class="font-semibold text-slate-900 dark:text-white">RKE2 (Rancher Kubernetes Engine 2)</strong> — a CNCF-certified, security-hardened enterprise Kubernetes distribution that combines <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s</code> operational simplicity with enterprise compliance (supporting FIPS 140-2 compliance when deployed with FIPS-validated cryptographic modules or Canal CNI, CIS Benchmark compliance, containerd runtime, and SELinux/AppArmor enforcement). When eBPF performance and advanced networking are required, Cilium CNI is used.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">Supporting Services Cluster (Small):</strong> Built using <strong class="font-semibold text-slate-900 dark:text-white">K3s</strong> — a lightweight, CNCF-certified Kubernetes distribution optimized for low-resource footprints, edge operations, and management utilities.</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>+-------------------------------------------------------------------------------------------------------------+
+|                                    SONGKETMAIL DUAL KUBERNETES FABRIC                                       |
++----------------------------------------------------+--------------------------------------------------------+
+|  CLUSTER 1: RKE2 MAIN PRODUCTION (14 NODES)        |  CLUSTER 2: K3S SUPPORTING SERVICES (5 NODES)          |
++----------------------------------------------------+--------------------------------------------------------+
+|  - 3x Control Plane / Server Nodes (HA etcd)       |  - 3x Control Plane / Server Nodes (HA embedded etcd)  |
+|  - 4x AI / GPU Acceleration Compute Worker Nodes   |  - 2x Dedicated Worker / Agent Nodes                   |
+|  - 4x Application / Microservices Worker Nodes     |  - Core Observability: Prometheus, Grafana, Loki       |
+|  - 3x Database &amp; High-IOPS Stateful Worker Nodes   |  - Centralized Vault Secrets &amp; Internal DNS/CI-CD      |
++----------------------------------------------------+--------------------------------------------------------+
+</code></pre>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="81-cluster-topology-node-allocation-matrix" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.1 Cluster Topology & Node Allocation Matrix</h3>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">Cluster A: RKE2 Main Production Cluster (14 Nodes - Very Big)</h4>
+<div class="overflow-x-auto my-6"><table class="w-full text-left border-collapse border border-slate-200 dark:border-slate-700 text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Hostname</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Role</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">IP Address (Data Plane)</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">OS Target</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Hardware Specs</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Configuration File Path</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Primary Workload</th></tr></thead><tbody><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 1</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.11</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">16 vCPU, 64GB RAM, 200GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Kubernetes Control Plane, etcd Member 1</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 2</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.12</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">16 vCPU, 64GB RAM, 200GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Kubernetes Control Plane, etcd Member 2</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-03</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 3</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.13</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">16 vCPU, 64GB RAM, 200GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Kubernetes Control Plane, etcd Member 3</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-ai-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / AI 1</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.21</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS</td><td class="p-3 border border-slate-200 dark:border-slate-700">128 vCPU, 2TB RAM, 8x H100/A100 GPU</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Real-Time NLP, BEC Embedding & Inspection</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-ai-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / AI 2</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.22</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS</td><td class="p-3 border border-slate-200 dark:border-slate-700">128 vCPU, 2TB RAM, 8x H100/A100 GPU</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Real-Time NLP, BEC Embedding & Inspection</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-ai-03</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / AI 3</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.23</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS</td><td class="p-3 border border-slate-200 dark:border-slate-700">128 vCPU, 2TB RAM, 8x H100/A100 GPU</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Multimodal OCR, Attachment Heuristics</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-ai-04</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / AI 4</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.24</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS</td><td class="p-3 border border-slate-200 dark:border-slate-700">128 vCPU, 2TB RAM, 8x H100/A100 GPU</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Multimodal OCR, Attachment Heuristics</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-app-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / App 1</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.31</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">64 vCPU, 1TB RAM, 500GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">SMTP Ingress Proxies, NGINX Ingress</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-app-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / App 2</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.32</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">64 vCPU, 1TB RAM, 500GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">SMTP Outbound Engine, Queue Processing</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-app-03</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / App 3</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.33</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">64 vCPU, 1TB RAM, 500GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Mail Policy Microservices, Webmail API</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-app-04</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / App 4</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.34</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">64 vCPU, 1TB RAM, 500GB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Kafka / RabbitMQ Streams, Redis Cache</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-db-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / DB 1</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.41</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">32 vCPU, 512GB RAM, 4x 3.2TB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">PostgreSQL Patroni Node 1, Ceph OSD</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-db-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / DB 2</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.42</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">32 vCPU, 512GB RAM, 4x 3.2TB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">PostgreSQL Patroni Node 2, Ceph OSD</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-db-03</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Worker / DB 3</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.43</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">32 vCPU, 512GB RAM, 4x 3.2TB NVMe</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">PostgreSQL Patroni Node 3, Ceph OSD</td></tr></tbody></table></div>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">Cluster B: K3s Supporting Services Cluster (5 Nodes - Small)</h4>
+<div class="overflow-x-auto my-6"><table class="w-full text-left border-collapse border border-slate-200 dark:border-slate-700 text-sm"><thead><tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Hostname</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Role</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">IP Address (Management)</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">OS Target</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Hardware Specs</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Configuration File Path</th><th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Primary Workload</th></tr></thead><tbody><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 1</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.11</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">8 vCPU, 32GB RAM, 100GB SSD</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">K3s Control Plane, Embedded etcd</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 2</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.12</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">8 vCPU, 32GB RAM, 100GB SSD</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">K3s Control Plane, Embedded etcd</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-03</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Server / CP 3</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.13</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">8 vCPU, 32GB RAM, 100GB SSD</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">K3s Control Plane, Embedded etcd</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-01</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Agent / Worker</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.21</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">16 vCPU, 64GB RAM, 500GB SSD</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Prometheus, Grafana, Loki Stack</td></tr><tr class="border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-02</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Agent / Worker</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.22</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">Ubuntu 26.04 LTS / Alma 9.6</td><td class="p-3 border border-slate-200 dark:border-slate-700">16 vCPU, 64GB RAM, 500GB SSD</td><td class="p-3 border border-slate-200 dark:border-slate-700"><code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code></td><td class="p-3 border border-slate-200 dark:border-slate-700">HashiCorp Vault, CI/CD Runners, DNS</td></tr></tbody></table></div>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="82-open-source-core-software-stack-supported-release-matrix" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.2 Open-Source Core Software Stack & Supported Release Matrix</h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">To eliminate proprietary dependencies and avoid vendor lock-in, the entire orchestration ecosystem leverages standard, CNCF-maintained open-source software tested against a single supported version matrix:</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Kubernetes Engines:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">RKE2 (v1.30.x LTS):</strong> Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">K3s (v1.30.x LTS):</strong> High-efficiency distribution for management cluster workloads.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Container Network Interface (CNI):</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">Cilium (v1.15.x):</strong> eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead. (Canal CNI can be selected for strict FIPS 140-2 profiles).</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Container Storage Interface (CSI):</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">Ceph CSI (v3.11.x):</strong> Direct block (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rbd.csi.ceph.com</code>) and filesystem (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">cephfs.csi.ceph.com</code>) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">Longhorn (v1.6.x):</strong> Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Ingress & Edge Traffic Management:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">NGINX Ingress Controller (v1.10.x):</strong> Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination (disabling default bundled RKE2/K3s ingress controllers).</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">MetalLB (v0.14.x):</strong> Bare-metal load balancer providing <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">LoadBalancer</code> type IP allocation over Layer 2 ARP / BGP.</p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Certificate & Secret Management:</strong></li></ul>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">Cert-Manager (v1.14.x):</strong> Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">* <strong class="font-semibold text-slate-900 dark:text-white">HashiCorp Vault (Open Source Edition v1.16.x):</strong> Centralized secrets engine with K8s Service Account auth.</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="83-node-system-prerequisites-host-preparation" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.3 Node System Prerequisites & Host Preparation</h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Before installing RKE2 or K3s, all Linux nodes must execute the following kernel and sysctl tuning configuration:</p>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">1. Load Required Kernel Modules (`/etc/modules-load.d/k8s.conf`)</h4>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo tee /etc/modules-load.d/k8s.conf &lt;&lt;EOF
+overlay
+br_netfilter
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+nf_conntrack
+EOF
 
-                <!-- Section 1 -->
-                <h2 id="1-ingress-external-integration-perimeter" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    📥 1. Ingress & External Integration Perimeter
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>Inbound & Outbound SMTP Mail Streams:</strong> Ingests real-time ESMTP connection streams, envelope metadata, and raw multi-part MIME payloads across edge Mail Transfer Agents (MTAs). Captures transport-layer telemetry, connection pacing, sender IP addresses, and real-time handshake properties.</li>
-                    <li><strong>Threat Intelligence & Network Reputation Feeds:</strong> Executes synchronous lookups against DNS-based Blackhole Lists (DNSBL/RBL) and custom real-time blocklists. Resolves Forward-Confirmed Reverse DNS (FCrDNS / PTR verification) and correlates Autonomous System Numbers (ASN), BGP route origins, and GeoIP datasets to identify suspicious relays, open proxies, and bulletproof hosting environments.</li>
-                    <li><strong>Domain Identity & PKI Cryptographic Registries:</strong> Queries and validates domain-level authentication frameworks including SPF record flattening/macro evaluation, DKIM cryptographic signature verification (RSA/Ed25519), DMARC policy alignment, and ARC (Authenticated Received Chain) validation. Inspects TLS certificate chains, Certificate Authority (CA) trust hierarchies, CRL/OCSP stapling status, Certificate Transparency (CT) log history, and cryptographic validation via DANE (TLSA) and MTA-STS. Analyses domain metadata for registration age (WHOIS), suspicious nameserver clustering, and lookalike homoglyph/typosquatting mutations.</li>
-                    <li><strong>Cross-Sector IOC & Regulatory Data Feeds:</strong> Pulls automated Indicators of Compromise (IOCs), malicious URL blacklists, known phishing hashes, and compliance blacklists via authenticated REST/gRPC interfaces secured with mutual TLS (mTLS 1.3).</li>
-                </ul>
+sudo modprobe overlay
+sudo modprobe br_netfilter
+</code></pre>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">2. Configure System Control Parameters (`/etc/sysctl.d/99-kubernetes.conf`)</h4>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo tee /etc/sysctl.d/99-kubernetes.conf &lt;&lt;EOF
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+vm.max_map_count                    = 262144
+fs.file-max                         = 2097152
+EOF
 
-                <!-- Section 2 -->
-                <h2 id="2-perimeter-security-traffic-routing" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    🛡️ 2. Perimeter Security & Traffic Routing
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>Boundary Firewall & Threat Mitigation:</strong> Upstream edge traffic is filtered through redundant Next-Generation Firewalls (NGFW) executing stateful packet filtering, Intrusion Prevention (IPS), and DDoS volumetric rate limiting.</li>
-                    <li><strong>Load Balancing & TLS Termination:</strong> Redundant Layer 4 / Layer 7 Load Balancers distribute ingress traffic evenly across upstream gateway proxies, managing external TLS termination, rate control, and health probing before routing to internal aggregation switches.</li>
-                </ul>
-
-                <!-- Section 3 -->
-                <h2 id="3-dual-plane-network-fabric" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    🔌 3. Dual-Plane Network Fabric
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>100GbE High-Throughput Data Plane:</strong> High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers.</li>
-                    <li><strong>10GbE Out-of-Band (OOB) Management Plane:</strong> An isolated physical and logical network reserved for control plane communications, IPMI/iDRAC bare-metal orchestration, monitoring telemetry, and administrative access.</li>
-                </ul>
-
-                <!-- Section 4 -->
-                <h2 id="4-clustered-compute-orchestration-tier" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    ⚙️ 4. Clustered Compute & Orchestration Tier
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>AI Accelerator Compute Tier (4 Nodes):</strong>
-                        <ul class="list-circle pl-5 mt-1 space-y-1">
-                            <li><em>Hardware Configuration:</em> Dual enterprise multi-core CPUs, 8x High-Performance Datacentre GPUs, 2TB System RAM per node.</li>
-                            <li><em>Workload Responsibilities:</em> Real-time text tokenisation, dense vector embedding generation, NLP-based Business Email Compromise (BEC) detection, deep semantic intention scoring, attachment heuristic unpacking, and multimodal visual analysis of embedded imagery/PDFs.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Application Services Tier (4 Nodes):</strong>
-                        <ul class="list-circle pl-5 mt-1 space-y-1">
-                            <li><em>Hardware Configuration:</em> Dual multi-core CPUs, 1TB System RAM per node.</li>
-                            <li><em>Workload Responsibilities:</em> Hosts Kubernetes master and worker control planes, core API gateways, SMTP protocol engines, message queue brokers (e.g., Kafka/RabbitMQ), mail policy microservices, and management interfaces.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Database & Stateful Tier (3 Nodes):</strong>
-                        <ul class="list-circle pl-5 mt-1 space-y-1">
-                            <li><em>Hardware Configuration:</em> Dual multi-core CPUs, 512GB System RAM per node.</li>
-                            <li><em>Workload Responsibilities:</em> High-availability relational database cluster (e.g., PostgreSQL with Patroni) and distributed metadata stores. Manages message disposition states, quarantine indices, system configuration matrices, forensic audit logs, and integration metadata.</li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <!-- Section 5 -->
-                <h2 id="5-distributed-software-defined-storage-ceph-sds" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    🗄️ 5. Distributed Software-Defined Storage (Ceph SDS)
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>High-Performance AI Model & Vector Storage Pool:</strong> NVMe-backed low-latency block (RBD) and object pools provisioned for rapid loading of neural network checkpoints, vector indices, and real-time inference scratchpads.</li>
-                    <li><strong>Application Persistent Volume Pool:</strong> Block and CephFS storage pools supplying resilient Persistent Volume Claims (PVCs) for container state, queue spooling, and application configuration caches.</li>
-                    <li><strong>Database & Quarantine Staging Pool:</strong> Dedicated, high-durability storage pools handling relational database write-ahead logs (WAL), transactional tablespaces, and encrypted quarantine staging for suspicious payloads.</li>
-                </ul>
-
-                <!-- Section 6 -->
-                <h2 id="6-datacentre-supporting-infrastructure" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    🏢 6. Datacentre Supporting Infrastructure
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>Uninterruptible Power Supply (UPS):</strong> N+1 redundant modular power architecture ensuring uninterrupted operation and clean power distribution across all compute, storage, and networking chassis.</li>
-                    <li><strong>Backup & Archival Subsystem:</strong> Dedicated backup appliances executing automated, air-gapped, and deduplicated point-in-time snapshots of databases, persistent state, and system configurations.</li>
-                    <li><strong>Integrated Security Monitoring:</strong> Centrally collects host metrics, audit logs, flow records, and network telemetry for comprehensive observability, anomaly alerting, and automated root cause analysis (RCA).</li>
-                </ul>
-
-                <!-- Section 7 -->
-                <h2 id="7-disaster-recovery-dr-site-continuity" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight pt-4 border-t border-slate-100 dark:border-slate-700">
-                    🔄 7. Disaster Recovery (DR) & Site Continuity
-                </h2>
-                <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li><strong>Warm-Standby Target Footprint:</strong> Sized at half capacity (2x AI Nodes, 2x Application Nodes, 1x Database Replica) to sustain essential security filtering and mail stream processing during a primary datacentre outage.</li>
-                    <li><strong>Cross-Site Replication Fabric:</strong> Employs asynchronous block-level Ceph RBD Mirroring over dedicated WAN links alongside database streaming replication to maintain minimal Recovery Point Objectives (RPO) and low Recovery Time Objectives (RTO).</li>
-                </ul>
-
-            </div>
+sudo sysctl --system
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Note: Binding low-numbered ports (such as SMTP port 25) without root permissions is configured specifically on SMTP ingress worker nodes (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-worker-app-</em></code>) via <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">net.ipv4.ip_unprivileged_port_start = 25</code> or Linux <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">CAP_NET_BIND_SERVICE</code> capability settings, keeping other nodes restricted.*</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="84-step-by-step-installation-configuration-guide" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.4 Step-by-Step Installation & Configuration Guide</h3>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">Secure Token Generation, CA Hash, & Security Notice</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster server and agent join operations using OpenSSL:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>openssl rand -hex 32
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">For cluster node join operations, full join-token values should include the CA hash prefix (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">K10<CA_HASH>::<SECRET_TOKEN></code>) to pin server TLS certificates during node registration.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><strong class="font-semibold text-slate-900 dark:text-white">Token Rotation Guidance:</strong></p>
+<ul class="list-disc list-inside my-4 space-y-1 text-slate-600 dark:text-slate-300"><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Server Token Rotation:</strong> To rotate server tokens, run <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2 token rotate</code> or <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s token rotate</code> on control-plane servers.</li><li class="ml-2"><strong class="font-semibold text-slate-900 dark:text-white">Agent Token Rotation:</strong> Rotating agent tokens requires updating the agent token on all control-plane servers (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code>), followed by updating agent configs on worker nodes and restarting affected worker agents (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">systemctl restart rke2-agent</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">systemctl restart k3s-agent</code>).</li></ul>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">A. Installing & Configuring RKE2 Production Cluster</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Note: RKE2 Supervisor port 9345 and Kubernetes API port 6443 must be exposed on all control-plane nodes and load-balanced behind the HA VIP (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.10</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-vip.songketmail.internal</code>).</p>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 1: Configure Primary Control Plane Node (`rke2-cp-01`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
+token: "&lt;GENERATE_SECURE_RKE2_TOKEN&gt;"
+tls-san:
+  - "10.200.10.10"
+  - "rke2-cp-01.songketmail.internal"
+  - "rke2-vip.songketmail.internal"
+cni:
+  - cilium
+write-kubeconfig-mode: "0600"
+etcd-expose-metrics: true
+disable:
+  - rke2-ingress-nginx
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Execute installation CLI commands on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-01</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-server.service
+</code></pre>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 2: Configure Additional Control Plane Nodes (`rke2-cp-02` & `rke2-cp-03`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code> on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-02</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-03</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
+server: "https://10.200.10.10:9345"
+token: "&lt;GENERATE_SECURE_RKE2_TOKEN&gt;"
+tls-san:
+  - "10.200.10.10"
+  - "rke2-vip.songketmail.internal"
+cni:
+  - cilium
+write-kubeconfig-mode: "0600"
+disable:
+  - rke2-ingress-nginx
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Enable systemd service on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-02</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-03</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-server.service
+</code></pre>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 3: Configure Worker / Agent Nodes (`rke2-worker-ai-*`, `rke2-worker-app-*`, `rke2-worker-db-*`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code> on agent nodes:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
+server: "https://10.200.10.10:9345"
+token: "&lt;GENERATE_SECURE_RKE2_AGENT_TOKEN&gt;"
+node-label:
+  - "songketmail.io/tier=ai-compute"  # (Adjust label per tier: application / database)
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Enable systemd agent service on worker nodes:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_CHANNEL="v1.30" sh -
+sudo systemctl enable --now rke2-agent.service
+</code></pre>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">B. Installing & Configuring K3s Supporting Services Cluster</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Note: K3s API server / supervisor port 6443 must be exposed across all management control-plane nodes and load-balanced behind the HA VIP (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.10</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt.songketmail.internal</code>).</p>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 1: Configure Primary K3s Control Plane Node (`k3s-mgmt-01`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
+cluster-init: true
+token: "&lt;GENERATE_SECURE_K3S_TOKEN&gt;"
+tls-san:
+  - "10.200.20.10"
+  - "k3s-mgmt.songketmail.internal"
+write-kubeconfig-mode: "0600"
+disable:
+  - servicelb
+  - traefik
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Execute installation CLI commands on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-01</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.30" sh -
+sudo systemctl enable --now k3s.service
+</code></pre>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 2: Join Additional K3s Control Plane Nodes (`k3s-mgmt-02` & `k3s-mgmt-03`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code> on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-02</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-03</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/k3s/config.yaml (Join HA Control Plane)
+server: "https://10.200.20.10:6443"
+token: "&lt;GENERATE_SECURE_K3S_TOKEN&gt;"
+tls-san:
+  - "10.200.20.10"
+  - "k3s-mgmt.songketmail.internal"
+write-kubeconfig-mode: "0600"
+disable:
+  - servicelb
+  - traefik
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Enable systemd service:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.30" sh -
+sudo systemctl enable --now k3s.service
+</code></pre>
+<h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)</h5>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Execute agent registration CLI command on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-01</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-02</code>:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="&lt;GENERATE_SECURE_K3S_AGENT_TOKEN&gt;" sh -
+sudo systemctl enable --now k3s-agent.service
+</code></pre>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="85-verification-operational-handover-checklist" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.5 Verification & Operational Handover Checklist</h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">RKE2 Cluster Node Status Verification:</strong></p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> 14 nodes listed in <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">Ready</code> status with containerd runtime.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">K3s Cluster Node Status Verification:</strong></p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo k3s kubectl get nodes -o wide</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> 5 nodes listed in <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">Ready</code> status.</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">3. <strong class="font-semibold text-slate-900 dark:text-white">Ceph Storage CSI Integration Verification:</strong></p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">ceph-rbd</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">cephfs</code> provisioners available and set as persistent volume backends.</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-20</em></p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0</em></p>
+</div>
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
@@ -426,6 +567,36 @@
                     <li class="pl-0">
                         <a href="#7-disaster-recovery-dr-site-continuity" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
                             🔄 7. Disaster Recovery (DR) & Site Continuity
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#8-open-source-dual-cluster-kubernetes-architecture-rke2-k3s" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ☸️ 8. Open-Source Dual-Cluster Kubernetes Architecture (RKE2 & K3s)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#81-cluster-topology-node-allocation-matrix" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.1 Cluster Topology & Node Allocation Matrix
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#82-open-source-core-software-stack-supported-release-matrix" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.2 Open-Source Core Software Stack & Supported Release Matrix
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#83-node-system-prerequisites-host-preparation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.3 Node System Prerequisites & Host Preparation
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#84-step-by-step-installation-configuration-guide" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.4 Step-by-Step Installation & Configuration Guide
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#85-verification-operational-handover-checklist" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.5 Verification & Operational Handover Checklist
                         </a>
                     </li>
                 </ul>
