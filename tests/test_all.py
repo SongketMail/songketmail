@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 44 Markdown (.md) files in the repository."""
+    """Retrieves all 45 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 44, f"Expected 44 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 45, f"Expected 45 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 26 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 27 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,12 +41,12 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 26, f"Expected 26 HTML files, found {len(html_files)}"
+    assert len(html_files) == 27, f"Expected 27 HTML files, found {len(html_files)}"
     return html_files
 
 
 def get_all_template_files():
-    """Retrieves all 9 template files under roles/podman_quadlet/templates/."""
+    """Retrieves all 10 template files under roles/podman_quadlet/templates/."""
     tpl_dir = "roles/podman_quadlet/templates"
     tpl_files = []
     if os.path.exists(tpl_dir):
@@ -54,7 +54,7 @@ def get_all_template_files():
             if os.path.isfile(os.path.join(tpl_dir, f)):
                 tpl_files.append(os.path.join(tpl_dir, f))
     tpl_files = sorted(list(set(tpl_files)))
-    assert len(tpl_files) == 9, f"Expected 9 template files, found {len(tpl_files)}"
+    assert len(tpl_files) == 10, f"Expected 10 template files, found {len(tpl_files)}"
     return tpl_files
 
 

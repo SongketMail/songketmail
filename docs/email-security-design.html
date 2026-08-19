@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part 25: Email Security from the Wire to the Mailbox, JMAP Protocol & ACME Management — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    SECURE EMAIL SERVER FABRIC // PODMAN 5+ & SYSTEMD QUADLET
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+                    <a href="ceph-ubuntu-deployment.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>21. Ceph Native Deployment</span>
+                    </a>
+                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>22. Geolocated Regional DC</span>
+                    </a>
+                    <a href="k8s-ceph-design.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>☸️</span>
+                        <span>23. Enterprise K8s & Ceph</span>
+                    </a>
+                    <a href="proxmox-datacenter-architecture.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🖥️</span>
+                        <span>24. Proxmox VE Datacentre</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<div class="border-b-2 border-violet-600 pb-4">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-3">
+                    <span>🔒</span>
+                    <span>Part 25: Email Security from the Wire to the Mailbox, JMAP & ACME Management</span>
+                </h1>
+            </div>
+
+            <!-- 1. Executive Summary -->
+            <div class="space-y-4">
+                <h2 id="1-executive-summary-security-philosophy" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🔒 1. Executive Summary & Security Philosophy
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed">
+                    Security in SongketMail is a core architectural default: <strong>Security is a default, not an add-on</strong>. The platform protects email communication across its entire lifecycle: <strong>from the wire to the mailbox</strong>.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-slate-700 dark:text-slate-300">
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Security as Default:</strong> All transports enforce TLS encryption, cryptographic identity checks, and strict authentication policies out-of-the-box.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Wire Security:</strong> In-transit mail stays encrypted and verified end-to-end with <strong>DANE</strong>, <strong>MTA-STS</strong>, and <strong>TLS Reporting (TLSRPT)</strong>.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Automated Certificate Lifecycle:</strong> TLS certificates renew automatically over <strong>ACMEv2</strong> (RFC 8555) via Let's Encrypt or an internal <strong>Smallstep Certificates (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono">step-ca</code>)</strong> Private CA server.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Zero-Trust Mailbox Encryption at Rest:</strong> Mailboxes stored on disk can be encrypted using the user's own <strong>S/MIME certificate</strong> or <strong>OpenPGP key</strong>. Storage operators or system admins with disk access cannot read mailbox contents without the user's private key.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Modern Web API Access (JMAP):</strong> Replaces legacy IMAP with the <strong>JSON Meta Application Protocol (JMAP / RFC 8620 & RFC 8621)</strong> over HTTP/2 and HTTP/3.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Memory Safety & Independent Audits:</strong> Core protocol components leverage <strong>Rust</strong> to eliminate memory-corruption vulnerabilities, validated by independent security audits.</li>
+                </ul>
+            </div>
+
+            <!-- 2. End-to-End Security Architecture -->
+            <div class="space-y-4">
+                <h2 id="2-end-to-end-email-security-architecture" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🏗️ 2. End-to-End Email Security Architecture
+                </h2>
+                <div class="bg-slate-900 text-slate-200 p-4 rounded-xl font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800 shadow-inner">
+<pre>
+                                 [ SENDER MTA / CLIENT ]
+                                            │
+                                            │ ESMTP / TLS 1.3 / DANE / MTA-STS
+                                            ▼
+                    ┌───────────────────────────────────────────────┐
+                    │     BunkerWeb WAF / Reverse Proxy             │
+                    │  - ACMEv2 TLS Termination (Let's Encrypt /    │
+                    │    Smallstep Private CA)                      │
+                    │  - Rate Limiting, ACLs, IP Banning            │
+                    └───────────────────────┬───────────────────────┘
+                                            │ PROXY Protocol v2
+                                            ▼
+                    ┌───────────────────────────────────────────────┐
+                    │    Postfix MTA (SMTP Ingress / Egress)       │
+                    │  - DANE TLSA Validation & MTA-STS Policy      │
+                    │  - Automated DKIM Signing (Rspamd Milter)     │
+                    └───────────────────────┬───────────────────────┘
+                                            │
+                                            ▼
+                    ┌───────────────────────────────────────────────┐
+                    │    Dovecot MDA / Stalwart Engine              │
+                    │  - S/MIME or OpenPGP Public Key Encryption    │
+                    │  - Encrypted Maildir / Object Storage         │
+                    └───────────────────────┬───────────────────────┘
+                                            │
+                                            ▼
+                    ┌───────────────────────────────────────────────┐
+                    │    JMAP & IMAP API Server (Port 8443 / 443)   │
+                    │  - Rust Memory-Safe Implementation            │
+                    │  - Synchronises Email, Calendar & Contacts     │
+                    └───────────────────────────────────────────────┘
+</pre>
+                </div>
+            </div>
+
+            <!-- 3. Strong Transport Security -->
+            <div class="space-y-4">
+                <h2 id="3-strong-transport-security-dane-mta-sts-tls-reporting" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🌐 3. Strong Transport Security: DANE, MTA-STS & TLS Reporting
+                </h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 id="31-dane-dns-based-authentication-of-named-entities" class="font-bold text-slate-900 dark:text-white text-base mb-2">3.1 DANE (DNS-based Authentication of Named Entities)</h3>
+                        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-2">
+                            DANE utilizes <strong>DNSSEC</strong> to publish TLSA records in DNS, securely binding domain MX hostnames directly to expected TLS certificates or public keys.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs">Standard: RFC 6698 / RFC 7672 — Prevents MitM attacks and compromised CA certificate spoofing.</p>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 id="32-mta-sts-smtp-mta-strict-transport-security" class="font-bold text-slate-900 dark:text-white text-base mb-2">3.2 MTA-STS (SMTP MTA Strict Transport Security)</h3>
+                        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-2">
+                            Enforces strict TLS connections for incoming mail streams. Published via DNS TXT <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">_mta-sts.songketmail.internal</code> and served over HTTPS at <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">https://mta-sts.songketmail.internal/.well-known/mta-sts.txt</code>.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs">Standard: RFC 8461 — Mode: enforce, max_age: 604800s.</p>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 id="33-tls-reporting-tlsrpt" class="font-bold text-slate-900 dark:text-white text-base mb-2">3.3 TLS Reporting (TLSRPT)</h3>
+                        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-2">
+                            Enables automated diagnostic feedback from sending relays regarding transport failures or policy violations via DNS record <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">_smtp._tls.songketmail.internal</code>.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs">Standard: RFC 8460 — Daily aggregate report feedback.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. ACMEv2 & Smallstep CA -->
+            <div class="space-y-4">
+                <h2 id="4-automatic-tls-provisioning-via-acmev2-smallstep-ca" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🔑 4. Automatic TLS Provisioning via ACMEv2 & Smallstep CA
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
+                    Automated certificate management eliminates service downtime caused by expired SSL/TLS certificates.
+                </p>
+                <div class="p-4 rounded-lg bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-900/50 space-y-2">
+                    <h3 id="smallstep-certificates-integration-smallstepcomcertificates" class="font-bold text-violet-900 dark:text-violet-200 text-base">Smallstep Certificates Integration (<code class="text-xs font-mono">smallstep.com/certificates</code>)</h3>
+                    <p class="text-violet-800 dark:text-violet-300 text-sm leading-relaxed">
+                        SongketMail includes a private certificate authority (X.509 & SSH) and embedded ACME server powered by Smallstep (<code class="text-xs font-mono">step-ca</code>). This enables automated internal TLS certificate issuance and renewal across all Podman Quadlet containers, combined with Single Sign-On (SSO) for SSH access.
+                    </p>
+                    <ul class="list-disc list-inside text-violet-800 dark:text-violet-300 text-xs space-y-1">
+                        <li><strong>Wildcard Certificate Support:</strong> Secure base and subdomains (<code class="font-mono">*.songketmail.internal</code>) via DNS-01 challenge.</li>
+                        <li><strong>TLS-ALPN-01 Support:</strong> Secure validation over HTTPS port 443 without open port 80.</li>
+                        <li><strong>HTTP-01 Challenge:</strong> Automated web server challenge verification.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 5. Mailbox Encryption at Rest -->
+            <div class="space-y-4">
+                <h2 id="5-zero-trust-mailbox-encryption-at-rest-openpgp-smime" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🔐 5. Zero-Trust Mailbox Encryption at Rest (OpenPGP & S/MIME)
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
+                    To guarantee mailbox privacy against untrusted storage providers or operator disk access, SongketMail provides server-side public-key encryption at rest:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 id="openpgp-encryption" class="font-bold text-slate-900 dark:text-white mb-2">OpenPGP Encryption</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs">
+                            Incoming email payloads are encrypted with the user's uploaded OpenPGP public key before writing to disk or RustFS S3.
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 id="smime-encryption" class="font-bold text-slate-900 dark:text-white mb-2">S/MIME Encryption</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs">
+                            Supports X.509 S/MIME certificates for enterprise compliance, ensuring messages are encrypted end-to-end to the recipient's maildir.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. JMAP Protocol -->
+            <div class="space-y-4">
+                <h2 id="6-json-meta-application-protocol-jmap-rfc-8620-rfc-8621" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    ⚡ 6. JSON Meta Application Protocol (JMAP - RFC 8620 & RFC 8621)
+                </h2>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
+                    <strong>JMAP</strong> is a modern open standard used to synchronize data like email, calendars, and contacts between devices and servers using fast, lightweight web APIs (ports 443 / 8443).
+                </p>
+                <div class="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-3 text-sm">
+                    <h3 id="how-jmap-works-benefits" class="font-bold text-slate-900 dark:text-white text-base">How JMAP Works & Benefits</h3>
+                    <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+                        Uses JSON over HTTP to fetch and sync data efficiently in a single request, replacing noisy multi-step IMAP protocol commands.
+                    </p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700 dark:text-slate-300 text-xs">
+                        <li><strong>Faster Performance:</strong> Synchronizes email, address books, and calendars in batch requests.</li>
+                        <li><strong>Lower Battery Consumption:</strong> Minimizes mobile radio wakeups compared to IMAP polling.</li>
+                        <li><strong>Developer Friendly:</strong> Simple JSON data models for mobile and web apps.</li>
+                        <li><strong>Learn More:</strong> Specifications available at <a href="https://jmap.io" target="_blank" class="text-violet-600 dark:text-violet-400 underline">JMAP.io</a>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. Memory Safety in Rust & Audits -->
+            <div class="space-y-4">
+                <h2 id="7-granular-acls-rate-limiting-dkim-automation-rust-memory-safety" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    🛡️ 7. Granular ACLs, Rate Limiting, DKIM Automation & Rust Memory Safety
+                </h2>
+                <ul class="list-disc list-inside space-y-2 text-slate-700 dark:text-slate-300 text-sm">
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Automated DKIM Lifecycle:</strong> Rspamd handles 2048-bit RSA/Ed25519 key generation, scheduled 90-day rotations, and automated DNS TXT record exports.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">ACLs, Rate Limiting & Banning:</strong> BunkerWeb WAF and Rspamd enforce connection rate limits and automatic IP banning.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Memory-Safe Architecture in Rust:</strong> Core storage (RustFS) and JMAP engines are written in Rust, mathematically preventing memory corruption vulnerabilities.</li>
+                    <li><strong class="font-semibold text-slate-900 dark:text-white">Independently Security-Audited:</strong> Verified against CIS benchmarks and OWASP guidelines.</li>
+                </ul>
+            </div>
+
+            <!-- 8. Ansible Mapping Table -->
+            <div class="space-y-4">
+                <h2 id="8-ansible-security-by-default-playbook-mapping" class="text-2xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                    ⚙️ 8. Ansible Security-by-Default Playbook Mapping
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse border border-slate-200 dark:border-slate-700 text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                                <th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Security Feature</th>
+                                <th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Group Variable / Ansible Task</th>
+                                <th class="p-3 border border-slate-200 dark:border-slate-700 font-semibold">Target Quadlet Container</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">DANE & DNSSEC Validation</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_dane: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">postfix.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">MTA-STS Enforcement</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_mta_sts: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">proxy.container / postfix.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">TLS Reporting (TLSRPT)</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_tls_rpt: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">postfix.container / rspamd.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">ACMEv2 Auto-Renewal</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_acme_v2: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">proxy.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">Smallstep Private CA & SSH SSO</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">smallstep_ca_url: "https://ca..."</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">smallstep.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">S/MIME / OpenPGP Encryption at Rest</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_openpgp_smime_at_rest: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">dovecot.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">JMAP Protocol API (Port 8443)</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">enable_jmap_protocol: true</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">proxy.container / dovecot.container</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-medium">DKIM Auto Rotation (90 Days)</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">dkim_rotation_days: 90</td>
+                                <td class="p-3 border border-slate-200 dark:border-slate-700 font-mono">rspamd.container</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#1-executive-summary-security-philosophy" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔒 1. Executive Summary & Security Philosophy
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-end-to-end-email-security-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏗️ 2. End-to-End Email Security Architecture
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-strong-transport-security-dane-mta-sts-tls-reporting" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🌐 3. Strong Transport Security: DANE, MTA-STS & TLS Reporting
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#31-dane-dns-based-authentication-of-named-entities" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.1 DANE (DNS-based Authentication of Named Entities)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#32-mta-sts-smtp-mta-strict-transport-security" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.2 MTA-STS (SMTP MTA Strict Transport Security)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#33-tls-reporting-tlsrpt" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            3.3 TLS Reporting (TLSRPT)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-automatic-tls-provisioning-via-acmev2-smallstep-ca" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔑 4. Automatic TLS Provisioning via ACMEv2 & Smallstep CA
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#smallstep-certificates-integration-smallstepcomcertificates" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Smallstep Certificates Integration (smallstep.com/certificates)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#5-zero-trust-mailbox-encryption-at-rest-openpgp-smime" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔐 5. Zero-Trust Mailbox Encryption at Rest (OpenPGP & S/MIME)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#openpgp-encryption" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            OpenPGP Encryption
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#smime-encryption" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            S/MIME Encryption
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#6-json-meta-application-protocol-jmap-rfc-8620-rfc-8621" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚡ 6. JSON Meta Application Protocol (JMAP - RFC 8620 & RFC 8621)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#how-jmap-works-benefits" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            How JMAP Works & Benefits
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#7-granular-acls-rate-limiting-dkim-automation-rust-memory-safety" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛡️ 7. Granular ACLs, Rate Limiting, DKIM Automation & Rust Memory Safety
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#8-ansible-security-by-default-playbook-mapping" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚙️ 8. Ansible Security-by-Default Playbook Mapping
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ REL: 5.0.0 ]</span>
+            <span>|</span>
+            <span>[ STD: RFC_9116 ]</span>
+            <span>|</span>
+            <span>[ ENV: PODMAN_5 ]</span>
+            <span>|</span>
+            <span>[ VIEW: STANDARD ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

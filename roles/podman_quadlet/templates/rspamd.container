@@ -10,6 +10,8 @@ UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/rspamd/config:/etc/rspamd/local.d:Z
 Volume={{ storage_base_path }}/rspamd/data:/var/lib/rspamd:Z
 Environment=TZ=UTC
+Environment=DKIM_KEY_BITS={{ dkim_key_bits | default(2048) }}
+Environment=DKIM_ROTATION_DAYS={{ dkim_rotation_days | default(90) }}
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=rspamd
 

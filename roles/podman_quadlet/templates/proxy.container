@@ -11,6 +11,7 @@ Volume={{ storage_base_path }}/bunkerweb/data:/data:Z
 PublishPort=80:8080
 PublishPort=443:8443
 PublishPort=443:8443/udp
+PublishPort={{ jmap_port }}:8443
 PublishPort=25:25
 PublishPort=587:587
 PublishPort=993:993
@@ -38,6 +39,11 @@ Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
 Environment=imap.songketmail.internal_REVERSE_PROXY_HOST={{ cluster_prefix }}-dovecot:993
 Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
 Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# ACMEv2, Smallstep Private CA & Security Control Environment
+Environment=ENABLE_ACME_V2={{ enable_acme_v2 | default(true) | string | lower }}
+Environment=SMALLSTEP_CA_URL={{ smallstep_ca_url }}
+Environment=ENABLE_MTA_STS={{ enable_mta_sts | default(true) | string | lower }}
+Environment=ENABLE_JMAP_PROTOCOL={{ enable_jmap_protocol | default(true) | string | lower }}
 # SSL/TLS Settings
 Environment=GENERATE_SELF_SIGNED_SSL=yes
 Label=fabric_cluster={{ cluster_prefix }}

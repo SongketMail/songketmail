@@ -109,7 +109,7 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 ## 🔌 3. Dual-Plane Network Fabric
 
 * **100GbE High-Throughput Data Plane:** High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers over dedicated SFP28/QSFP28 interfaces.
-* **Out-of-Band (OOB) Management Fabric:** Dedicated physical 1GbE / 10GbE RJ45 OOB interfaces connected to isolated out-of-band switches strictly reserved for IPMI/iDRAC bare-metal orchestration, BMC telemetry, control plane management, and administrative console access. These are physically separated from the 10GbE / 100GbE data plane and Ceph public network interfaces.
+* **100GbE / 10GbE Out-of-Band (OOB) Management Fabric:** Dedicated physical 1GbE / 10GbE RJ45 OOB interfaces connected to isolated out-of-band switches strictly reserved for IPMI/iDRAC bare-metal orchestration, BMC telemetry, control plane management, and administrative console access. These are physically separated from the 10GbE / 100GbE data plane and Ceph public network interfaces.
 
 ---
 
@@ -207,24 +207,24 @@ To guarantee zero vendor lock-in, complete operational autonomy, and strict ente
 
 ---
 
-### 8.2 Open-Source Core Software Stack & Supported Release Matrix
+### 8.2 Open-Source Core Software Stack
 
 To eliminate proprietary dependencies and avoid vendor lock-in, the entire orchestration ecosystem leverages standard, CNCF-maintained open-source software tested against a single supported version matrix:
 
 * **Kubernetes Engines:**
-  * **RKE2 (v1.30.x LTS):** Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.
-  * **K3s (v1.30.x LTS):** High-efficiency distribution for management cluster workloads.
+  * **RKE2 (v1.30+):** Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.
+  * **K3s (v1.30+):** High-efficiency distribution for management cluster workloads.
 * **Container Network Interface (CNI):**
-  * **Cilium (v1.15.x):** eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead. (Canal CNI can be selected for strict FIPS 140-2 profiles).
+  * **Cilium (v1.15+):** eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead.
 * **Container Storage Interface (CSI):**
-  * **Ceph CSI (v3.11.x):** Direct block (`rbd.csi.ceph.com`) and filesystem (`cephfs.csi.ceph.com`) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.
-  * **Longhorn (v1.6.x):** Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.
+  * **Ceph CSI (v3.10+):** Direct block (`rbd.csi.ceph.com`) and filesystem (`cephfs.csi.ceph.com`) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.
+  * **Longhorn (v1.6+):** Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.
 * **Ingress & Edge Traffic Management:**
-  * **NGINX Ingress Controller (v1.10.x):** Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination (disabling default bundled RKE2/K3s ingress controllers).
-  * **MetalLB (v0.14.x):** Bare-metal load balancer providing `LoadBalancer` type IP allocation over Layer 2 ARP / BGP.
+  * **Ingress-Nginx Controller (v1.10+):** Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination (disabling default bundled RKE2/K3s ingress controllers).
+  * **MetalLB (v0.14+):** Bare-metal load balancer providing `LoadBalancer` type IP allocation over Layer 2 ARP / BGP.
 * **Certificate & Secret Management:**
-  * **Cert-Manager (v1.14.x):** Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.
-  * **HashiCorp Vault (Open Source Edition v1.16.x):** Centralized secrets engine with K8s Service Account auth.
+  * **Cert-Manager (v1.14+):** Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.
+  * **HashiCorp Vault (Open Source Edition):** Centralized secrets engine with K8s Service Account auth.
 
 ---
 
@@ -287,7 +287,7 @@ Note: RKE2 Supervisor port 9345 and Kubernetes API port 6443 must be exposed on 
 Create `/etc/rancher/rke2/config.yaml`:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
-token: "<GENERATE_SECURE_RKE2_TOKEN>"
+token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
 tls-san:
   - "10.200.10.10"
   - "rke2-cp-01.songketmail.internal"
@@ -310,8 +310,8 @@ sudo systemctl enable --now rke2-server.service
 Create `/etc/rancher/rke2/config.yaml` on `rke2-cp-02` and `rke2-cp-03`:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
-server: "https://10.200.10.10:9345"
-token: "<GENERATE_SECURE_RKE2_TOKEN>"
+server: "https://10.200.10.11:9345"
+token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
 tls-san:
   - "10.200.10.10"
   - "rke2-vip.songketmail.internal"
@@ -355,7 +355,7 @@ Create `/etc/rancher/k3s/config.yaml`:
 ```yaml
 # /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
 cluster-init: true
-token: "<GENERATE_SECURE_K3S_TOKEN>"
+token: "SongketMail-K3s-MgmtToken-2026-Secret"
 tls-san:
   - "10.200.20.10"
   - "k3s-mgmt.songketmail.internal"
@@ -375,8 +375,8 @@ sudo systemctl enable --now k3s.service
 Create `/etc/rancher/k3s/config.yaml` on `k3s-mgmt-02` and `k3s-mgmt-03`:
 ```yaml
 # /etc/rancher/k3s/config.yaml (Join HA Control Plane)
-server: "https://10.200.20.10:6443"
-token: "<GENERATE_SECURE_K3S_TOKEN>"
+server: "https://10.200.20.11:6443"
+token: "SongketMail-K3s-MgmtToken-2026-Secret"
 tls-san:
   - "10.200.20.10"
   - "k3s-mgmt.songketmail.internal"
@@ -395,7 +395,7 @@ sudo systemctl enable --now k3s.service
 ##### Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)
 Execute agent registration CLI command on `k3s-worker-01` and `k3s-worker-02`:
 ```bash
-curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="<GENERATE_SECURE_K3S_AGENT_TOKEN>" sh -
+curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.11:6443" K3S_TOKEN="SongketMail-K3s-MgmtToken-2026-Secret" sh -
 sudo systemctl enable --now k3s-agent.service
 ```
 

@@ -20,7 +20,7 @@ The table below connects each automation playbook to its roles, managed services
 
 | Playbook | Purpose | Roles & Modules Utilized | Services Managed / Audited | Related Documentation |
 |:---|:---|:---|:---|:---|
-| **`site.yml`** | Primary Core Fabric Deployment | `host_prepare`<br>`podman_quadlet` | BunkerWeb, Postfix, Dovecot, PostgreSQL, MinIO, Roundcube, Rspamd | [Part 1](podman-rootless.md), [Part 2](ansible-fqcn.md), [Part 3](postfix-dovecot.md), [Part 4](s3-storage.md), [Part 5](webmail-clients.md), [Part 6](bunkerweb-proxy.md), [Part 7](architectural-blueprint.md), [Part 11](dockpod-integration.md), [Part 12](jules-planning.md), [Part 17](mail-web-app-verification.md) |
+| **`site.yml`** | Primary Core Fabric Deployment | `host_prepare`<br>`podman_quadlet` | BunkerWeb, Postfix, Dovecot, PostgreSQL, RustFS, Roundcube, Rspamd, Smallstep CA | [Part 1](podman-rootless.md), [Part 2](ansible-fqcn.md), [Part 3](postfix-dovecot.md), [Part 4](s3-storage.md), [Part 5](webmail-clients.md), [Part 6](bunkerweb-proxy.md), [Part 7](architectural-blueprint.md), [Part 11](dockpod-integration.md), [Part 12](jules-planning.md), [Part 17](mail-web-app-verification.md), [Part 25](email-security-design.md) |
 | **`asimp_hardening_playbook.yml`** | OS Security Hardening, Auditing & Compliance | `scripts/privilege_and_safety_test.py`<br>`asimp/play-localhost.yml`<br>`scripts/update_sidebars.py` | Host OS Kernel, systemd services, OpenSCAP, Lynis Auditing | [Part 13](asimp-hardening-report.md), [Part 14](SOP-KNOWLEDGE-FIRST-DISCOVERY.md), [Part 16](ANSIBLE-ADOPTION-REVIEW.md) |
 | **`wsl_feedback_playbook.yml`** | WSL Developer Testing & Telemetry Feedback | `ansible.builtin.shell`<br>`ansible.builtin.uri`<br>`jules` CLI commands | Local WSL Platform, Podman Mappings, GitHub PR Comments | [Part 15](wsl-development-feedback.md) |
 | **`playbooks/matrix_test.yml`** | Multi-OS Local Test Matrix Orchestration | `containers.podman`<br>`playbooks/tasks/run_distro.yml`<br>`feedback_collector` | Ubuntu 24.04, Ubuntu 26.04, AlmaLinux 9, Debian 12 | [Part 16](ANSIBLE-ADOPTION-REVIEW.md) |
@@ -91,6 +91,7 @@ Each playbook is supported by a rich, interactive suite of documents to provide 
 *   **[Part 13: ASIMP Compliance Report](asimp-hardening-report.md)**: Houses generated compliance scores, risk matrices, and platform privilege reports.
 *   **[Part 15: WSL Developer Feedback Loop](wsl-development-feedback.md)**: Outlines developer mode variables, telemetry formatting, and API comments configurations.
 *   **[Part 17: Mail Web Ingress Verification](mail-web-app-verification.md)**: Programmatically verifies proxy port bindings (`25, 80, 443, 587, 993`) and Quadlet configuration templates.
+*   **[Part 25: Email Security & JMAP Protocol](email-security-design.md)**: Details wire-to-mailbox transport encryption (DANE, MTA-STS, TLSRPT), Smallstep ACMEv2 CA, OpenPGP/S/MIME mailbox encryption at rest, JMAP web API integration, and security Ansible variables.
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
