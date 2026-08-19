@@ -48,7 +48,7 @@ def test_email_security_markdown_contents():
     assert "JMAP" in content
     assert "RFC 8620" in content
     assert "RFC 8621" in content
-    assert "JMAP.io" in content
+    assert "https://jmap.io" in content
     assert "Rust" in content
     assert "Independently Security-Audited" in content or "independently security-audited" in content.lower()
 
