@@ -398,11 +398,17 @@ sudo sysctl --system
 </code></pre>
 <hr class="my-8 border-slate-200 dark:border-slate-800" />
 <h3 id="84-step-by-step-installation-configuration-guide" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.4 Step-by-Step Installation & Configuration Guide</h3>
+<h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">Secure Token Generation & Security Notice</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster join operations using OpenSSL:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>openssl rand -hex 32
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories. If a token is exposed or compromised prior to deployment, rotate the token immediately using <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2 token rotate</code> or updating <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code>.</p>
 <h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">A. Installing & Configuring RKE2 Production Cluster</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Note: RKE2 Supervisor port 9345 and Kubernetes API port 6443 must be exposed on all control-plane nodes and load-balanced behind the HA VIP (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.10</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-vip.songketmail.internal</code>).</p>
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 1: Configure Primary Control Plane Node (`rke2-cp-01`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code>:</p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+token: "&lt;GENERATE_SECURE_RKE2_TOKEN&gt;"
 tls-san:
   - "10.200.10.10"
   - "rke2-cp-01.songketmail.internal"
@@ -421,8 +427,8 @@ sudo systemctl enable --now rke2-server.service
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 2: Configure Additional Control Plane Nodes (`rke2-cp-02` & `rke2-cp-03`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code> on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-02</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-cp-03</code>:</p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
-server: "https://10.200.10.11:9345"
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+server: "https://10.200.10.10:9345"
+token: "&lt;GENERATE_SECURE_RKE2_TOKEN&gt;"
 tls-san:
   - "10.200.10.10"
   - "rke2-vip.songketmail.internal"
@@ -439,8 +445,8 @@ sudo systemctl enable --now rke2-server.service
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 3: Configure Worker / Agent Nodes (`rke2-worker-ai-*`, `rke2-worker-app-*`, `rke2-worker-db-*`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/rke2/config.yaml</code> on agent nodes:</p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
-server: "https://10.200.10.11:9345"
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+server: "https://10.200.10.10:9345"
+token: "&lt;GENERATE_SECURE_RKE2_TOKEN&gt;"
 node-label:
   - "songketmail.io/tier=ai-compute"  # (Adjust label per tier: application / database)
 </code></pre>
@@ -450,11 +456,12 @@ sudo systemctl enable --now rke2-agent.service
 </code></pre>
 <hr class="my-8 border-slate-200 dark:border-slate-800" />
 <h4 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">B. Installing & Configuring K3s Supporting Services Cluster</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Note: K3s API server / supervisor port 6443 must be exposed across all management control-plane nodes and load-balanced behind the HA VIP (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.20.10</code> / <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt.songketmail.internal</code>).</p>
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 1: Configure Primary K3s Control Plane Node (`k3s-mgmt-01`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code>:</p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
 cluster-init: true
-token: "SongketMail-K3s-MgmtToken-2026-Secret"
+token: "&lt;GENERATE_SECURE_K3S_TOKEN&gt;"
 tls-san:
   - "10.200.20.10"
   - "k3s-mgmt.songketmail.internal"
@@ -470,8 +477,8 @@ sudo systemctl enable --now k3s.service
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 2: Join Additional K3s Control Plane Nodes (`k3s-mgmt-02` & `k3s-mgmt-03`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">/etc/rancher/k3s/config.yaml</code> on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-02</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-mgmt-03</code>:</p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># /etc/rancher/k3s/config.yaml (Join HA Control Plane)
-server: "https://10.200.20.11:6443"
-token: "SongketMail-K3s-MgmtToken-2026-Secret"
+server: "https://10.200.20.10:6443"
+token: "&lt;GENERATE_SECURE_K3S_TOKEN&gt;"
 write-kubeconfig-mode: "0600"
 disable:
   - servicelb
@@ -483,7 +490,7 @@ sudo systemctl enable --now k3s.service
 </code></pre>
 <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-2">Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)</h5>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Execute agent registration CLI command on <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-01</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">k3s-worker-02</code>:</p>
-<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.11:6443" K3S_TOKEN="SongketMail-K3s-MgmtToken-2026-Secret" sh -
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="&lt;GENERATE_SECURE_K3S_TOKEN&gt;" sh -
 sudo systemctl enable --now k3s-agent.service
 </code></pre>
 <hr class="my-8 border-slate-200 dark:border-slate-800" />

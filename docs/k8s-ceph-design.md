@@ -159,7 +159,7 @@ To guarantee zero vendor lock-in, complete operational autonomy, and strict ente
 1. **Main Production Cluster (Very Big):** Built using **RKE2 (Rancher Kubernetes Engine 2)** — a CNCF-certified, security-hardened enterprise Kubernetes distribution that combines `k3s` operational simplicity with `MKE/RKE` enterprise compliance (FIPS 140-2, CIS Benchmark compliance, containerd runtime, and SELinux/AppArmor enforcement).
 2. **Supporting Services Cluster (Small):** Built using **K3s** — a lightweight, CNCF-certified Kubernetes distribution optimized for low-resource footprints, edge operations, and management utilities.
 
-```
+```text
 +-------------------------------------------------------------------------------------------------------------+
 |                                    SONGKETMAIL DUAL KUBERNETES FABRIC                                       |
 +----------------------------------------------------+--------------------------------------------------------+
@@ -266,13 +266,22 @@ sudo sysctl --system
 
 ### 8.4 Step-by-Step Installation & Configuration Guide
 
+#### Secure Token Generation & Security Notice
+Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster join operations using OpenSSL:
+```bash
+openssl rand -hex 32
+```
+Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories. If a token is exposed or compromised prior to deployment, rotate the token immediately using `rke2 token rotate` or updating `/etc/rancher/k3s/config.yaml`.
+
 #### A. Installing & Configuring RKE2 Production Cluster
+
+Note: RKE2 Supervisor port 9345 and Kubernetes API port 6443 must be exposed on all control-plane nodes and load-balanced behind the HA VIP (`10.200.10.10` / `rke2-vip.songketmail.internal`).
 
 ##### Step 1: Configure Primary Control Plane Node (`rke2-cp-01`)
 Create `/etc/rancher/rke2/config.yaml`:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+token: "<GENERATE_SECURE_RKE2_TOKEN>"
 tls-san:
   - "10.200.10.10"
   - "rke2-cp-01.songketmail.internal"
@@ -295,8 +304,8 @@ sudo systemctl enable --now rke2-server.service
 Create `/etc/rancher/rke2/config.yaml` on `rke2-cp-02` and `rke2-cp-03`:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
-server: "https://10.200.10.11:9345"
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+server: "https://10.200.10.10:9345"
+token: "<GENERATE_SECURE_RKE2_TOKEN>"
 tls-san:
   - "10.200.10.10"
   - "rke2-vip.songketmail.internal"
@@ -317,8 +326,8 @@ sudo systemctl enable --now rke2-server.service
 Create `/etc/rancher/rke2/config.yaml` on agent nodes:
 ```yaml
 # /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
-server: "https://10.200.10.11:9345"
-token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"
+server: "https://10.200.10.10:9345"
+token: "<GENERATE_SECURE_RKE2_TOKEN>"
 node-label:
   - "songketmail.io/tier=ai-compute"  # (Adjust label per tier: application / database)
 ```
@@ -333,12 +342,14 @@ sudo systemctl enable --now rke2-agent.service
 
 #### B. Installing & Configuring K3s Supporting Services Cluster
 
+Note: K3s API server / supervisor port 6443 must be exposed across all management control-plane nodes and load-balanced behind the HA VIP (`10.200.20.10` / `k3s-mgmt.songketmail.internal`).
+
 ##### Step 1: Configure Primary K3s Control Plane Node (`k3s-mgmt-01`)
 Create `/etc/rancher/k3s/config.yaml`:
 ```yaml
 # /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
 cluster-init: true
-token: "SongketMail-K3s-MgmtToken-2026-Secret"
+token: "<GENERATE_SECURE_K3S_TOKEN>"
 tls-san:
   - "10.200.20.10"
   - "k3s-mgmt.songketmail.internal"
@@ -358,8 +369,8 @@ sudo systemctl enable --now k3s.service
 Create `/etc/rancher/k3s/config.yaml` on `k3s-mgmt-02` and `k3s-mgmt-03`:
 ```yaml
 # /etc/rancher/k3s/config.yaml (Join HA Control Plane)
-server: "https://10.200.20.11:6443"
-token: "SongketMail-K3s-MgmtToken-2026-Secret"
+server: "https://10.200.20.10:6443"
+token: "<GENERATE_SECURE_K3S_TOKEN>"
 write-kubeconfig-mode: "0600"
 disable:
   - servicelb
@@ -375,7 +386,7 @@ sudo systemctl enable --now k3s.service
 ##### Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)
 Execute agent registration CLI command on `k3s-worker-01` and `k3s-worker-02`:
 ```bash
-curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.11:6443" K3S_TOKEN="SongketMail-K3s-MgmtToken-2026-Secret" sh -
+curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="<GENERATE_SECURE_K3S_TOKEN>" sh -
 sudo systemctl enable --now k3s-agent.service
 ```
 
