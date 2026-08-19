@@ -16,7 +16,7 @@ topics: [kubernetes, rke2, k3s, ceph, architecture, container, songketmail]
 
 The following architectural diagram illustrates the end-to-end data flow, ingress traffic control, network segmentation, compute node tiering, distributed Ceph storage pools, and disaster recovery replication links for the SongketMail Enterprise Kubernetes environment.
 
-```
+```text
 +----------------------------------------------------------------------------------------------------+
 |                                    EXTERNAL SYSTEMS INTEGRATION                                    |
 |  +--------------------+  +--------------------+  +---------------------+  +---------------------+  |
@@ -108,8 +108,8 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 
 ## 🔌 3. Dual-Plane Network Fabric
 
-* **100GbE High-Throughput Data Plane:** High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers.
-* **100GbE / 10GbE Out-of-Band (OOB) Management Fabric:** An isolated physical and logical network reserved for control plane communications, IPMI/iDRAC bare-metal orchestration, monitoring telemetry, and administrative access.
+* **100GbE High-Throughput Data Plane:** High-bandwidth, non-blocking switching fabric dedicated entirely to internal East-West container networking (CNI), Ceph storage replication, and high-frequency model inference data transfers over dedicated SFP28/QSFP28 interfaces.
+* **Out-of-Band (OOB) Management Fabric:** Dedicated physical 1GbE / 10GbE RJ45 OOB interfaces connected to isolated out-of-band switches strictly reserved for IPMI/iDRAC bare-metal orchestration, BMC telemetry, control plane management, and administrative console access. These are physically separated from the 10GbE / 100GbE data plane and Ceph public network interfaces.
 
 ---
 
@@ -156,7 +156,7 @@ The following architectural diagram illustrates the end-to-end data flow, ingres
 
 To guarantee zero vendor lock-in, complete operational autonomy, and strict enterprise security standards, SongketMail divides its container orchestration into **two distinct open-source Kubernetes clusters**:
 
-1. **Main Production Cluster (Very Big):** Built using **RKE2 (Rancher Kubernetes Engine 2)** — a CNCF-certified, security-hardened enterprise Kubernetes distribution that combines `k3s` operational simplicity with `MKE/RKE` enterprise compliance (FIPS 140-2, CIS Benchmark compliance, containerd runtime, and SELinux/AppArmor enforcement).
+1. **Main Production Cluster (Very Big):** Built using **RKE2 (Rancher Kubernetes Engine 2)** — a CNCF-certified, security-hardened enterprise Kubernetes distribution that combines `k3s` operational simplicity with enterprise compliance (supporting FIPS 140-2 compliance when deployed with FIPS-validated cryptographic modules or Canal CNI, CIS Benchmark compliance, containerd runtime, and SELinux/AppArmor enforcement). When eBPF performance and advanced networking are required, Cilium CNI is used.
 2. **Supporting Services Cluster (Small):** Built using **K3s** — a lightweight, CNCF-certified Kubernetes distribution optimized for low-resource footprints, edge operations, and management utilities.
 
 ```text
@@ -187,7 +187,7 @@ To guarantee zero vendor lock-in, complete operational autonomy, and strict ente
 | `rke2-worker-ai-02` | Worker / AI 2 | `10.200.10.22` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Real-Time NLP, BEC Embedding & Inspection |
 | `rke2-worker-ai-03` | Worker / AI 3 | `10.200.10.23` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Multimodal OCR, Attachment Heuristics |
 | `rke2-worker-ai-04` | Worker / AI 4 | `10.200.10.24` | Ubuntu 26.04 LTS | 128 vCPU, 2TB RAM, 8x H100/A100 GPU | `/etc/rancher/rke2/config.yaml` | Multimodal OCR, Attachment Heuristics |
-| `rke2-worker-app-01`| Worker / App 1| `10.200.10.31` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | SMTP Ingress Proxies, Ingress-Nginx |
+| `rke2-worker-app-01`| Worker / App 1| `10.200.10.31` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | SMTP Ingress Proxies, NGINX Ingress |
 | `rke2-worker-app-02`| Worker / App 2| `10.200.10.32` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | SMTP Outbound Engine, Queue Processing |
 | `rke2-worker-app-03`| Worker / App 3| `10.200.10.33` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | Mail Policy Microservices, Webmail API |
 | `rke2-worker-app-04`| Worker / App 4| `10.200.10.34` | Ubuntu 26.04 LTS / Alma 9.6 | 64 vCPU, 1TB RAM, 500GB NVMe | `/etc/rancher/rke2/config.yaml` | Kafka / RabbitMQ Streams, Redis Cache |
@@ -207,24 +207,24 @@ To guarantee zero vendor lock-in, complete operational autonomy, and strict ente
 
 ---
 
-### 8.2 Open-Source Core Software Stack
+### 8.2 Open-Source Core Software Stack & Supported Release Matrix
 
-To eliminate proprietary dependencies and avoid vendor lock-in, the entire orchestration ecosystem leverages standard, CNCF-maintained open-source software:
+To eliminate proprietary dependencies and avoid vendor lock-in, the entire orchestration ecosystem leverages standard, CNCF-maintained open-source software tested against a single supported version matrix:
 
 * **Kubernetes Engines:**
-  * **RKE2 (v1.30+):** Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.
-  * **K3s (v1.30+):** High-efficiency distribution for management cluster workloads.
+  * **RKE2 (v1.30.x LTS):** Security-first distribution using containerd, embedded etcd, and CIS hardened defaults.
+  * **K3s (v1.30.x LTS):** High-efficiency distribution for management cluster workloads.
 * **Container Network Interface (CNI):**
-  * **Cilium (v1.15+):** eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead.
+  * **Cilium (v1.15.x):** eBPF-based networking, high-speed load balancing, dynamic network policy enforcement, and Hubble observability without IPVS/iptables overhead. (Canal CNI can be selected for strict FIPS 140-2 profiles).
 * **Container Storage Interface (CSI):**
-  * **Ceph CSI (v3.10+):** Direct block (`rbd.csi.ceph.com`) and filesystem (`cephfs.csi.ceph.com`) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.
-  * **Longhorn (v1.6+):** Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.
+  * **Ceph CSI (v3.11.x):** Direct block (`rbd.csi.ceph.com`) and filesystem (`cephfs.csi.ceph.com`) driver connecting Kubernetes PVCs directly to the external 3-node Ceph storage cluster.
+  * **Longhorn (v1.6.x):** Lightweight, open-source distributed block storage utilized strictly inside the K3s supporting cluster for management state snapshots.
 * **Ingress & Edge Traffic Management:**
-  * **Ingress-Nginx Controller (v1.10+):** Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination.
-  * **MetalLB (v0.14+):** Bare-metal load balancer providing `LoadBalancer` type IP allocation over Layer 2 ARP / BGP.
+  * **NGINX Ingress Controller (v1.10.x):** Open-source high-throughput HTTP/HTTPS reverse proxy and TLS termination (disabling default bundled RKE2/K3s ingress controllers).
+  * **MetalLB (v0.14.x):** Bare-metal load balancer providing `LoadBalancer` type IP allocation over Layer 2 ARP / BGP.
 * **Certificate & Secret Management:**
-  * **Cert-Manager (v1.14+):** Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.
-  * **HashiCorp Vault (Open Source Edition):** Centralized secrets engine with K8s Service Account auth.
+  * **Cert-Manager (v1.14.x):** Automated x509 certificate issuance via Let's Encrypt ACME and internal HashiCorp Vault PKI.
+  * **HashiCorp Vault (Open Source Edition v1.16.x):** Centralized secrets engine with K8s Service Account auth.
 
 ---
 
@@ -254,24 +254,30 @@ sudo tee /etc/sysctl.d/99-kubernetes.conf <<EOF
 net.bridge.bridge-nf-call-iptables  = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward                 = 1
-net.ipv4.ip_unprivileged_port_start = 25
 vm.max_map_count                    = 262144
 fs.file-max                         = 2097152
 EOF
 
 sudo sysctl --system
 ```
+*Note: Binding low-numbered ports (such as SMTP port 25) without root permissions is configured specifically on SMTP ingress worker nodes (`rke2-worker-app-*`) via `net.ipv4.ip_unprivileged_port_start = 25` or Linux `CAP_NET_BIND_SERVICE` capability settings, keeping other nodes restricted.*
 
 ---
 
 ### 8.4 Step-by-Step Installation & Configuration Guide
 
-#### Secure Token Generation & Security Notice
-Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster join operations using OpenSSL:
+#### Secure Token Generation, CA Hash, & Security Notice
+Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster server and agent join operations using OpenSSL:
 ```bash
 openssl rand -hex 32
 ```
-Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories. If a token is exposed or compromised prior to or during deployment, rotate the token immediately using `rke2 token rotate` or `k3s token rotate`, followed by reconfiguring and restarting all affected nodes (`systemctl restart rke2-server` / `systemctl restart k3s`).
+For cluster node join operations, full join-token values should include the CA hash prefix (`K10<CA_HASH>::<SECRET_TOKEN>`) to pin server TLS certificates during node registration.
+
+Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories.
+
+**Token Rotation Guidance:**
+* **Server Token Rotation:** To rotate server tokens, run `rke2 token rotate` or `k3s token rotate` on control-plane servers.
+* **Agent Token Rotation:** Rotating agent tokens requires updating the agent token on all control-plane servers (`/etc/rancher/rke2/config.yaml` / `/etc/rancher/k3s/config.yaml`), followed by updating agent configs on worker nodes and restarting affected worker agents (`systemctl restart rke2-agent` / `systemctl restart k3s-agent`).
 
 #### A. Installing & Configuring RKE2 Production Cluster
 
