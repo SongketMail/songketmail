@@ -46,3 +46,4 @@ https://songketmail.gitbook.io/songketmail/OKF-ADOPTION-GUIDE
 https://songketmail.gitbook.io/songketmail/SUMMARY
 https://songketmail.gitbook.io/songketmail/README
 https://songketmail.gitbook.io/songketmail/privilege-safety-report
+https://songketmail.gitbook.io/songketmail/email-security-design

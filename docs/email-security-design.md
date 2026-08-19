@@ -4,7 +4,7 @@ type: documentation
 title: "Part 25: Email Security from the Wire to the Mailbox, JMAP Protocol & ACME Management"
 description: "Architecture specification covering end-to-end transport security (DANE, MTA-STS, TLSRPT), Smallstep ACMEv2 certificate automation, OpenPGP/S/MIME mailbox encryption at rest, JMAP web API integration, Rust memory-safety, and security-focused Ansible playbooks."
 resource: "file:///docs/email-security-design.md"
-timestamp: 2026-08-25T12:00:00Z
+timestamp: 2026-08-19T12:00:00Z
 topics: [security, email-security, dane, mta-sts, acmev2, smallstep, openpgp, smime, jmap, rust, ansible]
 ---
 
@@ -25,7 +25,7 @@ Security in SongketMail is a core architectural default: **Security is a default
 
 ## 🏗️ 2. End-to-End Email Security Architecture
 
-```
+```text
                                  [ SENDER MTA / CLIENT ]
                                             │
                                             │ ESMTP / TLS 1.3 / DANE / MTA-STS
@@ -69,8 +69,10 @@ DANE leverages **DNSSEC** to publish TLSA records in DNS, binding domain MX serv
 * **Mitigation:** Completely eliminates Man-in-the-Middle (MitM) attacks and rogue CA certificate issuance.
 
 ### 3.2 MTA-STS (SMTP MTA Strict Transport Security - RFC 8461)
-MTA-STS allows domain owners to declare that inbound SMTP connections must use TLS with valid certificates.
-* **DNS DNS Record:** `_mta-sts.songketmail.internal. IN TXT "v=STSv1; id=2026082501;"`
+MTA-STS enables domain owners to declare that inbound SMTP connections must enforce TLS with valid certificates.
+* **Internet-Facing Domains:** Public domains deploy MTA-STS HTTPS policy endpoints (`https://mta-sts.domain.com/.well-known/mta-sts.txt`) backed by publicly trusted Let's Encrypt / ACME certificates.
+* **Private / Internal Environments:** Internal enterprise domains (`*.songketmail.internal`) utilize Smallstep Private CA issued certificates for `mta-sts.songketmail.internal`.
+* **DNS TXT Record:** `_mta-sts.songketmail.internal. IN TXT "v=STSv1; id=2026081901;"`
 * **Policy Endpoint:** Served over HTTPS at `https://mta-sts.songketmail.internal/.well-known/mta-sts.txt`:
   ```ini
   version: STSv1
@@ -151,5 +153,5 @@ The SongketMail Ansible automation suite enforces security variables by default 
 
 ---
 
-*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-25*
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-19*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*

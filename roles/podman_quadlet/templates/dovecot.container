@@ -11,8 +11,6 @@ Volume={{ storage_base_path }}/dovecot/config:/etc/dovecot:Z
 Volume={{ storage_base_path }}/dovecot/indexes:/var/vmail/indexes:Z
 Volume={{ storage_base_path }}/dovecot/cache:/var/vmail/cache:Z
 Environment=TZ=UTC
-Environment=ENABLE_OPENPGP_SMIME_AT_REST={{ enable_openpgp_smime_at_rest | default(true) | string | lower }}
-Environment=ENABLE_JMAP_PROTOCOL={{ enable_jmap_protocol | default(true) | string | lower }}
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=dovecot
 

@@ -6,6 +6,7 @@ After=network-online.target
 ContainerName={{ cluster_prefix }}-smallstep
 Image=docker.io/smallstep/step-ca:{{ smallstep_image_tag }}
 Network={{ podman_network_name }}
+NetworkAlias=ca.songketmail.internal
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/smallstep/config:/home/step/config:Z
 Volume={{ storage_base_path }}/smallstep/data:/home/step/db:Z
@@ -14,6 +15,7 @@ Environment=TZ=UTC
 Environment=DOCKER_STEPCA_INIT_NAME=SongketMail Private CA
 Environment=DOCKER_STEPCA_INIT_DNS_NAMES=localhost,ca.songketmail.internal
 Environment=DOCKER_STEPCA_INIT_PROVISIONER_NAME=admin@songketmail.internal
+Environment=DOCKER_STEPCA_INIT_ACME=acme
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=smallstep
 

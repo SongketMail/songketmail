@@ -39,7 +39,7 @@ Executes system-level configurations to bootstrap a secure, unprivileged environ
 *   **User Management**: Sets up the non-root `songketmail` user and enables systemd linger (`loginctl enable-linger`) to persist background container lifecycles beyond active ssh sessions.
 
 ### B. Container Orchestration (`podman_quadlet` role)
-Deploys the 7-service decoupled container mesh strictly in unprivileged space:
+Deploys the 8-service decoupled container mesh strictly in unprivileged space:
 *   Generates native systemd-user **Quadlet files** (`.container`, `.pod`, `.network`) in `/home/songketmail/.config/containers/systemd/`.
 *   Triggers the systemd user manager `systemctl --user daemon-reload` and enables the cluster services.
 *   Enforces user namespace parity via `keep-id:uid=2001,gid=2001` on mapped storage mounts.

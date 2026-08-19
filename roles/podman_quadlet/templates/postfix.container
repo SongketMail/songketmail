@@ -10,9 +10,6 @@ UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/postfix/config:/etc/postfix:Z
 Volume={{ storage_base_path }}/postfix/spool:/var/spool/postfix:Z
 Environment=TZ=UTC
-Environment=ENABLE_DANE={{ enable_dane | default(true) | string | lower }}
-Environment=ENABLE_MTA_STS={{ enable_mta_sts | default(true) | string | lower }}
-Environment=ENABLE_TLS_RPT={{ enable_tls_rpt | default(true) | string | lower }}
 Exec=/usr/sbin/postfix start-fg
 Label=fabric_cluster={{ cluster_prefix }}
 Label=service_type=postfix
