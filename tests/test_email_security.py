@@ -7,6 +7,15 @@ GROUP_VARS_FILE = "group_vars/all.yml"
 QUADLET_DIR = "roles/podman_quadlet/templates"
 
 def _read_file(path):
+    """
+    Read a UTF-8 encoded text file.
+    
+    Parameters:
+    	path: Path to the file to read.
+    
+    Returns:
+    	str: The file contents.
+    """
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
