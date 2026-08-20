@@ -18,7 +18,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 45 Markdown (.md) files in the repository."""
+    """
+    Collect repository Markdown files while excluding Git, pytest cache, and Python cache directories.
+    
+    Returns:
+        list[str]: Sorted unique paths to the 46 Markdown files found.
+    """
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +32,20 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 45, f"Expected 45 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 46, f"Expected 46 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 27 HTML (.html) files in the docs/ directory."""
+    """
+    Collect the repository's HTML files while excluding Git, pytest cache, and Python cache directories.
+    
+    Returns:
+        list[str]: Sorted unique paths to the 28 discovered HTML files.
+    
+    Raises:
+        AssertionError: If the number of discovered HTML files is not 28.
+    """
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +54,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 27, f"Expected 27 HTML files, found {len(html_files)}"
+    assert len(html_files) == 28, f"Expected 28 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -927,3 +940,382 @@ def test_k8s_ceph_design_section8_word_count_and_ordering():
     idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
 
     assert idx_section7 < idx_section8 < idx_footer, "Section 8 must be ordered between Section 7 and the DSOM footer"
+
+
+# --- Test Group 12: FreeBSD Options & Bhyve Hypervisor Content Verification ---
+
+def test_freebsd_bhyve_solutions_markdown_content():
+    """Verifies that docs/freebsd-bhyve-solutions.md exists and contains required technical sections."""
+    md_file = "docs/freebsd-bhyve-solutions.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    content = _read(md_file)
+
+    # Verify OKF frontmatter
+    assert content.startswith("---")
+    assert "okf_version: \"0.1\"" in content or "okf_version: '0.1'" in content or "okf_version: 0.1" in content
+    assert "freebsd" in content.lower()
+    assert "bhyve" in content.lower()
+
+    # Verify key sections
+    assert "FreeBSD Deployment Options Matrix" in content
+    assert "FreeBSD Jails (Containerization)" in content
+    assert "bhyve Hypervisor (Hardware-Accelerated Virtualization)" in content
+    assert "beehive" in content.lower()
+    assert "Bhyve Hypervisor Deep Dive" in content
+    assert "ZFS Storage Integration" in content
+    assert "Virtual Networking Architecture" in content
+    assert "Bhyve VM Management & Administration" in content
+    assert "SongketMail Deployment Architecture on FreeBSD" in content
+
+    # Verify DSOM footer
+    assert "Harisfazillah Jamel" in content
+    assert "LinuxMalaysia" in content
+
+
+def test_freebsd_bhyve_solutions_html_content():
+    """Verifies docs/freebsd-bhyve-solutions.html structure, anchors, and unified template styling."""
+    html_file = "docs/freebsd-bhyve-solutions.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    content = _read(html_file)
+
+    # Verify unified layout
+    assert "<!-- Column 2: Center Main Content Area" in content
+    assert 'id="executive-overview"' in content
+    assert 'id="freebsd-deployment-options-matrix"' in content
+    assert 'id="bhyve-hypervisor-deep-dive"' in content
+    assert 'id="zfs-storage-integration"' in content
+    assert 'href="#executive-overview"' in content
+
+
+def test_freebsd_bhyve_solutions_markdown_frontmatter_topics():
+    """Verifies the OKF frontmatter 'topics' list of freebsd-bhyve-solutions.md was populated correctly."""
+    content = _read("docs/freebsd-bhyve-solutions.md")
+
+    parts = content.split("---", 2)
+    assert len(parts) >= 3, "docs/freebsd-bhyve-solutions.md has incomplete frontmatter block"
+    frontmatter = parts[1]
+
+    assert "topics:" in frontmatter
+    topics_line = next((l for l in frontmatter.splitlines() if l.strip().startswith("topics:")), "")
+    for topic in ["freebsd", "bhyve", "hypervisor", "virtualization", "jails", "zfs", "networking", "songketmail"]:
+        assert topic in topics_line, f"Missing topic '{topic}' in frontmatter topics line"
+
+
+def test_freebsd_bhyve_solutions_markdown_technical_commands():
+    """Verifies key shell/administration commands introduced in the Bhyve VM management sections."""
+    content = _read("docs/freebsd-bhyve-solutions.md")
+
+    for snippet in [
+        "kldload vmm",
+        'sysrc -f /boot/loader.conf vmm_load="YES"',
+        'sysrc -f /boot/loader.conf nmdm_load="YES"',
+        'sysrc vm_dir="zfs:zroot/vm"',
+        "vm switch create public",
+        "vm switch add public igb0",
+        "vm iso https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso",
+        "vm create -c 4 -m 8G -s 50G songketmail-node01",
+        "vm install songketmail-node01 ubuntu-26.04-live-server-amd64.iso",
+        "vm console songketmail-node01",
+        "zfs create -V 50G -b 64k zroot/bhyve/vms/songket-mail-01/disk0",
+        "kldstat -n vmm",
+        "bhyvectl --get-all --vm=songketmail-node01",
+        "zfs list -t snapshot",
+    ]:
+        assert snippet in content, f"Missing expected command/snippet: {snippet}"
+
+
+def test_freebsd_bhyve_solutions_capability_table_markdown():
+    """Verifies the 'Key Technical Capabilities' comparison table rows are intact in Markdown."""
+    content = _read("docs/freebsd-bhyve-solutions.md")
+
+    assert "| Feature | Description | Enterprise Value for SongketMail |" in content
+    assert "| **CPU Acceleration** | Leverages Intel EPT, AMD RVI, and ARM64 Stage 2 Translation | Delivers near bare-metal virtual CPU execution speeds |" in content
+    assert "| **VirtIO Support** | Native `virtio-net`, `virtio-blk`, `virtio-scsi`, `virtio-rnd` | Maximize I/O throughput and lower CPU utilization |" in content
+    assert "| **UEFI / EDK2 Firmware** | UEFI boot assistance via `sysutils/bhyve-firmware` | Boot modern Linux distributions, Windows, and FreeBSD securely |" in content
+    assert "| **Pass-Through (PPT)** | PCI device passthrough (`ppt` driver) | Direct GPU, NVMe, or NIC hardware delegation to VMs |" in content
+    assert "| **Live Migration** | Stateful VM migration (in active development) | High availability and seamless host maintenance |" in content
+
+
+def test_freebsd_bhyve_solutions_capability_table_html():
+    """Verifies the HTML rendering contains exactly one capability comparison table with all rows."""
+    content = _read("docs/freebsd-bhyve-solutions.html")
+
+    assert content.count("<table") == 1, "Expected exactly one <table> element on the FreeBSD/Bhyve page"
+    for term in [
+        "CPU Acceleration",
+        "VirtIO Support",
+        "UEFI / EDK2 Firmware",
+        "Pass-Through (PPT)",
+        "Live Migration",
+        "Enterprise Value for SongketMail",
+    ]:
+        assert term in content, f"Missing table term in HTML: {term}"
+
+
+def test_freebsd_bhyve_solutions_topologies_markdown_and_html():
+    """Verifies both SongketMail-on-FreeBSD deployment topologies are documented in Markdown and HTML."""
+    md_content = _read("docs/freebsd-bhyve-solutions.md")
+    html_content = _read("docs/freebsd-bhyve-solutions.html")
+
+    for content in (md_content, html_content):
+        assert "Topology A: Native Podman in Ubuntu Linux bhyve Guest" in content
+        assert "Topology B: Hybrid FreeBSD Jails + bhyve Hypervisor" in content
+        assert "FreeBSD 14.x / 15.x with OpenZFS" in content
+        assert "FreeBSD VNET Jails" in content
+        assert "bhyve running Ubuntu 26.04 LTS guest VM" in content
+
+
+def test_freebsd_bhyve_solutions_html_footer_topic_pills():
+    """Verifies the global footer topic pills for Topic 26 are present and located within <footer>."""
+    content = _read("docs/freebsd-bhyve-solutions.html")
+
+    assert "[ TOPIC: 26 ]" in content
+    assert "[ HYPERVISOR: BHYVE ]" in content
+    assert "[ OS: FREEBSD_ZFS ]" in content
+
+    idx_footer_tag = content.index("<footer")
+    idx_topic_pill = content.index("[ TOPIC: 26 ]")
+    assert idx_topic_pill > idx_footer_tag, "Topic 26 footer pill must be located inside the <footer> element"
+
+
+def test_freebsd_bhyve_solutions_html_toc_matches_all_headings():
+    """Verifies every h2/h3 heading id in the body has a matching Table of Contents anchor link."""
+    content = _read("docs/freebsd-bhyve-solutions.html")
+
+    heading_ids = re.findall(r'<h[23]\s+id="([^"]+)"', content)
+    expected_ids = [
+        "executive-overview",
+        "freebsd-deployment-options-matrix",
+        "1-freebsd-jails-containerization",
+        "2-bhyve-hypervisor-hardware-accelerated-virtualization",
+        "bhyve-hypervisor-deep-dive",
+        "key-technical-capabilities",
+        "zfs-storage-integration",
+        "virtual-networking-architecture",
+        "network-interfaces-amp-tap-devices",
+        "bhyve-vm-management-amp-administration",
+        "1-host-preparation",
+        "2-provisioning-an-ubuntu-2604-linux-vm-for-songketmail",
+        "songketmail-deployment-architecture-on-freebsd",
+        "topology-a-native-podman-in-ubuntu-linux-bhyve-guest",
+        "topology-b-hybrid-freebsd-jails-bhyve-hypervisor",
+        "verification-amp-operational-checklist",
+        "conclusion",
+    ]
+    assert heading_ids == expected_ids, f"Heading id sequence mismatch: {heading_ids}"
+
+    for heading_id in expected_ids:
+        assert f'href="#{heading_id}"' in content, f"Missing TOC anchor link for heading id={heading_id}"
+
+
+def test_freebsd_bhyve_solutions_section_ordering_markdown():
+    """Ensures all Topic 26 sections appear in the documented order, ending before the DSOM footer."""
+    content = _read("docs/freebsd-bhyve-solutions.md")
+
+    idx_overview = content.index("## 📋 Executive Overview")
+    idx_matrix = content.index("## 🏗️ FreeBSD Deployment Options Matrix")
+    idx_deepdive = content.index("## ⚡ Bhyve Hypervisor Deep Dive")
+    idx_zfs = content.index("## 💾 ZFS Storage Integration")
+    idx_network = content.index("## 🔌 Virtual Networking Architecture")
+    idx_mgmt = content.index("## 🛠️ Bhyve VM Management & Administration")
+    idx_deploy = content.index("## 📧 SongketMail Deployment Architecture on FreeBSD")
+    idx_verify = content.index("## 📊 Verification & Operational Checklist")
+    idx_conclusion = content.index("## 🎯 Conclusion")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+
+    assert (idx_overview < idx_matrix < idx_deepdive < idx_zfs < idx_network <
+            idx_mgmt < idx_deploy < idx_verify < idx_conclusion < idx_footer), \
+        "FreeBSD & Bhyve sections are out of the expected document order"
+
+
+# --- Test Group 13: FreeBSD & Bhyve Sidebar Navigation Propagation Verification ---
+#
+# These tests verify that the new "26. FreeBSD & Bhyve Architecture" sidebar entry, added by
+# this PR to every existing compiled HTML documentation page (and to the new page itself),
+# was propagated correctly, is positioned consistently, and correctly reflects the active
+# page state.
+
+FREEBSD_BHYVE_NAV_LABEL = "26. FreeBSD & Bhyve Architecture"
+FREEBSD_BHYVE_NAV_ICON = "🐝"
+FREEBSD_BHYVE_ACTIVE_ANCHOR = (
+    '<a href="freebsd-bhyve-solutions.html" class="flex items-center space-x-2 px-3 py-2 '
+    'rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 '
+    'font-bold text-sm transition">'
+)
+FREEBSD_BHYVE_INACTIVE_ANCHOR = (
+    '<a href="freebsd-bhyve-solutions.html" class="flex items-center space-x-2 px-3 py-2 '
+    'rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 '
+    'text-sm transition font-medium">'
+)
+
+
+@pytest.mark.parametrize("html_filepath", get_all_html_files())
+def test_freebsd_bhyve_nav_link_present_in_every_doc(html_filepath):
+    """Every compiled HTML documentation page's sidebar must link to the new Topic 26 page."""
+    content = _read(html_filepath)
+    assert 'href="freebsd-bhyve-solutions.html"' in content, \
+        f"{html_filepath} is missing the FreeBSD & Bhyve sidebar link"
+    assert FREEBSD_BHYVE_NAV_LABEL in content, \
+        f"{html_filepath} is missing the '{FREEBSD_BHYVE_NAV_LABEL}' label"
+    assert FREEBSD_BHYVE_NAV_ICON in content, \
+        f"{html_filepath} is missing the 🐝 icon for the new sidebar entry"
+
+
+def test_freebsd_bhyve_nav_link_active_only_on_own_page():
+    """Verifies the new sidebar entry uses the active/highlighted style only on its own page."""
+    own_page_content = _read("docs/freebsd-bhyve-solutions.html")
+    assert FREEBSD_BHYVE_ACTIVE_ANCHOR in own_page_content
+
+    for other_page in [
+        "docs/index.html",
+        "docs/ai-dev.html",
+        "docs/legal-notice.html",
+        "docs/proxmox-ceph-hci.html",
+        "docs/k8s-ceph-design.html",
+    ]:
+        content = _read(other_page)
+        assert FREEBSD_BHYVE_INACTIVE_ANCHOR in content, \
+            f"{other_page} should render the FreeBSD & Bhyve nav link in its inactive style"
+        assert FREEBSD_BHYVE_ACTIVE_ANCHOR not in content, \
+            f"{other_page} incorrectly renders the FreeBSD & Bhyve nav link as active"
+
+
+def test_freebsd_bhyve_nav_link_positioned_after_topic24_and_before_lab_modules():
+    """Verifies the new nav item is inserted directly after Topic 24 and before the Laboratory Modules section."""
+    for html_filepath in [
+        "docs/index.html",
+        "docs/ai-dev.html",
+        "docs/legal-notice.html",
+        "docs/freebsd-bhyve-solutions.html",
+        "docs/SOP-KNOWLEDGE-FIRST-DISCOVERY.html",
+    ]:
+        content = _read(html_filepath)
+        idx_topic24 = content.index("24. Proxmox VE Datacentre")
+        idx_topic26 = content.index(FREEBSD_BHYVE_NAV_LABEL)
+        idx_lab_modules = content.index("Laboratory Modules")
+        assert idx_topic24 < idx_topic26 < idx_lab_modules, \
+            f"{html_filepath}: Topic 26 nav link must sit between Topic 24 and Laboratory Modules"
+
+
+def test_summary_md_contains_part26_entry_in_order():
+    """Verifies docs/SUMMARY.md lists Part 26 after Part 25 and before the DSOM footer."""
+    content = _read("docs/SUMMARY.md")
+
+    assert "* [Part 26: FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)" in content
+
+    idx_part25 = content.index("Part 25: Email Security from the Wire to the Mailbox")
+    idx_part26 = content.index("Part 26: FreeBSD Options & Bhyve Hypervisor Architecture")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+
+    assert idx_part25 < idx_part26 < idx_footer, "Part 26 entry must appear after Part 25 and before the DSOM footer"
+
+
+def test_index_md_contains_topic26_entry_in_order():
+    """Verifies docs/index.md lists Topic 26 after Topic 24 and before the DSOM footer."""
+    content = _read("docs/index.md")
+
+    assert "26. [FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)" in content
+
+    idx_topic24 = content.index("24. [Proxmox VE Enterprise Datacentre Architecture]")
+    idx_topic26 = content.index("26. [FreeBSD Options & Bhyve Hypervisor Architecture]")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+
+    assert idx_topic24 < idx_topic26 < idx_footer, "Topic 26 entry must appear after Topic 24 and before the DSOM footer"
+
+
+# --- Test Group 14: scripts/unify_templates.py FreeBSD & Bhyve Data Registration Verification ---
+#
+# scripts/unify_templates.py drives generation of the unified sidebar, footer topic pills, and
+# page subtitles for every documentation page. This PR added new dictionary entries for
+# freebsd-bhyve-solutions.html to SIDEBAR_ITEMS, TOPIC_MAP, and SUBTITLE_MAP. These tests verify
+# those additions are correctly registered and correctly rendered by the existing generator
+# functions.
+
+def test_unify_templates_sidebar_items_contains_freebsd_entry():
+    """Verifies SIDEBAR_ITEMS has exactly one correctly-configured entry for the new page."""
+    from scripts import unify_templates
+
+    matches = [item for item in unify_templates.SIDEBAR_ITEMS if item.get("href") == "freebsd-bhyve-solutions.html"]
+    assert len(matches) == 1, "Expected exactly one SIDEBAR_ITEMS entry for freebsd-bhyve-solutions.html"
+
+    entry = matches[0]
+    assert entry["icon"] == "🐝"
+    assert entry["label"] == "26. FreeBSD & Bhyve Architecture"
+    assert entry["section"] == "research"
+
+    # Confirm ordering: appears right after Topic 24 (Proxmox VE Datacentre) and before the
+    # "Laboratory Modules" section header.
+    hrefs_and_headers = [item.get("href") or item.get("header") for item in unify_templates.SIDEBAR_ITEMS]
+    idx_topic24 = hrefs_and_headers.index("proxmox-datacenter-architecture.html")
+    idx_topic26 = hrefs_and_headers.index("freebsd-bhyve-solutions.html")
+    idx_lab_header = hrefs_and_headers.index("Laboratory Modules")
+    assert idx_topic24 < idx_topic26 < idx_lab_header
+
+
+def test_unify_templates_topic_map_contains_freebsd_entry():
+    """Verifies TOPIC_MAP registers the correct footer topic pills for the new page."""
+    from scripts import unify_templates
+
+    assert unify_templates.TOPIC_MAP["freebsd-bhyve-solutions.html"] == (
+        "[ TOPIC: 26 ]", "[ HYPERVISOR: BHYVE ]", "[ OS: FREEBSD_ZFS ]"
+    )
+
+
+def test_unify_templates_subtitle_map_contains_freebsd_entry():
+    """Verifies SUBTITLE_MAP registers the correct header subtitle for the new page."""
+    from scripts import unify_templates
+
+    assert unify_templates.SUBTITLE_MAP["freebsd-bhyve-solutions.html"] == (
+        "Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture"
+    )
+
+
+def test_unify_templates_make_sidebar_marks_freebsd_active_on_own_page():
+    """Verifies make_sidebar() renders the FreeBSD & Bhyve entry with the active style when it's the current page."""
+    from scripts import unify_templates
+
+    sidebar_html = unify_templates.make_sidebar("freebsd-bhyve-solutions.html")
+
+    assert 'href="freebsd-bhyve-solutions.html"' in sidebar_html
+    assert "26. FreeBSD & Bhyve Architecture" in sidebar_html
+
+    anchor_start = sidebar_html.index('href="freebsd-bhyve-solutions.html"')
+    anchor_block = sidebar_html[anchor_start: anchor_start + 300]
+    assert "font-bold" in anchor_block
+    assert "bg-violet-50" in anchor_block
+    assert "font-medium" not in anchor_block
+
+
+def test_unify_templates_make_sidebar_marks_freebsd_inactive_on_other_pages():
+    """Verifies make_sidebar() renders the FreeBSD & Bhyve entry with the inactive style on other pages."""
+    from scripts import unify_templates
+
+    sidebar_html = unify_templates.make_sidebar("index.html")
+
+    freebsd_anchor_start = sidebar_html.index('href="freebsd-bhyve-solutions.html"')
+    freebsd_anchor_block = sidebar_html[freebsd_anchor_start: freebsd_anchor_start + 300]
+    assert "font-medium" in freebsd_anchor_block
+    assert "bg-violet-50" not in freebsd_anchor_block
+
+    # The "index.html" entry itself should now be the active one instead.
+    index_anchor_start = sidebar_html.index('href="index.html"')
+    index_anchor_block = sidebar_html[index_anchor_start: index_anchor_start + 300]
+    assert "font-bold" in index_anchor_block
+    assert "bg-violet-50" in index_anchor_block
+
+
+def test_unify_templates_build_unified_html_uses_freebsd_metadata():
+    """Verifies build_unified_html() renders the freebsd-bhyve-solutions.html subtitle and topic pills."""
+    from scripts import unify_templates
+
+    html_output = unify_templates.build_unified_html(
+        "freebsd-bhyve-solutions.html", {}, '<h2 id="test">Test</h2>', ""
+    )
+
+    assert "Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture" in html_output
+    assert "[ TOPIC: 26 ]" in html_output
+    assert "[ HYPERVISOR: BHYVE ]" in html_output
+    assert "[ OS: FREEBSD_ZFS ]" in html_output
+    assert 'href="freebsd-bhyve-solutions.html"' in html_output
