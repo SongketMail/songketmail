@@ -27,6 +27,19 @@ dovecot_image_tag: "2.3.21.1"
 roundcube_image_tag: "1.6.8-apache"
 rustfs_image_tag: "1.0.0"
 rspamd_image_tag: "3.9.1"
+smallstep_image_tag: "0.26.1"
+
+# Email Security-by-Default Controls
+enable_dane: true
+enable_mta_sts: true
+enable_tls_rpt: true
+enable_acme_v2: true
+smallstep_ca_url: "https://ca.songketmail.internal:9000"
+enable_openpgp_smime_at_rest: true
+enable_jmap_protocol: true
+jmap_port: 8443
+dkim_key_bits: 2048
+dkim_rotation_days: 90
 
 # Database Configuration & Credentials
 postgres_user: "mail_admin"
@@ -45,6 +58,7 @@ songketmail_services:
   - s3
   - web
   - rspamd
+  - smallstep
 
 # Subdirectories for keep-id mapping (UID/GID 2001:2001) host persistence
 songketmail_storage_dirs:
@@ -62,3 +76,5 @@ songketmail_storage_dirs:
   - "roundcube/db"
   - "rspamd/config"
   - "rspamd/data"
+  - "smallstep/config"
+  - "smallstep/data"

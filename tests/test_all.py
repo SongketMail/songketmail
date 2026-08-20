@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 44 Markdown (.md) files in the repository."""
+    """Retrieves all 45 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 44, f"Expected 44 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 45, f"Expected 45 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 26 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 27 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,12 +41,12 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 26, f"Expected 26 HTML files, found {len(html_files)}"
+    assert len(html_files) == 27, f"Expected 27 HTML files, found {len(html_files)}"
     return html_files
 
 
 def get_all_template_files():
-    """Retrieves all 9 template files under roles/podman_quadlet/templates/."""
+    """Retrieves all 10 template files under roles/podman_quadlet/templates/."""
     tpl_dir = "roles/podman_quadlet/templates"
     tpl_files = []
     if os.path.exists(tpl_dir):
@@ -54,7 +54,7 @@ def get_all_template_files():
             if os.path.isfile(os.path.join(tpl_dir, f)):
                 tpl_files.append(os.path.join(tpl_dir, f))
     tpl_files = sorted(list(set(tpl_files)))
-    assert len(tpl_files) == 9, f"Expected 9 template files, found {len(tpl_files)}"
+    assert len(tpl_files) == 10, f"Expected 10 template files, found {len(tpl_files)}"
     return tpl_files
 
 
@@ -693,11 +693,11 @@ def test_k8s_ceph_design_frontmatter_mentions_rke2_k3s():
 
 
 def test_k8s_ceph_design_network_fabric_updated_markdown():
-    """Verifies Section 3 (Dual-Plane Network Fabric) reflects the 100GbE/10GbE OOB fabric update."""
+    """Verifies Section 3 (Dual-Plane Network Fabric) reflects the 1GbE/10GbE OOB fabric update."""
     content = _read("docs/k8s-ceph-design.md")
 
     assert "## 🔌 3. Dual-Plane Network Fabric" in content
-    assert "**100GbE / 10GbE Out-of-Band (OOB) Management Fabric:**" in content
+    assert "**1GbE / 10GbE Out-of-Band (OOB) Management Fabric:**" in content
     # The old, narrower "10GbE Out-of-Band (OOB) Management Plane" bullet must be gone.
     assert "10GbE Out-of-Band (OOB) Management Plane" not in content
 
@@ -707,7 +707,7 @@ def test_k8s_ceph_design_network_fabric_updated_html():
     content = _read("docs/k8s-ceph-design.html")
 
     assert 'id="3-dual-plane-network-fabric"' in content
-    assert "100GbE / 10GbE Out-of-Band (OOB) Management Fabric" in content
+    assert "1GbE / 10GbE Out-of-Band (OOB) Management Fabric" in content
     assert "10GbE Out-of-Band (OOB) Management Plane" not in content
 
 
@@ -833,14 +833,14 @@ def test_k8s_ceph_design_software_stack_content_markdown():
     content = _read("docs/k8s-ceph-design.md")
 
     for term in [
-        "RKE2 (v1.30+)",
-        "K3s (v1.30+)",
+        "RKE2 (v1.31+)",
+        "K3s (v1.31+)",
         "Cilium (v1.15+)",
         "Ceph CSI (v3.10+)",
         "rbd.csi.ceph.com",
         "cephfs.csi.ceph.com",
         "Longhorn (v1.6+)",
-        "Ingress-Nginx Controller (v1.10+)",
+        "Ingress-NGINX / Gateway API (v1.11+)",
         "MetalLB (v0.14+)",
         "Cert-Manager (v1.14+)",
         "HashiCorp Vault (Open Source Edition)",
@@ -860,15 +860,15 @@ def test_k8s_ceph_design_node_prerequisites_and_install_commands_markdown():
     assert "vm.max_map_count                    = 262144" in content
 
     # 8.4 RKE2 install commands
-    assert "curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=\"v1.30\" sh -" in content
+    assert "curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=\"v1.31\" sh -" in content
     assert "sudo systemctl enable --now rke2-server.service" in content
     assert "INSTALL_RKE2_TYPE=\"agent\"" in content
     assert "sudo systemctl enable --now rke2-agent.service" in content
 
     # 8.4 K3s install commands
-    assert "curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=\"v1.30\" sh -" in content
+    assert "curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=\"v1.31\" sh -" in content
     assert "sudo systemctl enable --now k3s.service" in content
-    assert 'K3S_URL="https://10.200.20.11:6443"' in content
+    assert 'K3S_URL="https://10.200.20.10:6443"' in content
     assert "sudo systemctl enable --now k3s-agent.service" in content
 
 
@@ -876,12 +876,12 @@ def test_k8s_ceph_design_rke2_config_yaml_snippets_markdown():
     """Verifies the RKE2 config.yaml snippets contain expected keys for control plane and agent nodes."""
     content = _read("docs/k8s-ceph-design.md")
 
-    assert 'token: "SongketMail-RKE2-SecureClusterToken-2026-Secret"' in content
+    assert 'token: "<GENERATE_SECURE_RKE2_TOKEN>"' in content
     assert "tls-san:" in content
     assert '"rke2-vip.songketmail.internal"' in content
     assert "cni:\n  - cilium" in content
     assert "disable:\n  - rke2-ingress-nginx" in content
-    assert 'server: "https://10.200.10.11:9345"' in content
+    assert 'server: "https://10.200.10.10:9345"' in content
     assert '"songketmail.io/tier=ai-compute"' in content
 
 
@@ -890,8 +890,8 @@ def test_k8s_ceph_design_k3s_config_yaml_snippets_markdown():
     content = _read("docs/k8s-ceph-design.md")
 
     assert "cluster-init: true" in content
-    assert 'token: "SongketMail-K3s-MgmtToken-2026-Secret"' in content
-    assert 'server: "https://10.200.20.11:6443"' in content
+    assert 'token: "<GENERATE_SECURE_K3S_TOKEN>"' in content
+    assert 'server: "https://10.200.20.10:6443"' in content
     assert "disable:\n  - servicelb\n  - traefik" in content
 
 

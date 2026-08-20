@@ -22,6 +22,7 @@ https://songketmail.github.io/songketmail/OKF-ADOPTION-GUIDE.html
 https://songketmail.github.io/songketmail/SUMMARY.html
 https://songketmail.github.io/songketmail/README.html
 https://songketmail.github.io/songketmail/privilege-safety-report.html
+https://songketmail.github.io/songketmail/email-security-design.html
 https://songketmail.gitbook.io/songketmail/
 https://songketmail.gitbook.io/songketmail/podman-rootless
 https://songketmail.gitbook.io/songketmail/ansible-fqcn
@@ -45,3 +46,4 @@ https://songketmail.gitbook.io/songketmail/OKF-ADOPTION-GUIDE
 https://songketmail.gitbook.io/songketmail/SUMMARY
 https://songketmail.gitbook.io/songketmail/README
 https://songketmail.gitbook.io/songketmail/privilege-safety-report
+https://songketmail.gitbook.io/songketmail/email-security-design

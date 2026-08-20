@@ -8,19 +8,25 @@ Image=docker.io/bunkerity/bunkerweb-all-in-one:{{ bunkerweb_image_tag }}
 Network={{ podman_network_name }}
 UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
 Volume={{ storage_base_path }}/bunkerweb/data:/data:Z
+Volume={{ storage_base_path }}/smallstep/config/certs/root_ca.crt:/etc/ssl/certs/smallstep_root_ca.crt:ro,Z
 PublishPort=80:8080
 PublishPort=443:8443
 PublishPort=443:8443/udp
+PublishPort={{ jmap_port }}:8443
 PublishPort=25:25
 PublishPort=587:587
 PublishPort=993:993
 Environment=TZ=UTC
 Environment=MULTISITE=yes
-Environment=SERVER_NAME=mail.songketmail.internal smtp.songketmail.internal imap.songketmail.internal
+Environment=SERVER_NAME=mail.songketmail.internal jmap.songketmail.internal smtp.songketmail.internal imap.songketmail.internal
 # Webmail (HTTP/HTTPS)
 Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
 Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://{{ cluster_prefix }}-web:8080
 Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/
+# JMAP Web API Stream (Port 8443)
+Environment=jmap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=jmap.songketmail.internal_REVERSE_PROXY_HOST=http://{{ cluster_prefix }}-dovecot:8443
+Environment=jmap.songketmail.internal_REVERSE_PROXY_URL=/
 # SMTP Stream (Port 25)
 Environment=smtp.songketmail.internal_SERVER_TYPE=stream
 Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
@@ -38,6 +44,13 @@ Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
 Environment=imap.songketmail.internal_REVERSE_PROXY_HOST={{ cluster_prefix }}-dovecot:993
 Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
 Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# ACMEv2 & Smallstep Private CA Settings
+Environment=USE_ACME=yes
+Environment=ACME_DIRECTORY_URL={{ smallstep_ca_url }}/acme/acme/directory
+Environment=ACME_CA_CERT_PATH=/etc/ssl/certs/smallstep_root_ca.crt
+Environment=ACME_SSL_VERIFY=yes
+Environment=mail.songketmail.internal_ACME_DIRECTORY_URL={{ smallstep_ca_url }}/acme/acme/directory
+Environment=mail.songketmail.internal_ACME_CA_CERT_PATH=/etc/ssl/certs/smallstep_root_ca.crt
 # SSL/TLS Settings
 Environment=GENERATE_SELF_SIGNED_SSL=yes
 Label=fabric_cluster={{ cluster_prefix }}
