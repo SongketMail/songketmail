@@ -22,7 +22,7 @@ This document explores all primary FreeBSD deployment options and provides an in
 
 FreeBSD offers multiple tiers of workload isolation, ranging from OS-level containerization to full hardware-accelerated machine virtualization:
 
-```
+```text
 +-------------------------------------------------------------------------------+
 |                             FREEBSD HOST SYSTEM                               |
 |               Kernel: FreeBSD | Storage: OpenZFS | Network: pf / ipfw         |
@@ -46,7 +46,7 @@ FreeBSD offers multiple tiers of workload isolation, ranging from OS-level conta
 * **Architecture:** Type-2 hypervisor embedded directly in FreeBSD via the `vmm.ko` kernel module.
 * **Pronunciation:** **bhyve** is pronounced *"beehive"*.
 * **Supported Guest OS:** Running full, unmodified guest operating systems including **FreeBSD**, **Linux** (Ubuntu, Debian, AlmaLinux, Alpine), **OpenBSD**, **NetBSD**, and **Microsoft Windows**.
-* **Supported Architectures:** Hardware acceleration on modern **Intel** (VT-x / EPT), **AMD** (AMD-V / RVI), and **ARM64** (ARMv8.1+ NPT / virtualization extensions) processors.
+* **Supported Architectures:** Hardware acceleration on modern **Intel** (VT-x / EPT), **AMD** (AMD-V / RVI), and **ARM64** (an aarch64 host with pure ARMv8.0 virtualization, without NPT or Virtualization Host Extensions) processors.
 * **Key Benefit:** Complete OS independence, kernel isolation, and support for multi-OS heterogeneous mail infrastructure.
 
 ---
@@ -88,7 +88,7 @@ FreeBSD's native integration with **OpenZFS** provides an enterprise storage sub
 
 bhyve utilizes FreeBSD's flexible networking primitives to form dual-plane network fabrics:
 
-```
+```text
                  +-----------------------------------+
                  |      Physical NIC (e.g. igb0)     |
                  +-----------------------------------+
@@ -139,6 +139,9 @@ sysrc vm_dir="zfs:zroot/vm"
 vm init
 vm switch create public
 vm switch add public igb0
+
+# Copy Linux VM template from bhyve-firmware example location
+cp /usr/local/share/examples/vm-bhyve/linux.conf /zroot/vm/.templates/linux.conf
 ```
 
 ### 2. Provisioning an Ubuntu 26.04 / Linux VM for SongketMail
@@ -148,8 +151,8 @@ vm switch add public igb0
 # Download ISO image
 vm iso https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso
 
-# Create 4 vCPU, 8GB RAM virtual machine
-vm create -c 4 -m 8G -s 50G songketmail-node01
+# Create 4 vCPU, 8GB RAM virtual machine with linux template
+vm create -t linux -c 4 -m 8G -s 50G songketmail-node01
 
 # Install OS using UEFI EDK2 firmware
 vm install songketmail-node01 ubuntu-26.04-live-server-amd64.iso

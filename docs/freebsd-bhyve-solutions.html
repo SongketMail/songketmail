@@ -261,7 +261,7 @@
                 <li><strong>Architecture:</strong> Type-2 hypervisor embedded directly in FreeBSD via the <code>vmm.ko</code> kernel module.</li>
                 <li><strong>Pronunciation:</strong> <strong>bhyve</strong> is pronounced <em>"beehive"</em>.</li>
                 <li><strong>Supported Guest OS:</strong> Running full, unmodified guest operating systems including <strong>FreeBSD</strong>, <strong>Linux</strong> (Ubuntu, Debian, AlmaLinux, Alpine), <strong>OpenBSD</strong>, <strong>NetBSD</strong>, and <strong>Microsoft Windows</strong>.</li>
-                <li><strong>Supported Architectures:</strong> Hardware acceleration on modern <strong>Intel</strong> (VT-x / EPT), <strong>AMD</strong> (AMD-V / RVI), and <strong>ARM64</strong> (ARMv8.1+ NPT / virtualization extensions) processors.</li>
+                <li><strong>Supported Architectures:</strong> Hardware acceleration on modern <strong>Intel</strong> (VT-x / EPT), <strong>AMD</strong> (AMD-V / RVI), and <strong>ARM64</strong> (an aarch64 host with pure ARMv8.0 virtualization, without NPT or Virtualization Host Extensions) processors.</li>
                 <li><strong>Key Benefit:</strong> Complete OS independence, kernel isolation, and support for multi-OS heterogeneous mail infrastructure.</li>
             </ul>
 
@@ -362,14 +362,17 @@ sysrc vm_dir="zfs:zroot/vm"
 # Initialize vm-bhyve datastore
 vm init
 vm switch create public
-vm switch add public igb0</code></pre>
+vm switch add public igb0
+
+# Copy Linux VM template from bhyve-firmware example location
+cp /usr/local/share/examples/vm-bhyve/linux.conf /zroot/vm/.templates/linux.conf</code></pre>
 
             <h3 id="2-provisioning-an-ubuntu-2604-linux-vm-for-songketmail">2. Provisioning an Ubuntu 26.04 / Linux VM for SongketMail</h3>
             <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code># Download ISO image
 vm iso https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso
 
-# Create 4 vCPU, 8GB RAM virtual machine
-vm create -c 4 -m 8G -s 50G songketmail-node01
+# Create 4 vCPU, 8GB RAM virtual machine with linux template
+vm create -t linux -c 4 -m 8G -s 50G songketmail-node01</code></pre>
 
 # Install OS using UEFI EDK2 firmware
 vm install songketmail-node01 ubuntu-26.04-live-server-amd64.iso
