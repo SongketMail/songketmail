@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 45 Markdown (.md) files in the repository."""
+    """Retrieves all 46 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 45, f"Expected 45 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 46, f"Expected 46 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 27 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 28 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +41,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 27, f"Expected 27 HTML files, found {len(html_files)}"
+    assert len(html_files) == 28, f"Expected 28 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -927,3 +927,50 @@ def test_k8s_ceph_design_section8_word_count_and_ordering():
     idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
 
     assert idx_section7 < idx_section8 < idx_footer, "Section 8 must be ordered between Section 7 and the DSOM footer"
+
+
+# --- Test Group 12: FreeBSD Options & Bhyve Hypervisor Content Verification ---
+
+def test_freebsd_bhyve_solutions_markdown_content():
+    """Verifies that docs/freebsd-bhyve-solutions.md exists and contains required technical sections."""
+    md_file = "docs/freebsd-bhyve-solutions.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    content = _read(md_file)
+
+    # Verify OKF frontmatter
+    assert content.startswith("---")
+    assert "okf_version: \"0.1\"" in content or "okf_version: '0.1'" in content or "okf_version: 0.1" in content
+    assert "freebsd" in content.lower()
+    assert "bhyve" in content.lower()
+
+    # Verify key sections
+    assert "FreeBSD Deployment Options Matrix" in content
+    assert "FreeBSD Jails (Containerization)" in content
+    assert "bhyve Hypervisor (Hardware-Accelerated Virtualization)" in content
+    assert "beehive" in content.lower()
+    assert "Bhyve Hypervisor Deep Dive" in content
+    assert "ZFS Storage Integration" in content
+    assert "Virtual Networking Architecture" in content
+    assert "Bhyve VM Management & Administration" in content
+    assert "SongketMail Deployment Architecture on FreeBSD" in content
+
+    # Verify DSOM footer
+    assert "Harisfazillah Jamel" in content
+    assert "LinuxMalaysia" in content
+
+
+def test_freebsd_bhyve_solutions_html_content():
+    """Verifies docs/freebsd-bhyve-solutions.html structure, anchors, and unified template styling."""
+    html_file = "docs/freebsd-bhyve-solutions.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    content = _read(html_file)
+
+    # Verify unified layout
+    assert "<!-- Column 2: Center Main Content Area" in content
+    assert 'id="executive-overview"' in content
+    assert 'id="freebsd-deployment-options-matrix"' in content
+    assert 'id="bhyve-hypervisor-deep-dive"' in content
+    assert 'id="zfs-storage-integration"' in content
+    assert 'href="#executive-overview"' in content

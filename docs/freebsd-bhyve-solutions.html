@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeBSD Options & Bhyve Hypervisor Architecture — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+                    <a href="ceph-ubuntu-deployment.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>21. Ceph Native Deployment</span>
+                    </a>
+                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>22. Geolocated Regional DC</span>
+                    </a>
+                    <a href="k8s-ceph-design.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>☸️</span>
+                        <span>23. Enterprise K8s & Ceph</span>
+                    </a>
+                    <a href="proxmox-datacenter-architecture.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🖥️</span>
+                        <span>24. Proxmox VE Datacentre</span>
+                    </a>
+                    <a href="freebsd-bhyve-solutions.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>🐝</span>
+                        <span>26. FreeBSD & Bhyve Architecture</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">🐝 Part 26: FreeBSD Options &amp; Bhyve Hypervisor Architecture</h1>
+
+            <h2 id="executive-overview">📋 Executive Overview</h2>
+            <p>FreeBSD is an advanced Unix-like operating system renowned for its security, performance, networking stack, and state-of-the-art storage subsystem with native <strong>OpenZFS</strong>. When designing secure, highly reliable enterprise mail server fabrics like <strong>SongketMail</strong>, FreeBSD provides a comprehensive ecosystem of isolation and virtualization mechanisms.</p>
+            <p>This document explores all primary FreeBSD deployment options and provides an in-depth architectural guide for <strong>bhyve</strong> (pronounced <em>"beehive"</em>), FreeBSD's native lightweight type-2 hypervisor.</p>
+
+            <h2 id="freebsd-deployment-options-matrix">🏗️ FreeBSD Deployment Options Matrix</h2>
+            <p>FreeBSD offers multiple tiers of workload isolation, ranging from OS-level containerization to full hardware-accelerated machine virtualization:</p>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code>+-------------------------------------------------------------------------------+
+|                             FREEBSD HOST SYSTEM                               |
+|               Kernel: FreeBSD | Storage: OpenZFS | Network: pf / ipfw         |
++-------------------------------------------------------------------------------+
+        |                                       |
+        v                                       v
++-------------------------------+       +-------------------------------+
+|    FREEBSD JAILS (Lightweight) |       |  BHYVE HYPERVISOR (Type-2)    |
+| - Shared FreeBSD Kernel       |       | - Hardware-Accelerated (vmm)  |
+| - Process & Network Isolation |       | - Guest Kernels (Linux, Win)  |
+| - Zero VM Overhead            |       | - Intel, AMD & ARM64 Support  |
++-------------------------------+       +-------------------------------+</code></pre>
+
+            <h3 id="1-freebsd-jails-containerization">1. FreeBSD Jails (Containerization)</h3>
+            <ul class="list-disc pl-6 space-y-1">
+                <li><strong>Architecture:</strong> Operating system-level virtualization sharing the host kernel.</li>
+                <li><strong>Use Cases:</strong> Running native FreeBSD services (Postfix, Dovecot, Nginx, Redis) with process, filesystem, and network stack isolation (VNET).</li>
+                <li><strong>Key Benefit:</strong> Minimal memory footprint, near-zero CPU overhead, and instant startup times.</li>
+            </ul>
+
+            <h3 id="2-bhyve-hypervisor-hardware-accelerated-virtualization">2. bhyve Hypervisor (Hardware-Accelerated Virtualization)</h3>
+            <ul class="list-disc pl-6 space-y-1">
+                <li><strong>Architecture:</strong> Type-2 hypervisor embedded directly in FreeBSD via the <code>vmm.ko</code> kernel module.</li>
+                <li><strong>Pronunciation:</strong> <strong>bhyve</strong> is pronounced <em>"beehive"</em>.</li>
+                <li><strong>Supported Guest OS:</strong> Running full, unmodified guest operating systems including <strong>FreeBSD</strong>, <strong>Linux</strong> (Ubuntu, Debian, AlmaLinux, Alpine), <strong>OpenBSD</strong>, <strong>NetBSD</strong>, and <strong>Microsoft Windows</strong>.</li>
+                <li><strong>Supported Architectures:</strong> Hardware acceleration on modern <strong>Intel</strong> (VT-x / EPT), <strong>AMD</strong> (AMD-V / RVI), and <strong>ARM64</strong> (ARMv8.1+ NPT / virtualization extensions) processors.</li>
+                <li><strong>Key Benefit:</strong> Complete OS independence, kernel isolation, and support for multi-OS heterogeneous mail infrastructure.</li>
+            </ul>
+
+            <h2 id="bhyve-hypervisor-deep-dive">⚡ Bhyve Hypervisor Deep Dive</h2>
+            <p><strong>bhyve</strong> was designed from the ground up to be a clean, secure, and modern hypervisor for FreeBSD. Unlike legacy hypervisors, bhyve minimizes legacy device emulation by relying on standard <strong>virtio</strong> drivers for block devices, network interfaces, console access, and memory ballooning.</p>
+
+            <h3 id="key-technical-capabilities">Key Technical Capabilities</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left border-collapse border border-slate-200 dark:border-slate-700">
+                    <thead class="bg-slate-100 dark:bg-slate-800">
+                        <tr>
+                            <th class="p-2 border border-slate-200 dark:border-slate-700">Feature</th>
+                            <th class="p-2 border border-slate-200 dark:border-slate-700">Description</th>
+                            <th class="p-2 border border-slate-200 dark:border-slate-700">Enterprise Value for SongketMail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700"><strong>CPU Acceleration</strong></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Leverages Intel EPT, AMD RVI, and ARM64 Stage 2 Translation</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Delivers near bare-metal virtual CPU execution speeds</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700"><strong>VirtIO Support</strong></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Native <code>virtio-net</code>, <code>virtio-blk</code>, <code>virtio-scsi</code>, <code>virtio-rnd</code></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Maximize I/O throughput and lower CPU utilization</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700"><strong>UEFI / EDK2 Firmware</strong></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">UEFI boot assistance via <code>sysutils/bhyve-firmware</code></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Boot modern Linux distributions, Windows, and FreeBSD securely</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700"><strong>Pass-Through (PPT)</strong></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">PCI device passthrough (<code>ppt</code> driver)</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Direct GPU, NVMe, or NIC hardware delegation to VMs</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700"><strong>Live Migration</strong></td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">Stateful VM migration (in active development)</td>
+                            <td class="p-2 border border-slate-200 dark:border-slate-700">High availability and seamless host maintenance</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 id="zfs-storage-integration">💾 ZFS Storage Integration</h2>
+            <p>FreeBSD's native integration with <strong>OpenZFS</strong> provides an enterprise storage substrate for both Jails and bhyve virtual machines:</p>
+            <ol class="list-decimal pl-6 space-y-2">
+                <li><strong>ZFS Datasets for VM Disks:</strong> bhyve virtual disks can be backed by <strong>ZFS ZVOLs</strong> (block devices) or sparse disk images residing on ZFS datasets. Example: <code>zfs create -V 50G -b 64k zroot/bhyve/vms/songket-mail-01/disk0</code></li>
+                <li><strong>Continuous Data Protection:</strong> Atomic ZFS snapshots (<code>zfs snapshot</code>) allow instant point-in-time backups of running VMs before system updates. Boot Environments (<code>bectl</code>) enable single-command rollback of the FreeBSD hypervisor host.</li>
+                <li><strong>Replication &amp; DR:</strong> Incremental replication using <code>zfs send</code> and <code>zfs recv</code> enables high-speed VM image synchronization across regional data centres.</li>
+            </ol>
+
+            <h2 id="virtual-networking-architecture">🔌 Virtual Networking Architecture</h2>
+            <p>bhyve utilizes FreeBSD's flexible networking primitives to form dual-plane network fabrics:</p>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code>                 +-----------------------------------+
+                 |      Physical NIC (e.g. igb0)     |
+                 +-----------------------------------+
+                                   |
+                                   v
+                         +-------------------+
+                         | bridge0 (if_bridge)|
+                         +-------------------+
+                           /               \
+                          v                 v
+                   +--------------+  +--------------+
+                   | tap0 (virtio)|  | tap1 (virtio)|
+                   +--------------+  +--------------+
+                          |                 |
+                          v                 v
+                   +--------------+  +--------------+
+                   |  bhyve VM 1  |  |  bhyve VM 2  |
+                   | (SongketMail)|  | (BunkerWeb)  |
+                   +--------------+  +--------------+</code></pre>
+
+            <h3 id="network-interfaces-amp-tap-devices">Network Interfaces &amp; TAP Devices</h3>
+            <ul class="list-disc pl-6 space-y-1">
+                <li>Each bhyve VM attaches its virtual network interface (<code>virtio-net</code>) to a host TAP device (<code>tap0</code>, <code>tap1</code>).</li>
+                <li>The TAP devices are joined to a virtual bridge interface (<code>if_bridge</code>), connecting the VMs to the physical network or isolated VLANs.</li>
+            </ul>
+
+            <h2 id="bhyve-vm-management-amp-administration">🛠️ Bhyve VM Management &amp; Administration</h2>
+            <p>While bhyve can be controlled via raw command-line invocations (<code>bhyve</code> and <code>bhyvectl</code>), modern enterprise administration relies on management tools like <strong><code>vm-bhyve</code></strong>.</p>
+
+            <h3 id="1-host-preparation">1. Host Preparation</h3>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code># Load bhyve kernel module
+kldload vmm
+
+# Enable on startup in /boot/loader.conf
+sysrc -f /boot/loader.conf vmm_load="YES"
+sysrc -f /boot/loader.conf nmdm_load="YES"
+
+# Configure vm-bhyve in /etc/rc.conf
+sysrc vm_enable="YES"
+sysrc vm_dir="zfs:zroot/vm"
+
+# Initialize vm-bhyve datastore
+vm init
+vm switch create public
+vm switch add public igb0</code></pre>
+
+            <h3 id="2-provisioning-an-ubuntu-2604-linux-vm-for-songketmail">2. Provisioning an Ubuntu 26.04 / Linux VM for SongketMail</h3>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code># Download ISO image
+vm iso https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso
+
+# Create 4 vCPU, 8GB RAM virtual machine
+vm create -c 4 -m 8G -s 50G songketmail-node01
+
+# Install OS using UEFI EDK2 firmware
+vm install songketmail-node01 ubuntu-26.04-live-server-amd64.iso
+
+# Connect to VM console via null-modem
+vm console songketmail-node01</code></pre>
+
+            <h2 id="songketmail-deployment-architecture-on-freebsd">📧 SongketMail Deployment Architecture on FreeBSD</h2>
+            <p>SongketMail can be deployed on FreeBSD host environments using two primary topologies:</p>
+
+            <h3 id="topology-a-native-podman-in-ubuntu-linux-bhyve-guest">Topology A: Native Podman in Ubuntu Linux bhyve Guest</h3>
+            <ul class="list-disc pl-6 space-y-1">
+                <li><strong>Host:</strong> FreeBSD 14.x / 15.x with OpenZFS.</li>
+                <li><strong>Hypervisor:</strong> bhyve running Ubuntu 26.04 LTS guest VM.</li>
+                <li><strong>Application:</strong> SongketMail systemd Quadlets (Postfix, Dovecot, RustFS S3, BunkerWeb, PostgreSQL) executed inside the Linux VM using rootless Podman 5+.</li>
+                <li><strong>Benefit:</strong> Full compatibility with SongketMail Linux Quadlet deployment automation while retaining FreeBSD ZFS storage replication and host security.</li>
+            </ul>
+
+            <h3 id="topology-b-hybrid-freebsd-jails-bhyve-hypervisor">Topology B: Hybrid FreeBSD Jails + bhyve Hypervisor</h3>
+            <ul class="list-disc pl-6 space-y-1">
+                <li><strong>Core Mail Engine (Postfix/Dovecot):</strong> Deployed inside FreeBSD VNET Jails for zero-overhead performance.</li>
+                <li><strong>Supporting Services (BunkerWeb WAF / Podman Containers):</strong> Deployed inside a bhyve Linux guest VM.</li>
+                <li><strong>Benefit:</strong> Maximum performance for SMTP/IMAP protocol handling combined with container flexibility for edge proxies.</li>
+            </ul>
+
+            <h2 id="verification-amp-operational-checklist">📊 Verification &amp; Operational Checklist</h2>
+            <p>To verify bhyve hypervisor health and VM performance on FreeBSD:</p>
+            <ol class="list-decimal pl-6 space-y-1">
+                <li><strong>Hypervisor Module Check:</strong> <code>kldstat -n vmm</code></li>
+                <li><strong>Active VM Status Check:</strong> <code>vm list</code> &amp; <code>bhyvectl --get-all --vm=songketmail-node01</code></li>
+                <li><strong>ZFS Storage Performance Verification:</strong> <code>zpool status</code> &amp; <code>zfs list -t snapshot</code></li>
+            </ol>
+
+            <h2 id="conclusion">🎯 Conclusion</h2>
+            <p>FreeBSD with <strong>bhyve</strong> provides a robust, hardware-accelerated, and lightweight virtualization foundation for hosting enterprise email infrastructure. By combining FreeBSD's networking stack, ZFS data integrity, and multi-OS bhyve hypervisor capabilities, SongketMail achieves maximum operational resiliency and sovereign storage management.</p>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#executive-overview" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📋 Executive Overview
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#freebsd-deployment-options-matrix" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏗️ FreeBSD Deployment Options Matrix
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#1-freebsd-jails-containerization" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1. FreeBSD Jails (Containerization)
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-bhyve-hypervisor-hardware-accelerated-virtualization" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2. bhyve Hypervisor (Hardware-Accelerated Virtualization)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#bhyve-hypervisor-deep-dive" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚡ Bhyve Hypervisor Deep Dive
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#key-technical-capabilities" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Key Technical Capabilities
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#zfs-storage-integration" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            💾 ZFS Storage Integration
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#virtual-networking-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔌 Virtual Networking Architecture
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#network-interfaces-amp-tap-devices" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Network Interfaces &amp; TAP Devices
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#bhyve-vm-management-amp-administration" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛠️ Bhyve VM Management &amp; Administration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#1-host-preparation" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            1. Host Preparation
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#2-provisioning-an-ubuntu-2604-linux-vm-for-songketmail" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            2. Provisioning an Ubuntu 26.04 / Linux VM for SongketMail
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#songketmail-deployment-architecture-on-freebsd" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📧 SongketMail Deployment Architecture on FreeBSD
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#topology-a-native-podman-in-ubuntu-linux-bhyve-guest" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Topology A: Native Podman in Ubuntu Linux bhyve Guest
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#topology-b-hybrid-freebsd-jails-bhyve-hypervisor" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Topology B: Hybrid FreeBSD Jails + bhyve Hypervisor
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#verification-amp-operational-checklist" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📊 Verification &amp; Operational Checklist
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#conclusion" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🎯 Conclusion
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 26 ]</span>
+            <span>|</span>
+            <span>[ HYPERVISOR: BHYVE ]</span>
+            <span>|</span>
+            <span>[ OS: FREEBSD_ZFS ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

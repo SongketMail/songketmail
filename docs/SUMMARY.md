@@ -37,6 +37,7 @@ topics: [summary, index, navigation]
 * [Part 23: Enterprise Kubernetes & Distributed Ceph Architecture](k8s-ceph-design.md)
 * [Part 24: Proxmox VE Enterprise Datacentre Architecture](proxmox-datacenter-architecture.md)
 * [Part 25: Email Security from the Wire to the Mailbox, JMAP Protocol & ACME Management](email-security-design.md)
+* [Part 26: FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*

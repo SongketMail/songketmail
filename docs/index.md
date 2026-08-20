@@ -75,6 +75,7 @@ Explore our interactive and interconnected deep research topics:
 22. [Geolocated Regional Data Center Design](regional-design-proxmox-ceph.md)
 23. [Enterprise Kubernetes & Distributed Ceph Architecture](k8s-ceph-design.md)
 24. [Proxmox VE Enterprise Datacentre Architecture](proxmox-datacenter-architecture.md)
+26. [FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
