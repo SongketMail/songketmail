@@ -218,6 +218,31 @@ with urllib.request.urlopen(put_req) as resp:
 
 ---
 
+## 💻 Local Mintlify Documentation Preview
+
+Before committing changes to `docs-source/`, developers can run Mintlify locally to preview changes in real time:
+
+```bash
+cd docs-source
+npm i -g mint
+mint dev
+```
+
+The local preview server will run at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🚫 Governance & Synchronisation Rules
+
+To prevent broken builds, documentation drift, and lost changes across repositories, strictly observe these governance rules:
+
+- ❌ **Do NOT edit files directly in `songketmail-product-pages`:** Manual edits in the product pages repository will be permanently overwritten by the automated sync script during the next pipeline execution.
+- ❌ **Do NOT use the Mintlify Web Editor directly:** Web editor commits target `songketmail-product-pages` directly and will be overwritten on the next push from `docs-source/`.
+- ✅ **Single Source of Truth:** Only edit documentation source files (`.mdx`, `docs.json`, assets) under `docs-source/` within the main application repository (`SongketMail/songketmail`).
+- ✅ **Automated Build Trigger:** Pushing modifications to `main` under `docs-source/**` automatically triggers `.github/workflows/sync-docs.yml`, updates `songketmail-product-pages`, and triggers automatic deployment rebuilds on [https://songketmail.mintlify.app](https://songketmail.mintlify.app).
+
+---
+
 ## 📊 Verification & Operational Summary
 
 To confirm that the documentation sync pipeline is operating correctly:
