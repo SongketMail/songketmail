@@ -432,3 +432,56 @@ def test_agent_skills_compliance():
         # Footer check
         assert "Harisfazillah Jamel" in content, f"SKILL.md for '{skill}' is missing author reference in footer."
         assert "LinuxMalaysia" in content or "DSOM" in content, f"SKILL.md for '{skill}' lacks DSOM AI Protocol or LinuxMalaysia constitution in footer."
+
+
+def test_sync_docs_missing_token_raises_value_error():
+    """Verifies sync_docs.main() raises ValueError when DOCS_REPO_TOKEN is unset."""
+    from scripts import sync_docs
+
+    with patch.dict(os.environ, {}, clear=True):
+        try:
+            sync_docs.main()
+            assert False, "Expected ValueError when DOCS_REPO_TOKEN is missing"
+        except ValueError as exc:
+            assert "DOCS_REPO_TOKEN" in str(exc)
+
+
+@patch("scripts.sync_docs.run")
+@patch("scripts.sync_docs.shutil.rmtree")
+@patch("scripts.sync_docs.shutil.copytree")
+@patch("subprocess.run")
+def test_sync_docs_main_success_flow(mock_sub_run, mock_copytree, mock_rmtree, mock_run):
+    """Verifies sync_docs.main() cloning, copying, committing, and pushing workflow."""
+    from scripts import sync_docs
+    from pathlib import Path
+
+    mock_diff_res = MagicMock()
+    mock_diff_res.returncode = 1
+    mock_sub_run.return_value = mock_diff_res
+
+    fake_tmp = MagicMock()
+    fake_tmp.exists.return_value = True
+
+    git_item = MagicMock()
+    git_item.name = ".git"
+    git_item.is_dir.return_value = True
+
+    dir_item = MagicMock()
+    dir_item.name = "old_dir"
+    dir_item.is_dir.return_value = True
+
+    file_item = MagicMock()
+    file_item.name = "old_file.mdx"
+    file_item.is_dir.return_value = False
+
+    fake_tmp.iterdir.return_value = [git_item, dir_item, file_item]
+
+    with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
+         patch("scripts.sync_docs.Path", return_value=fake_tmp):
+        sync_docs.main()
+
+    # Verify run calls include git clone, git config, git add, git commit, git push
+    run_cmds = [call.args[0] for call in mock_run.call_args_list]
+    assert any("clone" in cmd for cmd in run_cmds)
+    assert any("commit" in cmd for cmd in run_cmds)
+    assert any("push" in cmd for cmd in run_cmds)

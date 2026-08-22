@@ -1,0 +1,27 @@
+---
+title: Quickstart Guide
+description: Learn how to quickly deploy and test SongketMail in your environment.
+---
+
+# Quickstart Guide
+
+This guide provides step-by-step instructions to get SongketMail up and running quickly.
+
+## Prerequisites
+
+- Ansible Core 2.16+
+- Podman 5.0+
+- Systemd with lingering enabled for non-root user
+
+## Deployment Steps
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SongketMail/songketmail.git
+   cd songketmail
+   ```
+
+2. Run the deployment playbook:
+   ```bash
+   ansible-playbook -i inventory/hosts.ini site.yml
+   ```

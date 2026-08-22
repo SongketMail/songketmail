@@ -1,0 +1,10 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "SongketMail Product Pages",
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["index", "quickstart"]
+    }
+  ]
+}
