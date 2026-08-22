@@ -23,7 +23,14 @@ def run(cmd, cwd=None):
 
 
 def main():
-    """Main execution function for syncing docs-source to songketmail-product-pages."""
+    """
+    Synchronize the local documentation source with the configured documentation repository.
+    
+    The repository is updated only when staged documentation changes are present.
+    
+    Raises:
+        ValueError: If the DOCS_REPO_TOKEN environment variable is not set.
+    """
     token = os.environ.get("DOCS_REPO_TOKEN")
     if not token:
         raise ValueError("DOCS_REPO_TOKEN environment variable is not set")
