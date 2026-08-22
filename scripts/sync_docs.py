@@ -71,17 +71,20 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
     """
-    Validate the source documentation directory and its navigation configuration.
+    Validate a documentation source directory, its file count, and navigation references.
     
     Parameters:
-    	source_dir (Path): Directory containing the source documentation and `docs.json`.
-    	min_files (int): Minimum number of files required in the source directory.
+    	source_dir (Path): Directory containing the documentation files and `docs.json`.
+    	min_files (int): Minimum number of files required in the directory.
     
     Returns:
-    	files (list[Path]): Files found recursively in the source directory.
+    	files (list[Path]): All files found recursively in the source directory.
     
     Raises:
-    	ValueError: If the source directory, configuration file, or navigation targets are invalid, if `docs.json` cannot be parsed, or if the file count is below `min_files`.
+    	ValueError: If the source directory or `docs.json` is missing, the file count is below `min_files`, `docs.json` cannot be parsed, or navigation references missing pages.
+    
+    Notes:
+    	Prints a warning for MDX files that are not referenced in the navigation.
     """
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
@@ -133,14 +136,14 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
 
 def compute_file_diff(target_dir: Path, source_dir: Path):
     """
-    Compare source and target files and identify additions, modifications, and deletions.
+    Compare source and target files and identify added, modified, and deleted files.
     
     Parameters:
     	target_dir (Path): Directory containing the existing target files.
     	source_dir (Path): Directory containing the source files.
     
     Returns:
-    	tuple: Lists of relative paths for added, modified, and deleted files, respectively.
+    	tuple: Added, modified, and deleted file paths as relative paths, respectively.
     """
     target_files = {
         f.relative_to(target_dir): f
@@ -229,10 +232,12 @@ def main(cli_args=None):
     Synchronize validated source documentation with the configured target repository.
     
     Parameters:
-        cli_args: Optional command-line arguments used to configure the synchronization.
+        cli_args: Optional command-line arguments that configure the source directory,
+            target repository, branch, validation thresholds, and dry-run mode.
     
     Raises:
-        ValueError: If the repository token is missing or the deletion limit is exceeded.
+        ValueError: If source documentation is invalid, the repository token is
+            missing, or the deletion limit is exceeded without an override.
     """
     parsed_args = parse_args(cli_args)
     source_dir = parsed_args.source_dir
