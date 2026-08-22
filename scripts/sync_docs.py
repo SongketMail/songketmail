@@ -62,7 +62,7 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
-    """Validates source documentation directory, docs.json, file count, navigation targets, and reports orphans."""
+    """Validates source documentation directory, docs.json, MDX file count, navigation targets, and reports orphans."""
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
 
@@ -73,9 +73,9 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
     files = [f for f in source_dir.rglob("*") if f.is_file()]
     mdx_files = [f for f in files if f.suffix == ".mdx"]
 
-    if len(files) < min_files:
+    if len(mdx_files) < min_files:
         raise ValueError(
-            f"Source directory '{source_dir}' contains {len(files)} file(s), "
+            f"Source directory '{source_dir}' contains {len(mdx_files)} MDX file(s), "
             f"which is fewer than the required minimum threshold of {min_files}."
         )
 
@@ -164,7 +164,7 @@ def parse_args(args=None):
         "--min-files",
         type=int,
         default=int(os.environ.get("MIN_MDX_FILES") or os.environ.get("MIN_FILES") or "5"),
-        help="Minimum required file count in source directory (default: 5 or MIN_MDX_FILES env)",
+        help="Minimum required MDX file count in source directory (default: 5 or MIN_MDX_FILES env)",
     )
     parser.add_argument(
         "--max-deletions",
@@ -200,15 +200,6 @@ def main(cli_args=None):
 
     # Guard A, B, C Validation Checks
     source_files = validate_source_docs(source_dir, min_files=min_files)
-
-    if dry_run:
-        print("=== DRY RUN MODE ===")
-        print(f"Source Directory: {source_dir} ({len(source_files)} files verified)")
-        print(f"Target Repository: {target_repo} (branch: {branch})")
-        print(f"Minimum File Floor Threshold: {min_files}")
-        print(f"Max Allowed Deletions Threshold: {max_deletions} (Allow Large Deletions: {allow_large_deletions})")
-        print("Safety guards A, B, C passed successfully! No downstream modifications performed.")
-        return
 
     token = os.environ.get("DOCS_REPO_TOKEN")
     if not token:
@@ -249,6 +240,15 @@ def main(cli_args=None):
                 f"which exceeds the maximum allowed threshold of {max_deletions}. "
                 "Set ALLOW_LARGE_DELETIONS=true to override."
             )
+
+        if dry_run:
+            print("=== DRY RUN MODE ===")
+            print(f"Source Directory: {source_dir} ({len(source_files)} files verified)")
+            print(f"Target Repository: {target_repo} (branch: {branch})")
+            print(f"Minimum File Floor Threshold: {min_files}")
+            print(f"Max Allowed Deletions Threshold: {max_deletions} (Allow Large Deletions: {allow_large_deletions})")
+            print("Safety guards passed successfully! No downstream modifications performed.")
+            return
 
         print(f"Wiping target repository and copying {len(source_files)} files from {source_dir}...")
 

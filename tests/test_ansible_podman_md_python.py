@@ -491,20 +491,35 @@ def test_sync_docs_unresolved_nav_page_raises_value_error(tmp_path):
     docs_json = source_dir / "docs.json"
     docs_json.write_text(json.dumps({"navigation": [{"pages": ["nonexistent_page"]}]}), encoding="utf-8")
 
-    # Create dummy files to exceed min_files threshold
+    # Create dummy MDX files to exceed min_files threshold
     for i in range(5):
-        (source_dir / f"dummy_{i}.txt").write_text("content", encoding="utf-8")
+        (source_dir / f"dummy_{i}.mdx").write_text("content", encoding="utf-8")
 
     with pytest.raises(ValueError, match=r"references page\(s\) that do not exist"):
         sync_docs.validate_source_docs(source_dir, min_files=5)
 
 
 def test_sync_docs_dry_run_mode_success():
-    """Verifies sync_docs.main(["--dry-run"]) passes validation without DOCS_REPO_TOKEN."""
+    """Verifies sync_docs.main(["--dry-run"]) passes validation with token and dry-run flag."""
     from scripts import sync_docs
+    from pathlib import Path
 
-    with patch.dict(os.environ, {}, clear=True):
-        # Should complete gracefully without raising token errors or running git push
+    mock_target = MagicMock()
+    mock_target.exists.return_value = True
+
+    with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
+         patch("scripts.sync_docs.Path") as mock_path, \
+         patch("scripts.sync_docs.run"), \
+         patch("scripts.sync_docs.shutil.rmtree"), \
+         patch("scripts.sync_docs.validate_source_docs", return_value=[Path("docs-source/docs.json")]), \
+         patch("scripts.sync_docs.compute_file_diff", return_value=([], [], [])):
+
+        def path_side_effect(arg):
+            if str(arg) == "/tmp/docs-repo":
+                return mock_target
+            return Path(arg)
+
+        mock_path.side_effect = path_side_effect
         sync_docs.main(["--dry-run"])
 
 
