@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open-Source Webmail Clients Comparison — SongketMail :: LAB</title>
+    <title>Documentation Sync Pipeline & GitHub Actions Setup Guide — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 5: Webmail Clients (Roundcube & SnappyMail)
+                    Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide
                 </div>
             </div>
 
@@ -124,7 +124,7 @@
                         <span>🪣</span>
                         <span>4. S3 Object Storage</span>
                     </a>
-                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>📧</span>
                         <span>5. Webmail Integration</span>
                     </a>
@@ -204,7 +204,7 @@
                         <span>🐝</span>
                         <span>26. FreeBSD & Bhyve Architecture</span>
                     </a>
-                    <a href="docs-sync-pipeline-guide.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="docs-sync-pipeline-guide.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>📚</span>
                         <span>27. Docs Sync Pipeline</span>
                     </a>
@@ -232,118 +232,87 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-<!-- Hero Header -->
-            <div class="border-b-2 border-violet-600 pb-4">
-                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight flex items-center space-x-2">
-                    <span>📧</span>
-                    <span>Open-Source Webmail Clients Comparison</span>
-                </h1>
-            </div>
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">📚 Part 27: Documentation Sync Pipeline &amp; GitHub Actions Setup Guide</h1>
 
-            <!-- Introduction Section -->
-            <div class="space-y-4">
-                <h2 id="evaluating-webmail-solutions-for-rootless-containers" class="text-xl font-bold text-slate-900 dark:text-white">
-                    Evaluating Webmail Solutions for Rootless Containers
-                </h2>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    Selecting a containerized webmail client requires careful assessment of scalability, state persistence, security, and performance. Traditional webmail (like Roundcube) requires dedicated MySQL/PostgreSQL databases to hold session and cache states. Modern webmail engines act as stateless client-side rendering portals, connecting directly to IMAP/SMTP backends on demand.
-                </p>
-            </div>
+<h2 id="executive-overview">📋 Executive Overview</h2>
+<p>SongketMail maintains its public product and developer documentation using <strong>Mintlify</strong>. To preserve single-source-of-truth integrity, documentation source files (<code>.mdx</code> files and <code>docs.json</code>) are maintained directly within the core repository under <code>docs-source/</code>.</p>
+<p>Whenever modifications are pushed to the <code>main</code> branch inside <code>docs-source/</code>, an automated GitHub Actions pipeline (<code>.github/workflows/sync-docs.yml</code>) executes <code>scripts/sync_docs.py</code>. This pipeline clones the target public product pages repository (<code>songketmail/songketmail-product-pages</code>), synchronizes the latest <code>.mdx</code> content, and automatically commits and pushes the updates.</p>
 
-            <!-- Detailed Comparison Matrix -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="webmail-comparison-matrix" class="text-lg font-bold text-slate-950 dark:text-white">Webmail Comparison Matrix</h3>
+<h2 id="pipeline-architecture">🏗️ Pipeline Architecture</h2>
+<p>The documentation sync mechanism operates across two distinct GitHub repositories:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code>+------------------------------------+          +--------------------------------------------+
+|      SongketMail/songketmail       |          |  songketmail/songketmail-product-pages     |
+|   (Core Application Repository)    |          |       (Mintlify Host Repository)           |
++------------------------------------+          +--------------------------------------------+
+                  |                                                   ^
+  Push to main    |                                                   |
+  (docs-source/)  v                                                   |
++------------------------------------+                                |
+|  .github/workflows/sync-docs.yml   |                                |
+|  - Triggers Python Sync Pipeline   |                                |
+|  - Injects DOCS_REPO_TOKEN         |                                |
++------------------------------------+                                |
+                  |                                                   |
+                  v                                                   |
++------------------------------------+                                |
+|       scripts/sync_docs.py         |                                |
+|  - Validates DOCS_REPO_TOKEN       |                                |
+|  - Ephemeral GIT_ASKPASS Auth      |                                |
+|  - Clones product-pages repo       |                                |
+|  - Synchronizes docs-source/       |                                |
+|  - Commits &amp; Pushes updates -------|--------------------------------+
++------------------------------------+</code></pre>
 
-                <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-                        <thead class="bg-slate-50 dark:bg-slate-900/50">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Client</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Architecture</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Database Req.</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Security / 2FA</th>
-                                <th class="px-3 py-2 text-left font-bold text-slate-900 dark:text-white">Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Roundcube</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Server-Side PHP (GPL-3.0+)</td>
-                                <td class="px-3 py-3 text-emerald-600 font-bold">Yes (SQL)</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Supported via Plugins</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Moderate (heavy server load)</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">SnappyMail</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">SPA/Client-Side Render (AGPL-3.0)</td>
-                                <td class="px-3 py-3 text-red-500 font-bold">No (Stateless)</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Native 2FA / Security Hardened</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Incredibly Fast / Low memory</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">RainLoop</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Legacy SPA (CC BY-NC-SA 3.0)</td>
-                                <td class="px-3 py-3 text-red-500 font-bold">No</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Outdated dependencies</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Moderate (unmaintained)</td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-3 font-bold">Nextcloud Mail</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Heavy Suite App (AGPL-3.0)</td>
-                                <td class="px-3 py-3 text-emerald-600 font-bold">Yes</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Native via Nextcloud Suite</td>
-                                <td class="px-3 py-3 text-slate-600 dark:text-slate-400">Very heavy (resource intense)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<h2 id="root-cause-analysis-valueerror-docsrepotoken-environment-variable-is-not-set">🚨 Root Cause Analysis: ValueError: DOCS_REPO_TOKEN environment variable is not set</h2>
+<p>When the workflow executes without <code>DOCS_REPO_TOKEN</code> configured in repository secrets, the build fails with the following log output:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code>Traceback (most recent call last):
+  File "/home/runner/work/songketmail/songketmail/scripts/sync_docs.py", line 86, in &lt;module&gt;
+    main()
+  File "/home/runner/work/songketmail/songketmail/scripts/sync_docs.py", line 30, in main
+    raise ValueError("DOCS_REPO_TOKEN environment variable is not set")
+ValueError: DOCS_REPO_TOKEN environment variable is not set
+Error: Process completed with exit code 1.</code></pre>
 
-            <!-- Chosen Client: Roundcube -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="chosen-baseline-roundcube-webmail" class="text-lg font-bold text-slate-950 dark:text-white flex items-center space-x-2 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <span>⚡</span>
-                    <span>Chosen Baseline: Roundcube Webmail</span>
-                </h3>
-                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    <strong>Roundcube</strong> is the chosen, production-ready webmail client deployed in the SongketMail configuration matrix. It offers classic, fully-featured, and highly intuitive desktop and mobile web interfaces with extensive plugin ecosystems.
-                </p>
-                <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-400 pl-4 list-disc">
-                    <li><strong>State Persistence Architecture:</strong> Unlike stateless clients like SnappyMail, Roundcube utilizes an internal SQLite/Postgres database to persistently store user session caches, active address books, and interface customization settings. This ensures absolute stability and standard-compliant mail interactions.</li>
-                    <li><strong>Secure Host Persistence:</strong> All configuration variables and sqlite database files are mapped directly under <code>/var/srv/songketmail/roundcube/config</code> and <code>/var/srv/songketmail/roundcube/db</code> respectively, maintaining storage sovereignty via keep-id.</li>
-                    <li><strong>Internal Port Binding:</strong> Roundcube runs on unprivileged internal port <code>8080</code> inside the secure <code>songketmail-net</code> network, accepting requests exclusively from the hardened Nginx proxy.</li>
-                </ul>
-            </div>
+<h2 id="step-by-step-setup-amp-configuration-guide">🛠️ Step-by-Step Setup &amp; Configuration Guide</h2>
+<p>To resolve this failure and enable seamless documentation synchronization, follow these configuration steps:</p>
 
-            <!-- Quadlet Deployment Code for Roundcube -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <h3 id="roundcube-container-quadlet" class="text-lg font-bold text-slate-950 dark:text-white">Roundcube Container Quadlet</h3>
-                <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    By running Roundcube in our unprivileged systemd Quadlet mesh, it connects to Dovecot and Postgres inside the secure cluster network.
-                </p>
-                <pre class="bg-slate-950 text-emerald-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">[Container]
-ContainerName=songketmail-web
-Network=songketmail-net
-Image=roundcube/roundcubemail:1.6.8-apache
-Volume=/var/srv/songketmail/roundcube/config:/var/www/html/config:Z
-Volume=/var/srv/songketmail/roundcube/db:/var/www/html/db:Z
-UserNS=keep-id:uid=2001,gid=2001
+<h3 id="option-a-configuration-via-github-rest-api-automated">Option A: Configuration via GitHub REST API (Automated)</h3>
+<p>Configure <code>DOCS_REPO_TOKEN</code> programmatically using Python and NaCl public key encryption:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto"><code class="language-python">import os, json, base64, urllib.request
+from nacl import encoding, public
 
-[Service]
-Restart=always</pre>
-            </div>
+PAT_TOKEN = "ghp_your_github_personal_access_token"
+REPO = "SongketMail/songketmail"
 
-            <!-- Back navigation / Action links -->
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="bunkerweb-proxy.html" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center justify-center space-x-2 transition">
-                    <span>🌐</span>
-                    <span>Next: Nginx Proxy Configuration</span>
-                </a>
-                <a href="s3-storage.html" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-lg text-sm font-bold border border-slate-200 dark:border-slate-700 flex items-center justify-center space-x-2 transition">
-                    <span>🪣</span>
-                    <span>Back: S3 Object Storage</span>
-                </a>
-            </div>
+# 1. Fetch Public Key
+req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/actions/secrets/public-key", headers={"Authorization": f"token {PAT_TOKEN}"})
+with urllib.request.urlopen(req) as resp:
+    key_data = json.loads(resp.read().decode())
+
+# 2. Encrypt &amp; Upload
+public_key = public.PublicKey(key_data["key"].encode("utf-8"), encoding.Base64Encoder)
+encrypted = base64.b64encode(public.SealedBox(public_key).encrypt(PAT_TOKEN.encode("utf-8"))).decode("utf-8")
+data = json.dumps({"encrypted_value": encrypted, "key_id": key_data["key_id"]}).encode("utf-8")
+
+put_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/actions/secrets/DOCS_REPO_TOKEN", data=data, headers={"Authorization": f"token {PAT_TOKEN}", "Content-Type": "application/json"}, method="PUT")
+with urllib.request.urlopen(put_req) as resp:
+    print(f"Status: {resp.status}")</code></pre>
+
+<h3 id="option-b-configuration-via-github-web-ui-manual">Option B: Configuration via GitHub Web UI (Manual)</h3>
+<ol class="list-decimal pl-6 space-y-1">
+  <li>Navigate to <strong>GitHub Settings -&gt; Developer Settings -&gt; Personal Access Tokens -&gt; Tokens (classic)</strong>.</li>
+  <li>Generate a token with <strong><code>repo</code></strong> or target repo write scope.</li>
+  <li>Add secret named <code>DOCS_REPO_TOKEN</code> in target core repo under <strong>Settings -&gt; Secrets and variables -&gt; Actions</strong>.</li>
+  <li>Re-run the failed GitHub Actions workflow run.</li>
+</ol>
+
+<h2 id="security-best-practices">🔒 Security Best Practices</h2>
+<p>1. <strong>Ephemeral Authentication:</strong> Uses <code>GIT_ASKPASS</code> script to avoid logging tokens in command arguments.<br>
+2. <strong>Least Privilege:</strong> Restrict bot tokens to specified target repositories.<br>
+3. <strong>Concurrency Guarding:</strong> Cancel redundant in-flight synchronization workflows during fast iterations.</p>
+
+<h2 id="verification-amp-operational-summary">📊 Verification &amp; Operational Summary</h2>
+<p>Verify that <code>DOCS_REPO_TOKEN</code> is set using the GitHub Secrets API endpoint or by inspecting commit history on <code>songketmail/songketmail-product-pages</code>.</p>
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
@@ -354,23 +323,43 @@ Restart=always</pre>
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
                 <ul class="space-y-2 text-sm">
                     <li class="pl-0">
-                        <a href="#evaluating-webmail-solutions-for-rootless-containers" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            Evaluating Webmail Solutions for Rootless Containers
+                        <a href="#executive-overview" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📋 Executive Overview
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#pipeline-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🏗️ Pipeline Architecture
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#root-cause-analysis-valueerror-docsrepotoken-environment-variable-is-not-set" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🚨 Root Cause Analysis: ValueError: DOCS_REPO_TOKEN environment variable is not set
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#step-by-step-setup-amp-configuration-guide" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛠️ Step-by-Step Setup &amp; Configuration Guide
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#webmail-comparison-matrix" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            Webmail Comparison Matrix
+                        <a href="#option-a-configuration-via-github-rest-api-automated" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Option A: Configuration via GitHub REST API (Automated)
                         </a>
                     </li>
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#chosen-baseline-roundcube-webmail" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            ⚡ Chosen Baseline: Roundcube Webmail
+                        <a href="#option-b-configuration-via-github-web-ui-manual" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Option B: Configuration via GitHub Web UI (Manual)
                         </a>
                     </li>
-                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <a href="#roundcube-container-quadlet" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
-                            Roundcube Container Quadlet
+                    <li class="pl-0">
+                        <a href="#security-best-practices" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔒 Security Best Practices
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#verification-amp-operational-summary" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📊 Verification &amp; Operational Summary
                         </a>
                     </li>
                 </ul>
@@ -390,11 +379,11 @@ Restart=always</pre>
             <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-<span>[ TOPIC: 5 ]</span>
+<span>[ TOPIC: 27 ]</span>
             <span>|</span>
-            <span>[ CLIENTS: ROUNDCUBE_SNAPPY ]</span>
+            <span>[ CI_CD: GH_ACTIONS ]</span>
             <span>|</span>
-            <span>[ ENG: NGINX_PHP ]</span>
+            <span>[ MINTLIFY: SYNC ]</span>
         </div>
     </footer>
 
