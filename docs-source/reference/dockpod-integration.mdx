@@ -1,0 +1,221 @@
+---
+title: "DockPod: Web UI and MCP Control Plane for SongketMail"
+sidebarTitle: "DockPod"
+description: "DockPod provides a lightweight web dashboard and Model Context Protocol server for managing SongketMail containers without root access."
+---
+
+DockPod is a single-binary container management tool that pairs naturally with SongketMail's rootless, unprivileged design philosophy. Where SongketMail uses Podman 5 Quadlets to run every mail service under a non-root user account, DockPod gives you a real-time browser-based window into those same containers — without ever requiring `sudo`. Together they form a complete control plane: Ansible handles declarative provisioning, Quadlets own the service lifecycle, and DockPod provides the observability and agentic interface layer on top.
+
+<Note>
+  DockPod is entirely optional. SongketMail runs fully without it. DockPod adds operational convenience — live log streaming, interactive shells, and AI-agent integration — but it is not part of the mail service fabric itself. You can add or remove it at any time without affecting running containers.
+</Note>
+
+---
+
+## DockPod Overview
+
+DockPod is distributed as a single compiled Go binary with an embedded React web interface and a SQLite backend. It consumes under 30 MB of RAM at idle, which means it fits comfortably alongside the full SongketMail service mesh without affecting mail delivery performance.
+
+<CardGroup cols={2}>
+  <Card title="Minimal Footprint" icon="feather">
+    Single Go binary, embedded React UI, and zero-dependency SQLite storage. No separate database container is required.
+  </Card>
+  <Card title="Dual-Engine Detection" icon="magnifying-glass">
+    DockPod automatically detects both Podman and Docker API sockets and negotiates the correct API protocol for each.
+  </Card>
+  <Card title="Web UI on Port 8080" icon="browser">
+    A full container management dashboard is available at `http://localhost:8080`, proxied securely through BunkerWeb for external access.
+  </Card>
+  <Card title="MCP Server on Port 8090" icon="robot">
+    A built-in Model Context Protocol (SSE-based) server on port `8090` allows AI agents to query container state and stream logs programmatically.
+  </Card>
+</CardGroup>
+
+---
+
+## Connecting DockPod to the Rootless Podman Socket
+
+By default, rootless Podman does not start its API socket automatically. You need to enable and start the `podman.socket` user-level systemd unit under the `songketmail` user session (UID `2001`) before DockPod can communicate with your containers.
+
+The rootless Podman API socket is located at:
+
+```text
+/run/user/2001/podman/podman.sock
+```
+
+Run the following commands as the `songketmail` user, or pass the environment variables explicitly in your shell session:
+
+```bash
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+
+# Enable and start the Podman API socket
+systemctl --user enable podman.socket
+systemctl --user start podman.socket
+```
+
+Verify the socket is active before proceeding:
+
+```bash
+ls -la /run/user/2001/podman/podman.sock
+# Expected: srw-rw----. 1 songketmail songketmail 0 ...
+```
+
+Once the socket exists, point DockPod at it by setting the environment variable when you launch the binary:
+
+```bash
+DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock" ./dockpod
+```
+
+---
+
+## Running DockPod as a Rootless Service
+
+Run DockPod as a persistent background service under the `songketmail` user so it survives session disconnects. Because systemd linger is already enabled for `songketmail` as part of the host preparation role, a user-level systemd service unit is the natural fit.
+
+Create the unit file at `/home/songketmail/.config/systemd/user/dockpod.service`:
+
+```ini
+[Unit]
+Description=DockPod Container Management UI
+After=podman.socket
+Requires=podman.socket
+
+[Service]
+Environment=DOCKPOD_SOCKET=/run/user/2001/podman/podman.sock
+Environment=XDG_RUNTIME_DIR=/run/user/2001
+ExecStart=/usr/local/bin/dockpod
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
+```
+
+Enable and start the service:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now dockpod.service
+```
+
+### Exposing the DockPod UI via BunkerWeb
+
+DockPod binds to `127.0.0.1:8080` (UI) and `127.0.0.1:8090` (MCP) by default. Expose the dashboard externally by adding a BunkerWeb server block that proxies to those local ports under a sub-path:
+
+```yaml
+# BunkerWeb environment variable block for the dockpod service
+SERVER_NAME: "mail.example.com"
+USE_REVERSE_PROXY: "yes"
+REVERSE_PROXY_URL_1: "/dockpod/"
+REVERSE_PROXY_HOST_1: "http://127.0.0.1:8080"
+```
+
+After reloading BunkerWeb, your DockPod dashboard is available at `https://<your-domain>/dockpod/`.
+
+---
+
+## Available Features
+
+DockPod exposes the full lifecycle of your SongketMail containers through both the web UI and the MCP API.
+
+<CardGroup cols={2}>
+  <Card title="Container Controls" icon="play">
+    Start, stop, and restart individual containers or the entire `songketmail_pod` from the browser without touching the terminal.
+  </Card>
+  <Card title="Live Log Streaming" icon="terminal">
+    Stream `stdout` and `stderr` from Postfix, Dovecot, Rspamd, and every other container over secure WebSockets in real time.
+  </Card>
+  <Card title="Interactive Shell" icon="code">
+    Open an interactive shell inside any running container directly from the browser — useful for inspecting mail queues or debugging LMTP sockets.
+  </Card>
+  <Card title="Resource Metrics" icon="chart-bar">
+    Monitor real-time CPU utilisation, memory consumption, and PID counts per container. Live cgroup limit adjustments are available for emergency scaling.
+  </Card>
+</CardGroup>
+
+### MCP Server for AI-Agent Integration
+
+The MCP server on port `8090` implements the Model Context Protocol over Server-Sent Events (SSE). AI agents — such as Google Jules — connect to this endpoint using a `Bearer dp_mcp_` prefixed API token and gain access to structured tool calls:
+
+| MCP Tool | Description |
+|---|---|
+| `list_containers` | Returns health status and state for all containers in the Podman socket scope |
+| `get_container_logs` | Streams stdout/stderr logs for a named container with optional tail count |
+| `restart_container` | Triggers a graceful restart for a target container by name or ID |
+| `pull_image` | Pulls a new container image and reports pull progress |
+| `get_system_info` | Returns host CPU, memory, and Podman version metadata |
+
+---
+
+## BunkerWeb Coexistence
+
+SongketMail uses BunkerWeb as its primary security-hardened WAF and reverse proxy for all public-facing mail and web traffic. DockPod ships with an embedded Traefik router for its own internal services. These two components can conflict if not configured correctly — both attempt to bind to ports `80` and `443` unless you intervene.
+
+Two deployment patterns resolve this:
+
+<Tabs>
+  <Tab title="Decoupled Direct Routing (Recommended)">
+    Disable Traefik inside DockPod entirely. BunkerWeb remains the sole ingress for all external traffic and proxies directly to DockPod's loopback ports. This preserves full WAF inspection, client IP integrity, and Let's Encrypt certificate management in a single place.
+
+    - BunkerWeb terminates TLS on ports `80` and `443`
+    - DockPod binds only to `127.0.0.1:8080` (UI) and `127.0.0.1:8090` (MCP)
+    - BunkerWeb reverse proxies `/dockpod/` to `http://127.0.0.1:8080`
+
+    This is the pattern recommended for all standard SongketMail deployments.
+  </Tab>
+  <Tab title="Nested Traefik Proxy">
+    If you need to keep Traefik active for DockPod's internal database or CrowdSec helpers, configure BunkerWeb as the public edge proxy and Traefik as a backend. BunkerWeb terminates TLS and performs WAF inspection, then forwards traffic to Traefik on a private loopback interface.
+
+    For this to preserve the original client IP, configure Traefik to trust BunkerWeb's internal Podman network bridge:
+
+    ```yaml
+    # Traefik entryPoints configuration
+    entryPoints:
+      web:
+        forwardedHeaders:
+          trustedIPs:
+            - "10.89.0.0/16" # SongketMail Podman network bridge
+    ```
+
+    BunkerWeb must pass the standard forwarding headers upstream:
+
+    ```nginx
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    ```
+
+    <Warning>
+      Without the `trustedIPs` block in Traefik, the original client IP is lost at the second proxy hop. This breaks Postfix connection-rate limits, Dovecot IP logging, and any `fail2ban` rules that inspect client addresses.
+    </Warning>
+  </Tab>
+</Tabs>
+
+---
+
+## Security Hardening
+
+DockPod provides access to container lifecycle operations, making it a high-value attack surface. Apply these hardening steps before exposing it externally:
+
+<Steps>
+  <Step title="Restrict socket binding to loopback">
+    Ensure DockPod's UI (`8080`) and MCP server (`8090`) bind only to `127.0.0.1`. Never bind these ports to a public interface directly.
+  </Step>
+  <Step title="Rotate MCP API keys regularly">
+    Store `dp_mcp_` Bearer tokens with `0600` file permissions and rotate them on a scheduled basis. Treat them with the same sensitivity as SSH private keys.
+  </Step>
+  <Step title="Sandbox the systemd service">
+    Add the following directives to your `dockpod.service` unit to limit filesystem write access to DockPod's own data directory:
+
+    ```ini
+    ProtectSystem=strict
+    ReadWritePaths=/var/lib/dockpod
+    PrivateDevices=true
+    ProtectHome=true
+    ```
+  </Step>
+  <Step title="Route all external access through BunkerWeb">
+    Never expose DockPod ports directly to the internet. Always terminate TLS and apply WAF rules at BunkerWeb before forwarding to DockPod's loopback address.
+  </Step>
+</Steps>

@@ -1,0 +1,131 @@
+---
+title: "Backing Up SongketMail Mail Data and Configuration"
+sidebarTitle: "Backups"
+description: "Back up SongketMail mail data, configuration files, and the PostgreSQL virtual account database without root privileges, using direct host path access."
+---
+
+Because SongketMail enforces Storage Sovereignty through the `UserNS=keep-id:uid=2001,gid=2001` mapping at the pod level, all host-mounted data directories are owned by the `songketmail` user with UID and GID `2001`. This means you can read, copy, and archive every piece of mail data, configuration, and database state directly from the host filesystem as the `songketmail` user — no `sudo`, no bind mounts, no container intrusion required. Your backup scripts run cleanly against standard directory paths like any other Linux service.
+
+<Warning>
+Always back up the PostgreSQL database before performing any major SongketMail updates or playbook changes. The virtual account database holds all domain, user, and alias mappings. Losing it without a backup means recreating every mailbox manually.
+</Warning>
+
+## What to Back Up
+
+The table below lists every important data path under the storage base `/var/srv/songketmail/`, its contents, and its recovery priority. Paths marked **Critical** must be included in every scheduled backup. Paths marked **High** should be included in daily backups. **Medium** paths can be captured less frequently.
+
+| Path | Contents | Priority |
+|---|---|---|
+| `/var/srv/songketmail/postfix/config` | Postfix configuration files | High |
+| `/var/srv/songketmail/dovecot/config` | Dovecot configuration files | High |
+| `/var/srv/songketmail/dovecot/indexes` | IMAP index files for all mailboxes | High |
+| `/var/srv/songketmail/postgres/data` | PostgreSQL virtual accounts database | Critical |
+| `/var/srv/songketmail/roundcube/config` | Roundcube application configuration | High |
+| `/var/srv/songketmail/roundcube/db` | Roundcube session and user preference database | Medium |
+| `/var/srv/songketmail/rspamd/config` | Rspamd local rules and overrides | High |
+| `/var/srv/songketmail/rspamd/data` | Learned Bayesian spam/ham corpus | Medium |
+| `/var/srv/songketmail/rustfs/data` | Mail bodies and attachments (S3 storage) | Critical |
+
+<Note>
+The BunkerWeb data path (`/var/srv/songketmail/bunkerweb/data`) and certificate path (`/var/srv/songketmail/certs`) are also worth backing up if you have customised WAF rules or are managing your own TLS certificates outside of automatic renewal.
+</Note>
+
+## PostgreSQL Database Backup
+
+The PostgreSQL container exposes `pg_dump` and `psql` through `podman exec`, making it straightforward to create and restore logical database dumps without stopping the service.
+
+```bash
+# Dump the mailserver database to a SQL file on the host
+podman exec songketmail-db pg_dump -U mail_admin mailserver > mailserver-backup.sql
+
+# Create a compressed dump for space-efficient archival
+podman exec songketmail-db pg_dump -U mail_admin mailserver | gzip > mailserver-backup-$(date +%Y%m%d).sql.gz
+
+# Restore from a plain SQL backup
+cat mailserver-backup.sql | podman exec -i songketmail-db psql -U mail_admin mailserver
+
+# Restore from a compressed backup
+gunzip -c mailserver-backup-20260704.sql.gz | podman exec -i songketmail-db psql -U mail_admin mailserver
+```
+
+Run database dumps from a cron job in the `songketmail` user's crontab (`crontab -u songketmail -e`) to automate daily snapshots.
+
+## Full Data rsync Backup
+
+Because all data directories are directly accessible to the `songketmail` user on the host, you can use a standard `rsync` command to copy the entire storage tree to a remote backup host. This approach captures every service's data in a single pass.
+
+```bash
+# Back up all SongketMail data to a remote host (run as the songketmail user)
+rsync -av --delete \
+  /var/srv/songketmail/ \
+  backup-host:/backups/songketmail/
+```
+
+For hosts without SSH key trust already set up, add the `-e ssh` flag with identity file options. The `--delete` flag ensures the backup mirror stays clean by removing files that have been deleted on the source. Omit it if you want a cumulative archive.
+
+<Tip>
+Consider using **borgbackup** or **restic** for encrypted, deduplicated incremental backups instead of plain `rsync`. Both tools run without root privileges, support pruning policies to manage retention automatically, and produce compact archives that are safe to store on untrusted remote storage. Example: `restic -r sftp:backup-host:/backups/songketmail backup /var/srv/songketmail/`
+</Tip>
+
+## Restoring from Backup
+
+Restoring SongketMail from a backup follows a consistent stop-restore-start pattern. Complete each step in order before proceeding to the next.
+
+<Steps>
+  <Step title="Stop all services">
+    Stop the SongketMail pod to ensure no container is writing to the directories you are about to restore into:
+
+    ```bash
+    systemctl --user stop songketmail_pod-pod.service
+    ```
+
+    Confirm all containers have stopped:
+
+    ```bash
+    podman ps --filter name=songketmail
+    ```
+
+    The output should be empty.
+  </Step>
+  <Step title="Restore configuration and data files">
+    Copy your backup data back to the host storage paths. If you used `rsync`, reverse the source and destination:
+
+    ```bash
+    rsync -av \
+      backup-host:/backups/songketmail/ \
+      /var/srv/songketmail/
+    ```
+
+    If you are restoring only specific services, target those subdirectories individually rather than overwriting the entire tree.
+  </Step>
+  <Step title="Restore the PostgreSQL database">
+    If your PostgreSQL data directory restore is incomplete or you are migrating to a fresh node, perform a logical restore from a SQL dump after the container is running:
+
+    ```bash
+    # Start only the database container temporarily
+    systemctl --user start songketmail_db.service
+
+    # Restore the dump
+    cat mailserver-backup.sql | podman exec -i songketmail-db psql -U mail_admin mailserver
+    ```
+  </Step>
+  <Step title="Verify file ownership">
+    Confirm that all restored files are still owned by UID/GID `2001:2001`. If you copied files as a different user or from a backup tool that stripped ownership, fix it:
+
+    ```bash
+    chown -R 2001:2001 /var/srv/songketmail/
+    ```
+
+    This command requires root or `sudo`. Once ownership is correct, Podman's `keep-id` mapping will match correctly.
+  </Step>
+  <Step title="Restart all services">
+    Start the pod and verify all containers return to a running state:
+
+    ```bash
+    systemctl --user start songketmail_pod-pod.service
+    systemctl --user list-units 'songketmail_*'
+    ```
+
+    Check the logs of each service briefly to confirm clean startup with no errors related to missing files or permission denials.
+  </Step>
+</Steps>

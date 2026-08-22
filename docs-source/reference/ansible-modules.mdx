@@ -1,0 +1,167 @@
+---
+title: "Ansible FQCN Modules and Playbook Structure for SongketMail"
+sidebarTitle: "Ansible Modules"
+description: "Reference for the Ansible FQCN module mappings, playbook roles, and privilege escalation patterns used to deploy and manage SongketMail."
+---
+
+SongketMail uses Fully Qualified Collection Names (FQCN) throughout every playbook and role, replacing all legacy shorthand module names such as `copy`, `systemd`, and `sysctl`. This convention ensures forward compatibility with future Ansible releases, prevents ambiguous name resolution when multiple collections are installed, and allows automation agents — including AI-driven tools like Google Jules — to reliably identify and reason about every task in the deployment graph.
+
+<Tip>
+  Set a default inventory path in your `ansible.cfg` so you never need to pass `-i inventory/` on every command. Add `inventory = inventory/hosts.yml` under the `[defaults]` section of your project-root `ansible.cfg` file to make all `ansible-playbook` invocations inventory-aware automatically.
+</Tip>
+
+---
+
+## FQCN Module Mapping Table
+
+The table below lists every module used across SongketMail playbooks and roles, mapping legacy shorthand names to their mandatory FQCN equivalents. Use these names in any task you write or modify.
+
+| Legacy Name | FQCN | Context |
+|---|---|---|
+| `copy` | `ansible.builtin.copy` | Config file provisioning for BunkerWeb, Postfix, and Dovecot |
+| `template` | `ansible.builtin.template` | Quadlet file generation and SQL initialisation scripts |
+| `file` | `ansible.builtin.file` | Storage path setup under `/var/srv/songketmail/` |
+| `systemd` | `ansible.builtin.systemd_service` | Quadlet unit management and `systemctl --user` reloads |
+| `sysctl` | `ansible.posix.sysctl` | Kernel parameter tuning (e.g. `net.ipv4.ip_unprivileged_port_start`) |
+| `postgresql_table` | `community.postgresql.postgresql_table` | DB schema setup for virtual accounts and mail domains |
+| `postgresql_db` | `community.postgresql.postgresql_db` | Database initialisation for Postfix, Roundcube, and Rspamd |
+| `podman_network` | `containers.podman.podman_network` | Network bridge setup for the `songketmail-net` rootless network |
+
+---
+
+## Playbook Role Structure
+
+SongketMail's Ansible automation is organised into two tiers: a master orchestration playbook (`site.yml`) that calls specialised roles, and a set of numbered supplementary playbooks for running individual lifecycle stages independently.
+
+### Core Roles
+
+| Playbook / Role | Responsibility |
+|---|---|
+| `site.yml` | Master orchestration playbook — runs `host_prepare` then `podman_quadlet` in sequence |
+| `roles/host_prepare` | OS kernel tuning via `sysctl`, `songketmail` user creation (UID `2001`), and `systemd` linger activation |
+| `roles/podman_quadlet` | Quadlet file deployment to `~/.config/containers/systemd/` and rootless service startup |
+| `roles/dovecot` | Dovecot configuration, LMTP settings, and obox/S3 object storage integration |
+| `roles/postfix` | Postfix MTA configuration, PostgreSQL lookup tables, and Rspamd milter bindings |
+| `roles/postgresql` | Database user permissions, initialisation scripts, and persistent storage setup |
+| `roles/minio` | MinIO S3 bucket creation, user access keys, and storage path mapping |
+
+### Supplementary Playbooks
+
+When you need to run a single lifecycle stage in isolation — for example, re-initialising the database schema after a schema migration — use the numbered playbooks directly:
+
+| Playbook | Stage | What It Does |
+|---|---|---|
+| `playbooks/01_host_prep.yml` | Host preparation | Sets kernel `sysctl` values, creates the `songketmail` user, enables systemd linger |
+| `playbooks/02_storage_setup.yml` | Storage provisioning | Creates all 14 subdirectories under `/var/srv/songketmail/` with `0700` permissions and `2001:2001` ownership |
+| `playbooks/03_database_init.yml` | Database initialisation | Deploys PostgreSQL and initialises virtual domain, mailbox, and alias schemas |
+| `playbooks/04_deploy_quadlets.yml` | Quadlet deployment | Generates Quadlet files in `$HOME/.config/containers/systemd/` and starts all services |
+
+---
+
+## Privilege Escalation Patterns
+
+SongketMail applies a symmetric privilege strategy: root-level OS tasks run as `root` via `become: yes`, and all container and service tasks run as the unprivileged `songketmail` user via `become_user: songketmail`. This boundary ensures that Quadlet files, service units, and user-namespace containers are always owned and managed by the correct user identity, and that no mail service process ever runs with elevated kernel privileges.
+
+| Task Category | `become` Setting | Examples |
+|---|---|---|
+| Rootful OS hardening | `become: yes` | `sysctl` kernel parameters, user/group creation, Podman installation |
+| Rootless deployment | `become: yes` + `become_user: songketmail` | Quadlet template deployment, `systemctl --user` daemon reloads, service activation |
+
+The following example shows both patterns side by side in a single playbook:
+
+```yaml
+# Rootful: OS-level kernel tuning
+- name: Set kernel max map count
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    state: present
+  become: yes
+
+# Rootless: Deploy Quadlet as songketmail user
+- name: Deploy container Quadlet
+  ansible.builtin.template:
+    src: postfix.container.j2
+    dest: "{{ songketmail_home }}/.config/containers/systemd/songketmail_postfix.container"
+    owner: songketmail
+    group: songketmail
+    mode: "0644"
+  become: yes
+  become_user: songketmail
+```
+
+When a task needs to call `systemctl --user` for the `songketmail` session, pass the runtime directory environment variables explicitly so Ansible's Python interpreter can locate the correct D-Bus socket:
+
+```yaml
+- name: Reload user-level systemd daemon and restart services
+  ansible.builtin.systemd_service:
+    daemon_reload: yes
+    scope: user
+    name: songketmail_pod-pod.service
+    state: restarted
+    enabled: yes
+  become: yes
+  become_user: songketmail
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/2001"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/2001/bus"
+```
+
+<Warning>
+  If you see `Failed to connect to bus` errors during a rootless task, verify two things: first, that systemd linger is enabled for the `songketmail` user (`loginctl enable-linger songketmail`); second, that both `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` are present in the task's `environment` block.
+</Warning>
+
+---
+
+## Required Ansible Collections
+
+Install all four required collections before running any SongketMail playbook. These collections provide the FQCN modules listed in the mapping table above.
+
+```bash
+ansible-galaxy collection install \
+  community.general \
+  ansible.posix \
+  containers.podman \
+  community.postgresql
+```
+
+If your deployment environment has no outbound internet access, download the collections on a connected machine, archive them, and install from the local archive on your target controller:
+
+```bash
+# On a connected machine — download to a local directory
+ansible-galaxy collection download \
+  community.general \
+  ansible.posix \
+  containers.podman \
+  community.postgresql \
+  --download-path ./collections-offline/
+
+# On the air-gapped controller — install from the local path
+ansible-galaxy collection install ./collections-offline/*.tar.gz
+```
+
+<CardGroup cols={2}>
+  <Card title="community.general" icon="cube">
+    General-purpose modules including `ini_file`, `locale_gen`, and `ufw` used during OS hardening.
+  </Card>
+  <Card title="ansible.posix" icon="cube">
+    POSIX system modules — most critically `ansible.posix.sysctl` for kernel parameter management.
+  </Card>
+  <Card title="containers.podman" icon="cube">
+    Podman-specific modules including `containers.podman.podman_network` for rootless bridge setup.
+  </Card>
+  <Card title="community.postgresql" icon="cube">
+    PostgreSQL modules for database and schema management — used by `03_database_init.yml`.
+  </Card>
+</CardGroup>
+
+---
+
+## Troubleshooting Common Errors
+
+| Error Message | Likely Cause | Resolution |
+|---|---|---|
+| `Failed to connect to bus` | Missing `XDG_RUNTIME_DIR` or linger not enabled | Add `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` to the task `environment` block; run `loginctl enable-linger songketmail` |
+| `Permission denied /var/srv/songketmail/` | Storage paths not yet provisioned for UID `2001` | Run `playbooks/02_storage_setup.yml` before `04_deploy_quadlets.yml` |
+| `couldn't resolve module/action 'systemd'` | Legacy shorthand name used instead of FQCN | Replace `systemd` with `ansible.builtin.systemd_service` in the task |
+| `Module not found: containers.podman.podman_network` | Collection not installed on the controller | Run the `ansible-galaxy collection install` command above |

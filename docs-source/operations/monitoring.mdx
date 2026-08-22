@@ -1,0 +1,113 @@
+---
+title: "Monitoring SongketMail Health, Logs, and Mail Flow"
+sidebarTitle: "Monitoring"
+description: "Monitor SongketMail container health, view live logs, check Rspamd statistics, and inspect Postfix mail queues from the command line."
+---
+
+SongketMail gives you several complementary monitoring approaches out of the box. Because every service is a standard Podman container, you can stream logs directly with `podman logs`, inspect resource consumption with `podman stats`, and query internal service utilities by dropping into a running container with `podman exec`. For spam and mail flow analytics, the Rspamd web dashboard is exposed through BunkerWeb at a protected path on your domain. Together these tools give you complete visibility into the health of your mail fabric without any additional monitoring infrastructure.
+
+<Note>
+Container logs are captured and managed by the systemd journal in the `songketmail` user session. Rotation and retention policies follow your system's `journald.conf` settings. For long-term log archival, configure `journald` persistent storage or forward logs to a centralised syslog target.
+</Note>
+
+## Viewing Container Logs
+
+Use `podman logs` to stream live output from any running container. All commands below should be run as the `songketmail` user, or with the session variables `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` exported.
+
+```bash
+# Follow live logs for the mail transfer agent
+podman logs -f songketmail-postfix
+
+# Follow live logs for the mail delivery agent
+podman logs -f songketmail-dovecot
+
+# Follow live logs for the BunkerWeb WAF proxy
+podman logs -f songketmail-proxy
+
+# View the last 100 lines from the spam filter
+podman logs --tail 100 songketmail-rspamd
+
+# View the last 100 lines from the webmail client
+podman logs --tail 100 songketmail-web
+```
+
+You can also use the systemd journal for structured, timestamped log queries across service restarts:
+
+```bash
+# Follow live journal entries for Postfix
+journalctl --user -fu songketmail_postfix.service
+
+# Show journal entries for Dovecot since last boot
+journalctl --user -b -u songketmail_dovecot.service
+```
+
+## Checking Container Health
+
+Use `podman ps` and `podman inspect` to verify that all fabric members are running and in a healthy state.
+
+```bash
+# List all running SongketMail containers
+podman ps --filter name=songketmail
+
+# Show full runtime details for a specific container
+podman inspect songketmail-postfix
+
+# Monitor live CPU and memory usage for mail-critical services
+podman stats songketmail-postfix songketmail-dovecot
+
+# Monitor all SongketMail containers together
+podman stats $(podman ps --filter name=songketmail --format '{{.Names}}' | tr '\n' ' ')
+```
+
+The `podman stats` output refreshes continuously. Press `Ctrl+C` to exit. Pay close attention to the `MEM USAGE` column for `songketmail-db` and `songketmail-rspamd`, as these services are the most memory-sensitive under load.
+
+## Postfix Mail Queue
+
+When mail delivery is delayed or bouncing, the Postfix mail queue is the first place to inspect. Enter the Postfix container interactively and use the standard `postqueue` utility:
+
+```bash
+# Open an interactive shell inside the Postfix container
+podman exec -it songketmail-postfix /bin/sh
+```
+
+Once inside the container, use these commands to inspect and manage the queue:
+
+```bash
+# Display the current mail queue with delivery status
+postqueue -p
+
+# Attempt immediate delivery of all queued messages
+postqueue -f
+
+# View the full content of a specific queued message by ID
+postcat -q <MESSAGE_ID>
+
+# Delete a specific message from the queue
+postsuper -d <MESSAGE_ID>
+
+# Delete all messages in the deferred queue
+postsuper -d ALL deferred
+```
+
+Exit the container shell by typing `exit` or pressing `Ctrl+D`.
+
+## Rspamd Web Dashboard
+
+Rspamd provides a built-in web dashboard that gives you real-time statistics on scanned messages, spam scores, fuzzy hash matches, greylisting status, and Bayesian classifier training progress. BunkerWeb proxies this interface securely through your domain.
+
+Access the dashboard in your browser at:
+
+```text
+https://<your-domain>/rspamd/
+```
+
+The dashboard shows:
+
+- **Scan history** — a rolling log of recent messages with their spam scores and actions taken (pass, reject, add header)
+- **Throughput graphs** — messages per second and classification breakdown over time
+- **Fuzzy hashes** — counts of known-bad message signatures matched
+- **Learning statistics** — the current state of the Bayes spam and ham corpus
+
+<Note>
+The Rspamd web UI is protected by BunkerWeb's WAF rules. If you cannot reach the `/rspamd/` path, verify that BunkerWeb is running (`podman ps --filter name=songketmail-proxy`) and that the proxy routing rule for the Rspamd upstream is present in your BunkerWeb configuration.
+</Note>

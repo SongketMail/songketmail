@@ -1,0 +1,176 @@
+---
+title: "Postfix and Dovecot IMAP: Mail Stack Configuration"
+sidebarTitle: "SMTP & IMAP"
+description: "Postfix handles inbound SMTP routing and Dovecot delivers mail via LMTP, with PostgreSQL virtual mailboxes and Argon2id password hashing."
+---
+
+SongketMail pairs Postfix and Dovecot as the inbound mail processing stack. Postfix receives messages from the internet, validates recipients against a PostgreSQL virtual mailbox database, passes each message through Rspamd for spam and policy filtering, and then hands it off to Dovecot using the Local Mail Transport Protocol (LMTP). Dovecot takes ownership of the message, authenticates IMAP clients against the same PostgreSQL database, and writes mail bodies and attachments to the RustFS S3 object storage cluster. Both containers run rootless under UID/GID 2001 inside the isolated `songketmail-net` network, so their internal LMTP and database traffic is never exposed to the host or other containers.
+
+## Mail Flow
+
+Understanding the end-to-end path helps you debug delivery problems and tune each stage independently.
+
+<Steps>
+  <Step title="Inbound SMTP (port 25)">
+    BunkerWeb accepts the external TCP connection and prepends a PROXY protocol header preserving the real sender IP before forwarding to `songketmail-postfix:25` inside `songketmail-net`.
+  </Step>
+  <Step title="Recipient validation">
+    Postfix queries PostgreSQL to confirm the destination domain exists in `virtual_domains` and the specific address exists in `users`. Unknown recipients are rejected at the SMTP layer before any message body is accepted.
+  </Step>
+  <Step title="Rspamd milter filtering">
+    Postfix passes the message to `songketmail-rspamd:11334` via the milter protocol. Rspamd evaluates SPF, DKIM, DMARC, Bayes, and neural scoring, then either accepts, rejects, or tags the message before returning control to Postfix.
+  </Step>
+  <Step title="LMTP delivery to Dovecot (port 24)">
+    Postfix delivers the accepted message to `songketmail-dovecot:24` using LMTP. Dovecot acknowledges delivery only after the message is durably committed to storage, giving Postfix a reliable receipt confirmation.
+  </Step>
+  <Step title="S3 object storage">
+    Dovecot writes the message body and attachments to the RustFS S3 cluster (`songketmail-s3:9000`), compressing with Zstandard and dispersing across storage via prefix hashing. Index metadata is kept on fast local NVMe storage at `/var/srv/songketmail/dovecot/indexes`.
+  </Step>
+</Steps>
+
+## Virtual Mailbox Configuration with PostgreSQL
+
+Postfix uses native PostgreSQL lookup tables to resolve domains, mailboxes, and aliases without touching local Unix accounts. Create three `.cf` files in `/var/srv/songketmail/postfix/config/` (mounted into the container at `/etc/postfix/`).
+
+**`pgsql-virtual-mailbox-maps.cf`** — looks up the maildir path for a given address:
+
+```ini
+hosts = songketmail-db.songketmail-net
+user = mail_admin
+password = super_secure_db_pass
+dbname = mailserver
+query = SELECT maildir FROM users WHERE email='%s' AND active=true
+```
+
+Add the following directives to **`main.cf`** to wire these lookup tables into Postfix and route accepted mail to Dovecot's LMTP listener:
+
+```ini
+# Virtual domain and mailbox resolution
+virtual_mailbox_domains = pgsql:/etc/postfix/pgsql-virtual-domains-maps.cf
+virtual_mailbox_maps    = pgsql:/etc/postfix/pgsql-virtual-mailbox-maps.cf
+virtual_alias_maps      = pgsql:/etc/postfix/pgsql-virtual-alias-maps.cf
+
+# Delegate delivery to Dovecot LMTP inside songketmail-net
+virtual_transport = lmtp:inet:songketmail-dovecot.songketmail-net:24
+```
+
+## Dovecot Authentication
+
+Dovecot validates IMAP client passwords by querying the same PostgreSQL database. Place `dovecot-sql.conf.ext` in `/var/srv/songketmail/dovecot/config/` (mounted at `/etc/dovecot/`):
+
+```ini
+driver = pgsql
+connect = host=songketmail-db.songketmail-net dbname=mailserver user=mail_admin password=super_secure_db_pass
+default_pass_scheme = ARGON2ID
+password_query = SELECT password FROM users WHERE email='%u' AND active=true
+user_query     = SELECT '/var/vmail/indexes/'||maildir AS home, 2001 AS uid, 2001 AS gid \
+                   FROM users WHERE email='%u'
+```
+
+Setting `default_pass_scheme = ARGON2ID` tells Dovecot to verify passwords hashed with Argon2id — the current recommended scheme for password storage. Passwords stored with the `{ARGON2ID}` prefix are automatically detected regardless of this default.
+
+## LMTP Service Configuration
+
+Add the following service and protocol blocks to `dovecot.conf` so Dovecot listens for inbound LMTP connections from Postfix:
+
+```ini
+protocols = imap lmtp
+
+service lmtp {
+  inet_listener lmtp {
+    address = *
+    port    = 24
+  }
+}
+
+protocol lmtp {
+  postmaster_address = postmaster@songketmail.internal
+  mail_plugins       = $mail_plugins sieve
+}
+```
+
+The `lmtp` listener binds to all interfaces inside the container, but because the container is attached only to `songketmail-net`, it is inaccessible from outside the cluster network.
+
+## Quadlet Container Configuration
+
+<Tabs>
+  <Tab title="Postfix">
+```ini
+[Unit]
+Description=SongketMail Mail Transfer Agent Container (Postfix)
+After=network-online.target
+
+[Container]
+ContainerName=songketmail-postfix
+Image=docker.io/library/postfix:3.9.0
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
+Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
+Environment=TZ=UTC
+Exec=/usr/sbin/postfix start-fg
+Label=fabric_cluster=songketmail
+Label=service_type=postfix
+
+[Install]
+WantedBy=default.target
+```
+  </Tab>
+  <Tab title="Dovecot">
+```ini
+[Unit]
+Description=SongketMail Mail Delivery Agent Container (Dovecot)
+After=network-online.target
+
+[Container]
+ContainerName=songketmail-dovecot
+Image=docker.io/library/dovecot:2.3.21.1
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/dovecot/config:/etc/dovecot:Z
+Volume=/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z
+Volume=/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z
+Environment=TZ=UTC
+Label=fabric_cluster=songketmail
+Label=service_type=dovecot
+
+[Install]
+WantedBy=default.target
+```
+  </Tab>
+</Tabs>
+
+Postfix's mail spool at `/var/srv/songketmail/postfix/spool` persists deferred messages across container restarts. Dovecot mounts three separate host directories: configuration files, index metadata on fast local storage, and a local fscache ring buffer for recently accessed message bodies.
+
+## Adding a Mailbox
+
+To provision a new domain and user, connect to the `songketmail-db` PostgreSQL container and run the following SQL statements:
+
+```sql
+-- Register a new virtual domain
+INSERT INTO virtual_domains (name)
+  VALUES ('example.com');
+
+-- Add a user under that domain
+-- Replace the {ARGON2ID}... placeholder with a real hash (see Tip below)
+INSERT INTO users (domain_id, email, password, maildir, active)
+  VALUES (
+    1,
+    'alice@example.com',
+    '{ARGON2ID}$argon2id$v=19$m=65536,t=3,p=4$...',
+    'alice@example.com/',
+    true
+  );
+```
+
+The `maildir` column stores the relative path that Dovecot and the S3 obox plugin use to construct the S3 object key prefix for this user's messages.
+
+<Tip>
+Generate an Argon2id hash before inserting a password. Install the `argon2` CLI tool and run:
+
+```bash
+echo -n 'your-plaintext-password' | argon2 $(openssl rand -hex 16) -id -t 3 -m 16 -p 4 -l 32 -e
+```
+
+Prepend `{ARGON2ID}` to the output string before storing it in PostgreSQL. Never store plaintext or MD5/SHA1 passwords — Dovecot will reject them unless you explicitly add an insecure scheme to `default_pass_scheme`.
+</Tip>

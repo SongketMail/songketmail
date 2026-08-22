@@ -1,0 +1,85 @@
+---
+title: "Managing SongketMail Services with systemd and podman"
+sidebarTitle: "Service Management"
+description: "Start, stop, restart, and inspect all SongketMail services using standard systemctl --user commands in the songketmail user session."
+---
+
+SongketMail services are standard systemd user units deployed as Podman 5 Quadlets, which means you manage them with the same familiar `systemctl` commands you already know — no Docker Compose wrappers, no custom scripts. Every container in the fabric is registered with the `songketmail` user's systemd session at deployment time, so the full service lifecycle from boot to restart is handled natively by the operating system.
+
+## Setting Up the User Session Environment
+
+Because SongketMail runs as the unprivileged `songketmail` user (UID 2001), systemd user commands must target that user's runtime session. If you are logged in as a different user, export the required session variables before running any `systemctl --user` commands:
+
+```bash
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+```
+
+Alternatively, switch into the `songketmail` shell session entirely to avoid setting these variables on every invocation:
+
+```bash
+sudo -u songketmail -s
+```
+
+All `systemctl --user` and `podman` commands in the rest of this guide assume you are operating inside the `songketmail` user session or have the environment variables exported.
+
+<Tip>
+Run `loginctl enable-linger songketmail` to ensure the `songketmail` user session starts automatically at boot and that all Quadlet services come online without requiring an active login. The Ansible playbook sets this up during deployment, but verify it manually after any system reimaging.
+</Tip>
+
+## Common Service Commands
+
+The shared Podman pod (`songketmail_pod`) acts as the lifecycle anchor for the entire fabric. Starting or stopping the pod brings all member containers up or down together. You can also manage individual container services independently when you need to restart a single component without disrupting the others.
+
+```bash
+# Check the status of the shared pod
+systemctl --user status songketmail_pod-pod.service
+
+# List all SongketMail units and their current states
+systemctl --user list-units 'songketmail_*'
+
+# Restart a specific service without stopping others
+systemctl --user restart songketmail_postfix.service
+
+# Stop all services by stopping the pod
+systemctl --user stop songketmail_pod-pod.service
+
+# Start all services by starting the pod
+systemctl --user start songketmail_pod-pod.service
+```
+
+To reload the systemd daemon after any manual changes to Quadlet definition files under `~/.config/containers/systemd/`, run:
+
+```bash
+systemctl --user daemon-reload
+```
+
+## Service Names Reference
+
+The table below maps each systemd unit name to its Podman container name and its role within the fabric. Use the unit name with `systemctl` commands and the container name with `podman` commands.
+
+| Unit Name | Container Name | Role |
+|---|---|---|
+| `songketmail_pod-pod.service` | `songketmail_pod` | Shared pod (lifecycle anchor) |
+| `songketmail_proxy.service` | `songketmail-proxy` | BunkerWeb WAF — SSL termination and ingress |
+| `songketmail_postfix.service` | `songketmail-postfix` | Postfix MTA — mail transfer |
+| `songketmail_dovecot.service` | `songketmail-dovecot` | Dovecot MDA — mail delivery and IMAP |
+| `songketmail_db.service` | `songketmail-db` | PostgreSQL — virtual account database |
+| `songketmail_s3.service` | `songketmail-s3` | RustFS — S3-compatible mail body storage |
+| `songketmail_web.service` | `songketmail-web` | Roundcube — webmail client |
+| `songketmail_rspamd.service` | `songketmail-rspamd` | Rspamd — spam filtering and DKIM signing |
+
+## Checking Service Logs via systemd Journal
+
+Each Quadlet service writes its output to the systemd journal under the `songketmail` user session. Use `journalctl` to query structured log history, which is especially useful for diagnosing startup failures:
+
+```bash
+# Follow live journal output for a service
+journalctl --user -fu songketmail_postfix.service
+
+# Show the last 50 journal entries for the pod
+journalctl --user -n 50 -u songketmail_pod-pod.service
+
+# Show all journal entries since last boot
+journalctl --user -b -u songketmail_dovecot.service
+```

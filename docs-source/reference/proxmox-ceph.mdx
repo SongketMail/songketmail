@@ -1,0 +1,228 @@
+---
+title: "Proxmox and Ceph Hyper-Converged Storage for SongketMail"
+sidebarTitle: "Proxmox & Ceph"
+description: "Deploy SongketMail on a Proxmox VE cluster backed by external Ceph storage for enterprise HA, RBD mirroring, and multi-region disaster recovery."
+---
+
+For production environments that demand high availability, geo-redundancy, and block-level data replication, SongketMail integrates with Proxmox VE and Ceph to deliver enterprise-grade infrastructure beneath your mail services. This setup separates compute (Proxmox VE 9) from storage (independent Ceph clusters) so that each layer scales and fails independently, and it provides a clear upgrade and disaster recovery path without downtime to mail delivery.
+
+<Note>
+  This integration targets advanced production deployments. A single-node SongketMail setup on a standard Ubuntu or AlmaLinux host is fully supported and does not require Proxmox or Ceph. Return to this page when you are ready to graduate to a multi-node, high-availability configuration.
+</Note>
+
+---
+
+## Architecture Overview
+
+The recommended production topology places Proxmox VE 9 compute nodes and the Ceph storage clusters on entirely separate hardware. This separation prevents storage replication traffic from competing with VM workloads for CPU and memory on the same host.
+
+The full deployment moves through six sequential stages:
+
+```text
++---------------------------------------------------------------------------------------------------+
+|                                     DEPLOYMENT STAGE FLOW                                         |
++---------------------------------------------------------------------------------------------------+
+|  STAGE 1: Configure Proxmox VE 9 Compute Cluster (4 nodes, no local Ceph)                         |
+|    |                                                                                              |
+|    +---> STAGE 2A: Configure Ceph Production Cluster (3 nodes, Ubuntu 26.04 + Tentacle)           |
+|    |       |                                                                                      |
+|    |       +---> STAGE 3: Configure RBD Mirroring Production <-> DR (replication link)            |
+|    |       |       |                                                                              |
+|    +---> STAGE 2B: Configure Ceph DR Cluster (3 nodes, Ubuntu 26.04 + Tentacle)                   |
+|            |       |                                                                              |
+|            |       v                                                                              |
+|            +---> STAGE 4: Integrate PVE <-> Ceph (Keyring transfer, storage.cfg, test VM on pool) |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 5: Validate & Test (Benchmark, HA node failure, DR failover / failback)    |
+|                    |                                                                              |
+|                    v                                                                              |
+|                  STAGE 6: Documentation, UAT & Handover to Customer                              |
++---------------------------------------------------------------------------------------------------+
+```
+
+The compute cluster runs four Proxmox VE 9 nodes with local Ceph services disabled — this preserves maximum CPU and memory for SongketMail virtual machines. Both the Production and DR Ceph clusters run three nodes each, sized with at least three Monitor daemons and three Manager daemons per site for stable quorum.
+
+---
+
+## Ceph Bootstrap with Ubuntu 26.04
+
+Each Ceph site runs the **Tentacle** release deployed via the official `cephadm` containerised orchestrator on **Ubuntu 26.04 LTS**. This approach keeps the storage OS minimal and gives you direct access to upstream Ceph point releases.
+
+<Steps>
+  <Step title="Prepare the storage nodes">
+    On each of the three Ceph nodes, install the container runtime and download `cephadm`:
+
+    ```bash
+    sudo apt update && sudo apt install -y docker.io python3
+    curl --silent --remote-name https://download.ceph.com/rpm/el9/scap-security-guide/cephadm
+    chmod +x cephadm
+    ```
+  </Step>
+  <Step title="Bootstrap the first monitor">
+    Run the bootstrap command on `ceph-node1`, binding to the Ceph Public Network interface:
+
+    ```bash
+    sudo ./cephadm bootstrap --mon-ip 10.10.20.11
+    ```
+
+    This creates the initial Monitor, a co-located Manager, distributes cluster keys, and starts the Ceph Dashboard on port `8443`.
+  </Step>
+  <Step title="Expand MON and MGR quorum">
+    Add the two remaining storage nodes to the cluster so that MON quorum reaches three members — the minimum for a fault-tolerant Ceph cluster:
+
+    ```bash
+    ceph orch host add ceph-node2 10.10.20.12
+    ceph orch host add ceph-node3 10.10.20.13
+    ```
+  </Step>
+  <Step title="Provision OSDs">
+    List available raw, unpartitioned disks on each node and assign them as OSD daemons. One OSD maps to one physical disk:
+
+    ```bash
+    # List available storage devices across all hosts
+    sudo ceph orch device ls
+
+    # Add all available devices automatically
+    sudo ceph orch apply osd --all-available-devices
+    ```
+
+    Each OSD daemon should receive at least **8 GiB of RAM** reserved on the host and **1 dedicated CPU thread** to prevent backfill operations from stalling under load.
+  </Step>
+</Steps>
+
+The cluster node addressing for a standard three-node Ceph site looks like this:
+
+| Hostname | Role | Ceph Public IP | Ceph Cluster IP |
+|---|---|---|---|
+| `ceph-node1` | MON / MGR / OSD | `10.10.20.11` | `10.10.30.11` |
+| `ceph-node2` | MON / MGR / OSD | `10.10.20.12` | `10.10.30.12` |
+| `ceph-node3` | MON / MGR / OSD | `10.10.20.13` | `10.10.30.13` |
+| `pve-node1–4` | PVE 9 Compute | `10.10.10.21–24` | — |
+
+---
+
+## RBD Mirroring for Disaster Recovery
+
+Ceph RADOS Block Device (RBD) mirroring replicates block-level writes from the Production cluster to the DR cluster over your WAN link. The replication is **active-passive**: the Production site handles all write I/O, and the DR site receives a continuous stream of journal deltas.
+
+<Steps>
+  <Step title="Enable the rbd-mirror daemon on both sites">
+    Deploy the mirroring daemon on the Production and DR clusters:
+
+    ```bash
+    # Run on the Production cluster
+    ceph orch apply rbd-mirror --placement "ceph-node1"
+
+    # Run on the DR cluster
+    ceph orch apply rbd-mirror --placement "ceph-dr-node1"
+    ```
+  </Step>
+  <Step title="Exchange bootstrap tokens">
+    Generate a peer token on the Production cluster and import it on the DR cluster to establish the daemon-to-daemon trust relationship:
+
+    ```bash
+    # On Production: generate a bootstrap token for the pool
+    rbd mirror pool peer bootstrap create --site-name production pve-rbd-pool
+
+    # On DR: import the token
+    rbd mirror pool peer bootstrap import --site-name dr --direction rx-only pve-rbd-pool <token>
+    ```
+  </Step>
+  <Step title="Enable journalling on the SongketMail RBD pool">
+    Journalling must be active on images for mirror replication to track changes:
+
+    ```bash
+    rbd mirror pool enable pve-rbd-pool image
+    rbd feature enable pve-rbd-pool/songketmail-data journaling
+    ```
+  </Step>
+  <Step title="Verify replication status">
+    Confirm the mirror is synchronising before completing the DR setup:
+
+    ```bash
+    rbd mirror pool status pve-rbd-pool --verbose
+    ```
+
+    Look for `health: OK` and a `replaying` state on each image. The `entries_behind_primary` counter should trend towards zero after initial sync.
+  </Step>
+</Steps>
+
+SongketMail's persistent data lives under `/var/srv/songketmail/` on each compute node. These paths are backed by RBD volumes mounted into the virtual machines. When you mount the DR cluster's promoted RBD images after a failover event, all 14 SongketMail storage subdirectories — mail spools, database volumes, S3 object stores, and TLS certificates — are immediately available to the standby nodes.
+
+---
+
+## Multi-Region Geodistributed Topology
+
+For organisations requiring cross-border fault isolation or regulatory data residency, SongketMail supports a three-region deployment topology connected by an IPsec mesh and BGP dynamic routing.
+
+```text
+       [ Region Alpha (Main/KUL) ]
+             /               \
+       IPsec Mesh         IPsec Mesh
+           /                   \
+[ Region Beta (JHB) ] ===== [ Region Gamma (PEN) ]
+                    IPsec Mesh
+```
+
+Each region runs an independent Proxmox VE compute cluster and a dedicated Ceph storage tier. BGP routing between regions is managed by [FRRouting (FRR)](https://frrouting.org/) over routed IPsec or WireGuard tunnels.
+
+| Region | Geographic Role | Primary Workloads | Interconnect |
+|---|---|---|---|
+| **Region Alpha** (Central – KUL) | Primary Ingestion & Control Plane | Core SongketMail MTA, Percona Patroni Master, Elastic Stack Hot Nodes | Dual 10GbE dark fibre, FRR BGP with IPsec mesh |
+| **Region Beta** (Southern – JHB) | Active-Active Replica & Real-Time DR Target | Read-replica MTAs, Patroni Standby, Ceph Tier-2 Mirror, PBS Pull Target | Redundant 10GbE WAN transit, WireGuard/StrongSwan backup |
+| **Region Gamma** (Northern – PEN) | Edge Proxy, Analytics & Archival Target | GIS workloads, Elastic Warm/Cold Nodes, PBS Offsite Cold Vault | Carrier-diverse MPLS/IPsec, BGP EVPN fabric extension |
+
+<Tip>
+  To prevent Ceph MON election failures and Patroni consensus breaks across regions, deploy a geolocated Chrony NTP topology. Align each region to a local Stratum-1/2 source (for example, the National Metrology Institute of Malaysia for Region Alpha) and configure cross-region peer entries so that clock skew stays below 50 ms across all nodes.
+</Tip>
+
+---
+
+## Integration with SongketMail Storage Paths
+
+SongketMail's Ansible `host_prepare` role provisions 14 storage subdirectories under `/var/srv/songketmail/` on each compute node, all owned by UID/GID `2001:2001`. When you back these paths with Ceph RBD volumes, you get block-level HA and point-in-time snapshot capability for every mail service component.
+
+Mount the Production RBD pool as an external storage backend in Proxmox by registering it in `/etc/pve/storage.cfg`:
+
+```ini
+rbd: external-ceph-prod
+    monhost 10.10.20.11;10.10.20.12;10.10.20.13
+    pool pve-rbd-pool
+    username admin
+    content images,rootdir
+    krbd 0
+```
+
+Transfer the admin keyring from `ceph-node1` to all four PVE compute hosts:
+
+```bash
+mkdir -p /etc/pve/priv/ceph/
+scp /etc/ceph/ceph.client.admin.keyring \
+    root@10.10.10.21:/etc/pve/priv/ceph/external-ceph-prod.keyring
+```
+
+Once registered, create and attach RBD images to your SongketMail virtual machines and mount them at `/var/srv/songketmail` inside the guest OS. Every Quadlet-managed container that maps a volume from `/var/srv/songketmail/` will automatically benefit from Ceph's replication factor, OSD-level checksumming, and RBD mirroring to your DR site.
+
+---
+
+## Validation and Benchmarking
+
+Before routing live mail traffic to your new cluster, run synthetic storage benchmarks to confirm that the fabric is healthy and meets your IOPS baseline:
+
+```bash
+# Write benchmark — 30-second sustained write against the SongketMail RBD pool
+cephadm shell -- rados bench -p pve-rbd-pool 30 write --no-cleanup
+
+# Clean up benchmark objects after recording results
+cephadm shell -- rados -p pve-rbd-pool cleanup
+```
+
+Check overall cluster health and watch the recovery counter during any rebalancing:
+
+```bash
+ceph status
+ceph -w
+```
+
+Confirm `HEALTH_OK` before enabling your first SongketMail virtual machine on the external Ceph pool.

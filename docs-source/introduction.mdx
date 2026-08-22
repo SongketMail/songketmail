@@ -1,0 +1,76 @@
+---
+title: "SongketMail: Rootless Email Server Deployment Fabric"
+sidebarTitle: "Introduction"
+description: "SongketMail deploys a complete, hardened email stack as rootless Podman containers — no root daemon, full storage sovereignty, one Ansible command."
+---
+
+SongketMail is an enterprise-grade email server deployment fabric that gives you a production-ready, security-hardened mail stack without ever running a root daemon. Orchestrated by Ansible 9+ and powered by Podman 5+ Quadlets, it provisions seven tightly integrated containerised services — from WAF proxy to object storage — under a single unprivileged system user. Whether you are a platform engineer standing up self-hosted email for the first time or a systems architect replacing a fragile legacy stack, SongketMail gives you a reproducible, auditable, and horizontally scalable baseline you can run with a single command.
+
+## The Persistence Trinity
+
+SongketMail's design is governed by three architectural pillars, collectively called the **Persistence Trinity**. Together they ensure that every node in your deployment is isolated, self-healing, and fully owned by the operator — no root access required at runtime.
+
+<CardGroup cols={3}>
+  <Card title="Fabric Isolation" icon="shield-halved">
+    Every pod, network, and container is cluster-prefixed (e.g., `songketmail-net`, `songketmail_pod`). Multiple independent fabrics can co-exist on a single host or hypervisor without port collisions, network conflicts, or cross-contamination of internal TCP streams.
+  </Card>
+  <Card title="Quadlet Orchestration" icon="gear">
+    Instead of docker-compose or ad-hoc run scripts, SongketMail uses **Podman 5 Quadlets** — declarative `.container`, `.pod`, and `.network` files that the systemd generator converts into native user-level systemd units. Services survive reboots and recover automatically, managed entirely through standard `systemctl --user` tooling.
+  </Card>
+  <Card title="Sovereign Storage" icon="hard-drive">
+    Volume mounts point to host paths under `/var/srv/songketmail/`, owned by UID/GID `2001:2001`. The `UserNS=keep-id:uid=2001,gid=2001` Quadlet directive maps container-internal UIDs directly to the host user's UID, so you can inspect, back up, and audit data directories without ever reaching for `sudo`.
+  </Card>
+</CardGroup>
+
+## Key Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Truly Rootless Runtime" icon="lock">
+    All seven services execute under the unprivileged `songketmail` user (UID/GID 2001). The Podman daemon never runs as root, and no container escapes the user namespace boundary.
+  </Card>
+  <Card title="One-Command Deployment" icon="terminal">
+    A single `ansible-playbook -i inventory/hosts.ini site.yml` invocation prepares the host, maps namespaces, hardens the OS, and launches every containerised service in the correct order.
+  </Card>
+  <Card title="WAF-First Ingress" icon="tower-broadcast">
+    All inbound HTTPS, SMTP, and IMAP traffic enters through BunkerWeb — an NGINX-based Web Application Firewall — before it ever reaches your mail services. SSL is terminated and hardened at the edge.
+  </Card>
+  <Card title="S3-Backed Mail Storage" icon="bucket">
+    Dovecot stores message bodies and attachments directly in RustFS, an S3-compatible object store running inside the fabric. Your mail data lives on block storage you control, with no third-party dependency.
+  </Card>
+  <Card title="Virtual Account Database" icon="database">
+    PostgreSQL maintains virtual domain, user, and alias tables with Argon2id-hashed passwords. Adding a new mailbox is a SQL INSERT — no flat-file reloads, no service restart.
+  </Card>
+  <Card title="ASIMP Security Alignment" icon="shield-check">
+    The host preparation role integrates Lynis, OpenSCAP (CIS Level 2), and Debsums auditing to give you a documented, measurable security baseline before the first container starts.
+  </Card>
+  <Card title="Native systemd Integration" icon="arrows-rotate">
+    Quadlet-generated systemd units respect `Restart=always`, `loginctl enable-linger`, and all standard systemd directives. There is no wrapper process sitting between your OS and your containers.
+  </Card>
+  <Card title="Horizontal Scalability" icon="server">
+    Node-isolated storage paths under `/var/srv/songketmail/` mean you can add nodes to `inventory/hosts.ini` and rerun the playbook to scale out without touching existing nodes.
+  </Card>
+</CardGroup>
+
+## Technology Stack
+
+SongketMail assembles the following open-source components into a cohesive, versioned fabric. Every image pin avoids `:latest` tags to guarantee reproducible deployments across environments.
+
+| Layer | Component | Version |
+|---|---|---|
+| **Orchestration** | Ansible | 9.0+ |
+| **Container Runtime** | Podman (rootless) | 5.0+ |
+| **Ingress / WAF** | BunkerWeb | 1.6.13 |
+| **Mail Transfer Agent** | Postfix | 3.9.0 |
+| **Mail Delivery Agent** | Dovecot | 2.3.21.1 |
+| **Spam Filter** | Rspamd | 3.9.1 |
+| **Webmail Client** | Roundcube | 1.6.8-apache |
+| **Object Storage** | RustFS | 1.0.0 |
+| **Virtual Account DB** | PostgreSQL | 16-alpine |
+
+<Note>
+  Host-level tasks (kernel tuning, namespace mapping, systemd lingering) run with `become: yes` for the preparation phase only. Once the host is prepared, all Quadlet container units execute exclusively under the unprivileged `songketmail` user account. Root access is never required at runtime.
+</Note>
+
+## Next Steps
+
+To understand how all seven services connect and communicate, continue to the [Architecture Overview](/architecture-overview).
