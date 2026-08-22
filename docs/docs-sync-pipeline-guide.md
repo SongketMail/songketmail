@@ -110,19 +110,27 @@ To maintain strong operational security, the deployment architecture strictly di
 
 ### Option A: Configuration via GitHub REST API (Automated)
 
-If you possess a administrative Personal Access Token with repository secret management permissions (`ADMIN_SECRET_PAT`), you can upload the dedicated fine-grained deployment token (`DEPLOYMENT_PAT`) into `DOCS_REPO_TOKEN` programmatically using Python and NaCl public key encryption:
+#### Prerequisites & Dependency Installation
+Before running the automated Python script, install the `PyNaCl` library (which binds libsodium for sealed-box public key encryption):
+
+```bash
+python3 -m pip install PyNaCl
+```
+
+> **🔒 Critical Security Directive:** Real tokens and credentials must **never** be hardcoded or committed to source control. In the script below, tokens are safely retrieved at runtime from environment variables (`ADMIN_SECRET_PAT` and `DEPLOYMENT_PAT`) or interactive user prompts using `getpass.getpass()`.
 
 ```python
 import os
 import json
 import base64
+import getpass
 import urllib.request
 from nacl import encoding, public
 
-# 1. Separate Credentials & Scope Separation
-ADMIN_SECRET_PAT = "ghp_admin_bootstrap_credential_for_secret_mgmt"
-DEPLOYMENT_PAT = "github_pat_fine_grained_deployment_token_for_docs_repo"
-REPO = "SongketMail/songketmail"
+# 1. Retrieve Credentials safely from Environment Variables or Prompt (Never Hardcoded)
+ADMIN_SECRET_PAT = os.environ.get("ADMIN_SECRET_PAT") or getpass.getpass("Enter Admin Secret Mgmt PAT: ")
+DEPLOYMENT_PAT = os.environ.get("DEPLOYMENT_PAT") or getpass.getpass("Enter Deployment Fine-Grained PAT: ")
+REPO = os.environ.get("GITHUB_REPOSITORY", "SongketMail/songketmail")
 
 # 2. Fetch Repository Public Key using Admin Credential
 req = urllib.request.Request(
