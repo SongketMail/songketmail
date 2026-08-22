@@ -59,23 +59,6 @@ The documentation sync mechanism operates across two distinct GitHub repositorie
 
 ---
 
-## 🚨 Root Cause Analysis: `ValueError: DOCS_REPO_TOKEN environment variable is not set`
-
-### Error Traceback
-When the workflow executes without `DOCS_REPO_TOKEN` configured in repository secrets, the build fails with the following log output:
-
-```text
-Traceback (most recent call last):
-  File "/home/runner/work/songketmail/songketmail/scripts/sync_docs.py", line 86, in <module>
-    main()
-  File "/home/runner/work/songketmail/songketmail/scripts/sync_docs.py", line 30, in main
-    raise ValueError("DOCS_REPO_TOKEN environment variable is not set")
-ValueError: DOCS_REPO_TOKEN environment variable is not set
-Error: Process completed with exit code 1.
-```
-
----
-
 ## 🚨 Incident Report: Unsafe Sync Wiped Pages (2026-08-22)
 
 ### What Happened
