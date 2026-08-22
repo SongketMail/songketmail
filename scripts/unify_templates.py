@@ -47,6 +47,7 @@ SIDEBAR_ITEMS = [
     { "href": "k8s-ceph-design.html", "icon": "☸️", "label": "23. Enterprise K8s & Ceph", "section": "research" },
     { "href": "proxmox-datacenter-architecture.html", "icon": "🖥️", "label": "24. Proxmox VE Datacentre", "section": "research" },
     { "href": "freebsd-bhyve-solutions.html", "icon": "🐝", "label": "26. FreeBSD & Bhyve Architecture", "section": "research" },
+    { "href": "docs-sync-pipeline-guide.html", "icon": "📚", "label": "27. Docs Sync Pipeline", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -80,6 +81,7 @@ TOPIC_MAP = {
     "k8s-ceph-design.html": ("[ TOPIC: 23 ]", "[ ORCH: KUBERNETES ]", "[ SDS: CEPH_RBD_FS_S3 ]"),
     "proxmox-datacenter-architecture.html": ("[ TOPIC: 24 ]", "[ ORCH: PROXMOX_VE ]", "[ SDS: CEPH_HCI ]"),
     "freebsd-bhyve-solutions.html": ("[ TOPIC: 26 ]", "[ HYPERVISOR: BHYVE ]", "[ OS: FREEBSD_ZFS ]"),
+    "docs-sync-pipeline-guide.html": ("[ TOPIC: 27 ]", "[ CI_CD: GH_ACTIONS ]", "[ MINTLIFY: SYNC ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -111,6 +113,7 @@ SUBTITLE_MAP = {
     "k8s-ceph-design.html": "Deep Research // Topic 23: Enterprise Kubernetes & Distributed Ceph Architecture",
     "proxmox-datacenter-architecture.html": "Deep Research // Topic 24: Proxmox VE Enterprise Datacentre Architecture",
     "freebsd-bhyve-solutions.html": "Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture",
+    "docs-sync-pipeline-guide.html": "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
