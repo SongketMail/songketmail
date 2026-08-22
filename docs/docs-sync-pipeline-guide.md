@@ -76,12 +76,14 @@ Error: Process completed with exit code 1.
 ### Cause & Mechanism
 In `.github/workflows/sync-docs.yml`, the workflow passes `DOCS_REPO_TOKEN` into the environment via GitHub Secrets:
 
+{% raw %}
 ```yaml
       - name: Sync docs
         env:
           DOCS_REPO_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
         run: python scripts/sync_docs.py
 ```
+{% endraw %}
 
 If `DOCS_REPO_TOKEN` has not been added to the repository's **Settings -> Secrets and variables -> Actions**, `${{ secrets.DOCS_REPO_TOKEN }}` evaluates to an empty string. `scripts/sync_docs.py` detects this missing token during initialization and deliberately aborts execution before attempting any git operations:
 
@@ -97,9 +99,18 @@ if not token:
 
 To resolve this failure and enable seamless documentation synchronization, follow these configuration steps:
 
+### Two-Token Model & Separation of Duties
+
+To maintain strong operational security, the deployment architecture strictly distinguishes between two separate types of tokens:
+
+1. **Admin / Bootstrap Credential (`ADMIN_SECRET_PAT`):** A temporary, high-privilege Personal Access Token used solely by an administrator or automated setup tool to manage repository secrets via the GitHub REST API (`/actions/secrets`). This credential is **never** stored inside repository secrets or passed into runtime workflow steps.
+2. **Runtime Deployment Token (`DOCS_REPO_TOKEN`):** A dedicated, fine-grained Personal Access Token (or bot token) stored securely as a repository secret (`DOCS_REPO_TOKEN`). This token is injected into the runtime sync job and is strictly limited to content write permissions (`Contents: Read and write`) on the target repository (`songketmail/songketmail-product-pages`). It has zero access to manage secrets or access administrative settings in the core repository.
+
+---
+
 ### Option A: Configuration via GitHub REST API (Automated)
 
-If you possess a Personal Access Token (PAT) with `repo` or `admin` scopes (or repository secret management permissions), you can configure `DOCS_REPO_TOKEN` programmatically using Python and NaCl public key encryption:
+If you possess a administrative Personal Access Token with repository secret management permissions (`ADMIN_SECRET_PAT`), you can upload the dedicated fine-grained deployment token (`DEPLOYMENT_PAT`) into `DOCS_REPO_TOKEN` programmatically using Python and NaCl public key encryption:
 
 ```python
 import os
@@ -108,15 +119,16 @@ import base64
 import urllib.request
 from nacl import encoding, public
 
-# 1. Credentials and Target Repository
-PAT_TOKEN = "ghp_your_github_personal_access_token"
+# 1. Separate Credentials & Scope Separation
+ADMIN_SECRET_PAT = "ghp_admin_bootstrap_credential_for_secret_mgmt"
+DEPLOYMENT_PAT = "github_pat_fine_grained_deployment_token_for_docs_repo"
 REPO = "SongketMail/songketmail"
 
-# 2. Fetch Repository Public Key
+# 2. Fetch Repository Public Key using Admin Credential
 req = urllib.request.Request(
     f"https://api.github.com/repos/{REPO}/actions/secrets/public-key",
     headers={
-        "Authorization": f"token {PAT_TOKEN}",
+        "Authorization": f"token {ADMIN_SECRET_PAT}",
         "Accept": "application/vnd.github+json",
         "User-Agent": "SongketMail-DocsSync"
     }
@@ -127,19 +139,19 @@ with urllib.request.urlopen(req) as response:
 public_key = key_data["key"]
 key_id = key_data["key_id"]
 
-# 3. Encrypt the Token using libsodium / PyNaCl
+# 3. Encrypt the Fine-Grained Deployment Token using libsodium / PyNaCl
 public_key_obj = public.PublicKey(public_key.encode("utf-8"), encoding.Base64Encoder)
 sealed_box = public.SealedBox(public_key_obj)
-encrypted = sealed_box.encrypt(PAT_TOKEN.encode("utf-8"))
+encrypted = sealed_box.encrypt(DEPLOYMENT_PAT.encode("utf-8"))
 encrypted_value = base64.b64encode(encrypted).decode("utf-8")
 
-# 4. Upload DOCS_REPO_TOKEN as a Secret
+# 4. Upload DOCS_REPO_TOKEN Secret using Admin Credential
 data = json.dumps({"encrypted_value": encrypted_value, "key_id": key_id}).encode("utf-8")
 put_req = urllib.request.Request(
     f"https://api.github.com/repos/{REPO}/actions/secrets/DOCS_REPO_TOKEN",
     data=data,
     headers={
-        "Authorization": f"token {PAT_TOKEN}",
+        "Authorization": f"token {ADMIN_SECRET_PAT}",
         "Accept": "application/vnd.github+json",
         "Content-Type": "application/json",
         "User-Agent": "SongketMail-DocsSync"
@@ -155,19 +167,19 @@ with urllib.request.urlopen(put_req) as resp:
 
 ### Option B: Configuration via GitHub Web UI (Manual)
 
-1. **Generate Personal Access Token (Classic):**
-   - Navigate to **GitHub Settings -> Developer Settings -> Personal Access Tokens -> Tokens (classic)**.
-   - Click **Generate new token (classic)**.
-   - Note: Give it a descriptive name (e.g., `SongketMail Mintlify Sync Token`).
-   - Select scope: **`repo`** (Full control of private repositories) or specifically write permissions for `songketmail/songketmail-product-pages`.
-   - Click **Generate token** and copy the resulting string (`ghp_...`).
+1. **Generate Fine-Grained Personal Access Token for Runtime Sync:**
+   - Navigate to **GitHub Settings -> Developer Settings -> Personal Access Tokens -> Fine-grained tokens**.
+   - Click **Generate new token**.
+   - **Repository access:** Select **Only select repositories** -> `songketmail/songketmail-product-pages`.
+   - **Permissions:** Under **Repository permissions**, set **Contents** to **Access: Read and write**.
+   - Click **Generate token** and copy the resulting string (`github_pat_...`).
 
 2. **Add Repository Secret in Core Repository:**
    - Go to `https://github.com/SongketMail/songketmail`.
    - Click **Settings** -> **Secrets and variables** -> **Actions**.
    - Click **New repository secret**.
    - **Name:** `DOCS_REPO_TOKEN`
-   - **Secret:** Paste the PAT token (`ghp_...`).
+   - **Secret:** Paste the fine-grained deployment token (`github_pat_...`).
    - Click **Add secret**.
 
 3. **Re-run Failed Workflow:**
@@ -194,7 +206,7 @@ with urllib.request.urlopen(put_req) as resp:
    Dedicated bot accounts (e.g., `bot@songketmail.com` / `Docs Sync Bot`) should be assigned fine-grained PAT tokens restricted strictly to contents write permissions on `songketmail/songketmail-product-pages`.
 
 3. **Concurrency Control:**
-   The GitHub Actions workflow includes concurrency controls (`group: sync-docs-${{ github.ref }}`, `cancel-in-progress: true`) to prevent race conditions during rapid consecutive pushes.
+   The GitHub Actions workflow includes concurrency controls (`group: sync-docs-{% raw %}${{ github.ref }}{% endraw %}`, `cancel-in-progress: true`) to prevent race conditions during rapid consecutive pushes.
 
 ---
 
