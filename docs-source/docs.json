@@ -16,6 +16,7 @@
           {
             "group": "Introduction",
             "pages": [
+              "index",
               "introduction",
               "quickstart",
               "architecture-overview",

@@ -29,11 +29,11 @@ loginctl show-user songketmail | grep Linger
 
 The output should read `Linger=yes`. If it reads `Linger=no`, the command did not take effect — check that you ran it with sufficient privileges.
 
-After enabling linger, start the pod manually for this boot cycle:
+After enabling linger, start the services manually for this boot cycle:
 
 ```bash
 sudo -u songketmail -s
-systemctl --user start songketmail_pod-pod.service
+systemctl --user start 'songketmail-*'
 ```
 
 Future reboots will bring services up automatically.
@@ -100,7 +100,7 @@ A non-empty deferred queue with `Connection refused (port 24)` errors indicates 
 podman logs --tail 100 songketmail-dovecot
 ```
 
-Look for LMTP listener startup confirmation and any `Permission denied` or `Authentication failed` errors. Confirm that both containers are members of the same pod and network (`songketmail-net`).
+Look for LMTP listener startup confirmation and any `Permission denied` or `Authentication failed` errors. Confirm that both containers are members of the same network (`songketmail-net`).
 </Accordion>
 
 <Accordion title="IMAP clients cannot connect">
@@ -144,12 +144,12 @@ A successful TLS handshake confirms the proxy and Dovecot are wired correctly. A
 </Accordion>
 
 <Accordion title="Host storage shows nobody:nogroup ownership">
-**Cause:** The `UserNS=keep-id:uid=2001,gid=2001` directive is missing or misconfigured in the pod's Quadlet definition file. Without this directive, Podman uses its default rootless UID remapping, which maps the internal UID `2001` to a high-range subuid on the host (typically in the `100000+` range). The host filesystem then displays those files as owned by `nobody:nogroup`.
+**Cause:** The `UserNS=keep-id:uid=2001,gid=2001` directive is missing or misconfigured in the Quadlet definition files. Without this directive, Podman uses its default rootless UID remapping, which maps the internal UID `2001` to a high-range subuid on the host (typically in the `100000+` range). The host filesystem then displays those files as owned by `nobody:nogroup`.
 
-**Check the pod Quadlet file** for the correct `UserNS` setting:
+**Check the container Quadlet files** for the correct `UserNS` setting:
 
 ```bash
-cat ~/.config/containers/systemd/songketmail_pod.pod | grep UserNS
+cat ~/.config/containers/systemd/songketmail-postfix.container | grep UserNS
 ```
 
 The output must read:
@@ -168,7 +168,7 @@ id songketmail
 
 Expected output: `uid=2001(songketmail) gid=2001(songketmail) groups=2001(songketmail)`
 
-After correcting the Quadlet and restarting the pod, newly written files will appear with `songketmail:songketmail` ownership. Existing files with the wrong ownership must be corrected manually with `chown -R 2001:2001 /var/srv/songketmail/`.
+After correcting the Quadlet and restarting the services, newly written files will appear with `songketmail:songketmail` ownership. Existing files with the wrong ownership must be corrected manually with `chown -R 2001:2001 /var/srv/songketmail/`.
 </Accordion>
 
 <Accordion title="Roundcube shows a database error">
@@ -189,7 +189,7 @@ sudo chown -R 2001:2001 /var/srv/songketmail/roundcube/db/
 **Step 2 — Restart the web service** to trigger a fresh initialisation attempt:
 
 ```bash
-systemctl --user restart songketmail_web.service
+systemctl --user restart songketmail-web.service
 ```
 
 **Step 3 — Check the container logs** for the specific database error:
@@ -213,16 +213,16 @@ podman ps --filter name=songketmail-s3
 If it is absent from the output, check why it failed to start:
 
 ```bash
-journalctl --user -n 50 -u songketmail_s3.service
+journalctl --user -n 50 -u songketmail-s3.service
 ```
 
-**Step 2 — Verify that the required environment variables are present** in the Quadlet definition:
+**Step 2 — Verify that the required environment variable keys are present** without outputting secret values:
 
 ```bash
-cat ~/.config/containers/systemd/songketmail_s3.container | grep -E 'RUSTFS_ACCESS_KEY|RUSTFS_SECRET_KEY'
+grep -E 'RUSTFS_ACCESS_KEY|RUSTFS_SECRET_KEY' ~/.config/containers/systemd/songketmail-s3.container | sed 's/=.*/=[REDACTED]/'
 ```
 
-Both `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY` must be set. If they are missing, update your `group_vars/all.yml` with the correct values and re-run the playbook to regenerate the Quadlet.
+Both `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY` must be defined. If either key is missing, update `group_vars/all.yml` with the required vault parameters and re-run the playbook to regenerate the Quadlet.
 
 **Step 3 — Check the data directory permissions:**
 
@@ -239,7 +239,7 @@ sudo chown -R 2001:2001 /var/srv/songketmail/rustfs/data/
 Then restart the service:
 
 ```bash
-systemctl --user restart songketmail_s3.service
+systemctl --user restart songketmail-s3.service
 podman logs --tail 50 songketmail-s3
 ```
 
@@ -252,7 +252,7 @@ podman logs --tail 50 songketmail-s3
 If you have worked through the relevant accordion above and the issue persists, the following resources are available:
 
 <CardGroup cols={2}>
-  <Card title="GitHub Issues" icon="github" href="https://github.com/LinuxMalaysia-SmartWork/SongketMail/issues">
+  <Card title="GitHub Issues" icon="github" href="https://github.com/SongketMail/songketmail/issues">
     Open a bug report or feature request on the SongketMail GitHub repository. Include the output of `podman logs <container>` and `journalctl --user -n 100 -u <unit>` in your report.
   </Card>
   <Card title="Architectural Blueprint" icon="map" href="/architecture-overview">

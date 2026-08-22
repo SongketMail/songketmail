@@ -1,33 +1,39 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+---
+okf_version: "0.1"
+type: "instructions"
+title: "SongketMail Documentation Source AGENTS Instructions"
+timestamp: "2026-08-22T20:45:00Z"
+topics:
+  - "mintlify"
+  - "docs-source"
+  - "songketmail"
+  - "ai-instructions"
+---
 
-# Documentation project instructions
+# SongketMail Documentation Source Instructions
 
 ## About this project
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+- This directory (`docs-source/`) is the single source of truth for SongketMail product documentation built on [Mintlify](https://mintlify.com).
+- Documentation pages are written in MDX (`.mdx`) with YAML frontmatter.
+- Site navigation and configuration live in `docs-source/docs.json`.
+- Changes are automatically synchronized downstream to `songketmail/songketmail-product-pages` via `.github/workflows/sync-docs.yml` and `scripts/sync_docs.py`.
 
-## Terminology
+## Rules for AI Agents and Developers
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- Always make documentation edits under `docs-source/` in this repository.
+- Never edit the downstream `songketmail-product-pages` repository directly.
+- Before committing changes to `docs-source/`, run `python3 scripts/sync_docs.py --dry-run` locally to verify navigation integrity and dry-run validation.
+- When adding a new page to `docs.json` navigation, ensure the corresponding `.mdx` file exists under `docs-source/` in the same commit.
 
-## Style preferences
+## Style Preferences
 
-{/* Add any project-specific style rules below */}
+- Use active voice and second person ("you").
+- Keep sentences concise and clear.
+- Use sentence case for headings.
+- Use bold for UI elements: Click **Settings**.
+- Use code formatting for file names, commands, paths, and code references.
 
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
+---
 
-## Content boundaries
-
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+*SongketMail Documentation Architecture // DSOM AI Protocol Compliant*

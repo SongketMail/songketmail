@@ -41,11 +41,7 @@ def get_quadlet_files():
 
 
 def get_markdown_files():
-    """Collects Markdown files from the repository, excluding Git, pytest cache, bytecode cache, and docs-source directories.
-    
-    Returns:
-        list[str]: Sorted paths to the Markdown files found.
-    """
+    """Retrieves all Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
@@ -533,15 +529,6 @@ def test_sync_docs_deletion_cap_exceeded_raises_value_error():
          patch("scripts.sync_docs.compute_file_diff", return_value=([], [], [Path(f"del_{i}.mdx") for i in range(15)])):
 
         def path_side_effect(arg):
-            """
-            Redirect the documentation repository path to the mocked target.
-            
-            Parameters:
-            	arg: Path-like value to resolve.
-            
-            Returns:
-            	The mocked target for "/tmp/docs-repo"; otherwise, a Path for the input.
-            """
             if str(arg) == "/tmp/docs-repo":
                 return mock_target
             return Path(arg)
@@ -585,15 +572,6 @@ def test_sync_docs_main_success_flow(mock_sub_run, mock_copytree, mock_rmtree, m
          patch("scripts.sync_docs.Path") as mock_path:
         # Redirect /tmp/docs-repo Path instantiation to fake_tmp
         def path_side_effect(arg):
-            """
-            Map the temporary documentation repository path to its test fixture.
-            
-            Parameters:
-                arg: A path-like value to resolve.
-            
-            Returns:
-                The fake temporary path for `/tmp/docs-repo`; otherwise, a `Path` for the supplied value.
-            """
             if str(arg) == "/tmp/docs-repo":
                 return fake_tmp
             return Path(arg)

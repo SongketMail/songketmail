@@ -91,6 +91,25 @@ protocol lmtp {
 
 The `lmtp` listener binds to all interfaces inside the container, but because the container is attached only to `songketmail-net`, it is inaccessible from outside the cluster network.
 
+## Roundcube Webmail Connection Configuration
+
+Roundcube 1.6+ uses `imap_host` and `smtp_host` instead of legacy array configuration keys. Configure connection endpoints in `/var/srv/songketmail/roundcube/config/config.inc.php`:
+
+```php
+<?php
+// Roundcube 1.6+ connection settings
+$config['imap_host'] = 'ssl://songketmail-dovecot:993';
+$config['smtp_host'] = 'tls://songketmail-postfix:587';
+
+// Mandatory 24-character encryption secret for session DES key
+// Every deployment MUST generate and use its own unique 24-character key
+$config['des_key'] = 'rc_key_24_char_unique_39a';
+```
+
+<Warning>
+  `des_key` must be exactly 24 characters long. Replace the placeholder string with a unique, randomly generated 24-character secret for each deployment. Reusing default encryption keys across installations compromises webmail session security.
+</Warning>
+
 ## Quadlet Container Configuration
 
 <Tabs>
@@ -152,7 +171,6 @@ INSERT INTO virtual_domains (name)
   VALUES ('example.com');
 
 -- Add a user under that domain
--- Replace the {ARGON2ID}... placeholder with a real hash (see Tip below)
 INSERT INTO users (domain_id, email, password, maildir, active)
   VALUES (
     1,

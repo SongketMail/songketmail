@@ -25,10 +25,10 @@ Rspamd evaluates each message through a layered set of checks in this order:
 
 <Steps>
   <Step title="SPF check">
-    Validates that the sending IP is authorised to send for the envelope sender domain. A hard SPF fail immediately adds significant negative score.
+    Validates that the sending IP is authorised to send for the envelope sender domain. An SPF authentication failure increases the message's spam score (positive delta pushing towards spam thresholds), whereas a valid SPF pass can reduce the score.
   </Step>
   <Step title="DKIM verification">
-    Verifies the cryptographic DKIM signature in the message headers. A valid signature from a trusted domain adds positive score; a broken or missing signature subtracts score.
+    Verifies the cryptographic DKIM signature in the message headers. A valid signature from a trusted domain reduces the spam score (negative delta reward); a broken or failing signature increases the spam score.
   </Step>
   <Step title="DMARC policy enforcement">
     Combines the SPF and DKIM results against the domain's published DMARC `p=` policy. Failure can trigger reject or quarantine actions depending on your `actions.conf` thresholds.

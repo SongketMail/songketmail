@@ -1,28 +1,41 @@
 ---
-title: "Configuring SongketMail Before Deployment"
+title: "Configure SongketMail before deployment"
 sidebarTitle: "Configuration"
-description: "Set up your inventory file, global variables, pinned image tags, and storage paths before running the SongketMail Ansible playbook."
+description: "Set up your inventory file, global variables, pinned image tags, and storage paths before you run the SongketMail Ansible playbook."
 ---
 
-SongketMail is driven entirely by two configuration files: an Ansible inventory that tells the playbook which nodes to target, and a `group_vars/all.yml` file that controls every tunable parameter — from container image versions to storage paths and network subnets. Review and update both files before you run the playbook for the first time.
+You drive SongketMail deployment using two configuration files: an Ansible inventory file that specifies your target nodes, and a `group_vars/all.yml` file that controls tunable parameters — from container image versions to storage paths and network subnets. Review and update both files before you run the playbook.
 
-## Section 1: Inventory Setup
+## Inventory setup
 
-The inventory file lives at `inventory/hosts.ini`. It defines the nodes that belong to the `email_servers` group, which is the target group for the main `site.yml` playbook.
+The inventory file lives at `inventory/hosts.ini` (or `inventory/hosts.yml` if you prefer YAML syntax). It defines the nodes that belong to the `email_servers` group, which is the target group for the main `site.yml` playbook.
 
-```ini
-[email_servers]
-node1.example.com ansible_host=10.0.1.11
-node2.example.com ansible_host=10.0.1.12
-```
-
-Replace the example hostnames and IP addresses with your real servers. For production deployments, you will also want to specify the SSH user and key:
+### INI inventory format (`inventory/hosts.ini`)
 
 ```ini
 [email_servers]
 node1.example.com ansible_host=10.0.1.11 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/songketmail_deploy
 node2.example.com ansible_host=10.0.1.12 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/songketmail_deploy
 ```
+
+### YAML inventory format (`inventory/hosts.yml`)
+
+```yaml
+all:
+  children:
+    email_servers:
+      hosts:
+        node1.example.com:
+          ansible_host: 10.0.1.11
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/songketmail_deploy
+        node2.example.com:
+          ansible_host: 10.0.1.12
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/songketmail_deploy
+```
+
+Replace the example hostnames and IP addresses with your real servers.
 
 | Variable | Purpose |
 |----------|---------|
@@ -31,9 +44,9 @@ node2.example.com ansible_host=10.0.1.12 ansible_user=ubuntu ansible_ssh_private
 | `ansible_ssh_private_key_file` | Path to the private key used for SSH authentication |
 | `ansible_connection=local` | Use for localhost-only testing without a real remote host |
 
-## Section 2: Global Variables
+## Global variables
 
-All tuneable parameters are consolidated in `group_vars/all.yml`. The complete file with default values looks like this:
+You consolidate all tunable parameters in `group_vars/all.yml`. The complete file with default values looks like this:
 
 ```yaml
 # Environment constraints toggle
@@ -77,7 +90,7 @@ songketmail_services:
   - rspamd
 ```
 
-### Key Variables Explained
+### Key variables explained
 
 <CardGroup cols={2}>
   <Card title="cluster_prefix" icon="tag">
@@ -117,7 +130,7 @@ songketmail_services:
   deployment.**
 </Note>
 
-## Section 3: Storage Layout
+## Storage layout
 
 The playbook creates a structured directory tree under `storage_base_path` (`/var/srv/songketmail` by default). Every directory is owned by `2001:2001` with mode `0700`, ensuring that only the `songketmail` user can access mail data on the host.
 

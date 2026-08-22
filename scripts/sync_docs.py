@@ -28,15 +28,7 @@ def run(cmd, cwd=None, env=None):
 
 
 def extract_pages_from_nav(nav_data):
-    """
-    Collect page references from a nested documentation navigation structure.
-    
-    Parameters:
-        nav_data: Navigation data containing nested lists and dictionaries.
-    
-    Returns:
-        list: Page reference strings found in the navigation structure.
-    """
+    """Recursively extracts page paths from docs.json navigation structure."""
     pages = []
     if isinstance(nav_data, list):
         for item in nav_data:
@@ -55,7 +47,7 @@ def extract_pages_from_nav(nav_data):
 
 
 def resolve_page_path(source_dir: Path, page: str) -> bool:
-    """Determine whether a navigation page reference resolves to an existing source file."""
+    """Checks if a page referenced in docs.json navigation exists on disk."""
     if page.startswith("http://") or page.startswith("https://"):
         return True
 
@@ -70,22 +62,7 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
-    """
-    Validate a documentation source directory, its file count, and navigation references.
-    
-    Parameters:
-    	source_dir (Path): Directory containing the documentation files and `docs.json`.
-    	min_files (int): Minimum number of files required in the directory.
-    
-    Returns:
-    	files (list[Path]): All files found recursively in the source directory.
-    
-    Raises:
-    	ValueError: If the source directory or `docs.json` is missing, the file count is below `min_files`, `docs.json` cannot be parsed, or navigation references missing pages.
-    
-    Notes:
-    	Prints a warning for MDX files that are not referenced in the navigation.
-    """
+    """Validates source documentation directory, docs.json, file count, navigation targets, and reports orphans."""
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
 
@@ -135,16 +112,7 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
 
 
 def compute_file_diff(target_dir: Path, source_dir: Path):
-    """
-    Compare source and target files and identify added, modified, and deleted files.
-    
-    Parameters:
-    	target_dir (Path): Directory containing the existing target files.
-    	source_dir (Path): Directory containing the source files.
-    
-    Returns:
-    	tuple: Added, modified, and deleted file paths as relative paths, respectively.
-    """
+    """Computes file-level diff lists: files_added, files_modified, files_deleted."""
     target_files = {
         f.relative_to(target_dir): f
         for f in target_dir.rglob("*")
@@ -172,15 +140,7 @@ def compute_file_diff(target_dir: Path, source_dir: Path):
 
 
 def parse_args(args=None):
-    """
-    Parse command-line options for the documentation synchronization pipeline.
-    
-    Parameters:
-        args (list[str] | None): Argument values to parse; uses command-line arguments when omitted.
-    
-    Returns:
-        argparse.Namespace: Parsed synchronization configuration.
-    """
+    """Parses command-line arguments for sync_docs.py."""
     parser = argparse.ArgumentParser(description="Documentation Sync Pipeline Script")
     parser.add_argument(
         "--source-dir",
@@ -228,17 +188,7 @@ def parse_args(args=None):
 
 
 def main(cli_args=None):
-    """
-    Synchronize validated source documentation with the configured target repository.
-    
-    Parameters:
-        cli_args: Optional command-line arguments that configure the source directory,
-            target repository, branch, validation thresholds, and dry-run mode.
-    
-    Raises:
-        ValueError: If source documentation is invalid, the repository token is
-            missing, or the deletion limit is exceeded without an override.
-    """
+    """Main execution function for syncing source docs to target docs repo."""
     parsed_args = parse_args(cli_args)
     source_dir = parsed_args.source_dir
     target_repo = parsed_args.target_repo

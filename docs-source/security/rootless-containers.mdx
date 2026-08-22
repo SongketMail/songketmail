@@ -8,7 +8,7 @@ Running a mail server as a root-owned daemon is one of the most common vectors f
 
 ## How Podman Quadlets Work
 
-Podman 5+ introduces **Quadlets** — a declarative, file-based approach to defining containers, pods, networks, and volumes as native systemd units. You place `.container`, `.pod`, and `.network` files inside `~/.config/containers/systemd/` for the target user account. On the next daemon reload, the `podman-systemd-generator` reads those files and produces fully functional systemd unit files, wiring container lifecycle directly into systemd's supervision tree.
+Podman 5+ introduces **Quadlets** — a declarative, file-based approach to defining containers, networks, and volumes as native systemd units. You place `.container` and `.network` files inside `~/.config/containers/systemd/` for the target user account. On the next daemon reload, the `podman-systemd-generator` reads those files and produces fully functional systemd unit files, wiring container lifecycle directly into systemd's supervision tree.
 
 This design means containers start on boot, restart on failure, and log to journald — all without any background daemon holding a root socket. The generator runs as a standard systemd unit generator, and because it operates entirely within the user session, the kernel never grants elevated privileges.
 
@@ -59,7 +59,7 @@ To manage services interactively as the `songketmail` user, switch to that accou
 sudo -i -u songketmail
 export XDG_RUNTIME_DIR="/run/user/2001"
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
-systemctl --user list-units 'songketmail_*'
+systemctl --user list-units 'songketmail-*'
 ```
 </Tip>
 
@@ -71,37 +71,21 @@ The `podman-systemd-generator` scans a fixed search path within the user's home 
 /home/songketmail/.config/containers/systemd/
 ```
 
-The fabric is composed of three Quadlet file types:
+The fabric is composed of Quadlet files attached directly to the bridge network:
 
 | File | Type | Purpose |
 |---|---|---|
-| `skm_fabric_net.network` | Network | Defines the isolated internal container network |
-| `skm_fabric_pod.pod` | Pod | Groups all service containers and publishes mail ports |
-| `songketmail_{service}.container` | Container | One file per service (postfix, dovecot, db, etc.) |
+| `songketmail-net.network` | Network | Defines the isolated internal container bridge network |
+| `songketmail-{service}.container` | Container | One file per service (postfix, dovecot, proxy, db, etc.) |
 
-### Example: Pod Quadlet (`skm_fabric_pod.pod`)
+### Example: Container Quadlet (`songketmail-postfix.container`)
 
-The pod definition is the anchor of the entire fabric. It establishes the shared network namespace that all service containers join, sets the port publishing rules, and — critically — declares the user namespace mapping that enforces storage sovereignty.
-
-```ini
-[Pod]
-PodName=skm_fabric_pod
-Network=skm_fabric_net.network
-UserNS=keep-id:uid=2001,gid=2001
-PublishPort=25:25
-PublishPort=143:143
-PublishPort=465:465
-PublishPort=993:993
-```
-
-### Example: Container Quadlet (`emailserver.container`)
-
-Each service has its own `.container` file. The Postfix container mounts two host directories for configuration and spool data. The `:Z` SELinux label flag ensures the container has correct access to the bind-mounted volumes.
+Each service has its own `.container` file attached directly to `songketmail-net.network`. The Postfix container mounts two host directories for configuration and spool data. The `:Z` SELinux label flag ensures the container has correct access to the bind-mounted volumes.
 
 ```ini
 [Container]
-ContainerName=skm_fabric_emailserver
-Pod=skm_fabric_pod.pod
+ContainerName=songketmail-postfix
+Network=songketmail-net.network
 Image=docker.io/library/postfix:3.9.0
 Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
 Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
@@ -118,13 +102,13 @@ Use `systemctl --user` for all day-to-day service management as the `songketmail
 
 ```bash
 # Check status of all SongketMail units
-systemctl --user status 'songketmail_*'
+systemctl --user status 'songketmail-*'
 
 # Restart the Postfix container
-systemctl --user restart songketmail_postfix.service
+systemctl --user restart songketmail-postfix.service
 
 # View real-time container logs
-journalctl --user -u songketmail_postfix.service -f
+journalctl --user -u songketmail-postfix.service -f
 ```
 
 All output flows through journald, giving you a unified log stream for every service in the fabric.

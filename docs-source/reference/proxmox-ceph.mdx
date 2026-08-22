@@ -51,19 +51,21 @@ Each Ceph site runs the **Tentacle** release deployed via the official `cephadm`
 
 <Steps>
   <Step title="Prepare the storage nodes">
-    On each of the three Ceph nodes, install the container runtime and download `cephadm`:
+    On each of the three Ceph nodes, install the container runtime and `cephadm` from official APT or official standalone download:
 
     ```bash
     sudo apt update && sudo apt install -y docker.io python3
-    curl --silent --remote-name https://download.ceph.com/rpm/el9/scap-security-guide/cephadm
+    curl --silent --remote-name https://download.ceph.com/cephadm/cephadm
     chmod +x cephadm
+    sudo ./cephadm add-repo --release tentacle
+    sudo ./cephadm install
     ```
   </Step>
   <Step title="Bootstrap the first monitor">
     Run the bootstrap command on `ceph-node1`, binding to the Ceph Public Network interface:
 
     ```bash
-    sudo ./cephadm bootstrap --mon-ip 10.10.20.11
+    sudo cephadm bootstrap --mon-ip 10.10.20.11
     ```
 
     This creates the initial Monitor, a co-located Manager, distributes cluster keys, and starts the Ceph Dashboard on port `8443`.
@@ -119,14 +121,17 @@ Ceph RADOS Block Device (RBD) mirroring replicates block-level writes from the P
     ```
   </Step>
   <Step title="Exchange bootstrap tokens">
-    Generate a peer token on the Production cluster and import it on the DR cluster to establish the daemon-to-daemon trust relationship:
+    Generate a peer token on the Production cluster, save it to a secure token file, and pass the file path to `rbd mirror pool peer bootstrap import` on the DR cluster:
 
     ```bash
-    # On Production: generate a bootstrap token for the pool
-    rbd mirror pool peer bootstrap create --site-name production pve-rbd-pool
+    # On Production: generate a bootstrap token and save to file
+    rbd mirror pool peer bootstrap create --site-name production pve-rbd-pool > /tmp/bootstrap_token.json
 
-    # On DR: import the token
-    rbd mirror pool peer bootstrap import --site-name dr --direction rx-only pve-rbd-pool <token>
+    # Transfer token file securely to DR node
+    scp /tmp/bootstrap_token.json root@ceph-dr-node1:/etc/ceph/bootstrap_token.json
+
+    # On DR: import the bootstrap token from file path
+    rbd mirror pool peer bootstrap import --site-name dr --direction rx-only pve-rbd-pool /etc/ceph/bootstrap_token.json
     ```
   </Step>
   <Step title="Enable journalling on the SongketMail RBD pool">
@@ -183,23 +188,32 @@ Each region runs an independent Proxmox VE compute cluster and a dedicated Ceph 
 
 SongketMail's Ansible `host_prepare` role provisions 14 storage subdirectories under `/var/srv/songketmail/` on each compute node, all owned by UID/GID `2001:2001`. When you back these paths with Ceph RBD volumes, you get block-level HA and point-in-time snapshot capability for every mail service component.
 
-Mount the Production RBD pool as an external storage backend in Proxmox by registering it in `/etc/pve/storage.cfg`:
+### Scoped CephX Client Keyring Creation
+
+Rather than deploying the root `client.admin` keyring across compute hosts, create a dedicated, least-privilege CephX client (`client.pve`) restricted exclusively to `pve-rbd-pool`:
+
+```bash
+# On ceph-node1: create dedicated CephX user scoped to pve-rbd-pool
+ceph auth get-or-create client.pve \
+  mon 'allow r' \
+  osd 'allow rwx pool=pve-rbd-pool' \
+  -o /etc/ceph/ceph.client.pve.keyring
+
+# Distribute the scoped client.pve keyring to all four Proxmox VE compute hosts
+for host in 10.10.10.21 10.10.10.22 10.10.10.23 10.10.10.24; do
+  scp /etc/ceph/ceph.client.pve.keyring root@${host}:/etc/pve/priv/ceph/external-ceph-prod.keyring
+done
+```
+
+Mount the Production RBD pool as an external storage backend in Proxmox by registering it in `/etc/pve/storage.cfg` with `username pve`:
 
 ```ini
 rbd: external-ceph-prod
     monhost 10.10.20.11;10.10.20.12;10.10.20.13
     pool pve-rbd-pool
-    username admin
+    username pve
     content images,rootdir
     krbd 0
-```
-
-Transfer the admin keyring from `ceph-node1` to all four PVE compute hosts:
-
-```bash
-mkdir -p /etc/pve/priv/ceph/
-scp /etc/ceph/ceph.client.admin.keyring \
-    root@10.10.10.21:/etc/pve/priv/ceph/external-ceph-prod.keyring
 ```
 
 Once registered, create and attach RBD images to your SongketMail virtual machines and mount them at `/var/srv/songketmail` inside the guest OS. Every Quadlet-managed container that maps a volume from `/var/srv/songketmail/` will automatically benefit from Ceph's replication factor, OSD-level checksumming, and RBD mirroring to your DR site.

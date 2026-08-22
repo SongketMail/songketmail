@@ -4,7 +4,7 @@ sidebarTitle: "Network Ports"
 description: "Complete reference for all public and internal network ports used by SongketMail — inbound mail, webmail, management, and inter-service communication."
 ---
 
-SongketMail distinguishes clearly between public-facing ports, which BunkerWeb exposes on the host network interface, and internal fabric ports, which are reachable only within the `songketmail-net` bridge network. This separation means your host firewall needs to permit only five ports for normal operation, while all inter-service communication — database queries, spam filtering, LMTP delivery, and object storage — remains invisible to the outside world.
+SongketMail distinguishes clearly between public-facing ports, which BunkerWeb exposes on the host network interface, and internal fabric ports, which are reachable only within the `songketmail-net` bridge network. This separation means your host firewall needs to permit only five core ports (plus UDP 443 for HTTP/3) for normal operation, while all inter-service communication — database queries, spam filtering, LMTP delivery, and object storage — remains invisible to the outside world.
 
 ---
 
@@ -16,14 +16,13 @@ These ports are bound directly on the host by the BunkerWeb proxy container via 
 |------|----------|---------|-----------|
 | 25 | TCP / SMTP | BunkerWeb → Postfix MTA | Inbound mail from the internet |
 | 80 | TCP / HTTP | BunkerWeb | HTTP to HTTPS redirect |
-| 443 | TCP / HTTPS | BunkerWeb | Webmail and admin UI |
+| 443 | TCP & UDP / HTTPS & QUIC | BunkerWeb | Webmail and admin UI (HTTP/1.1, HTTP/2, HTTP/3) |
 | 587 | TCP / Submission | BunkerWeb → Postfix MSA | Authenticated client mail submission |
 | 993 | TCP / IMAPS | BunkerWeb → Dovecot | Mail client retrieval over TLS |
+| 8443 | TCP / JMAP | BunkerWeb → Dovecot | JMAP mail protocol endpoint (RFC 8620) |
 
 <Note>
-  Port 443 is also bound as UDP to support HTTP/3 (QUIC) connections for webmail clients
-  that negotiate it. This corresponds to the `PublishPort=443:8443/udp` directive in the
-  proxy container template.
+  Port 443 is bound as both TCP and UDP (`PublishPort=443:8443/udp`) to support HTTP/3 (QUIC) connections for webmail clients that negotiate it.
 </Note>
 
 ---
@@ -41,29 +40,30 @@ These ports are bound inside containers within `songketmail-net` and are never p
 | 8080 | Roundcube | HTTP | Webmail HTTP served by Apache; reverse-proxied by BunkerWeb |
 | 9000 | RustFS | S3 API | Object storage API used by Dovecot for mail body and attachment storage |
 | 9001 | RustFS | HTTP | RustFS management console |
+| 9000 | Smallstep | HTTPS | ACMEv2 CA service for internal certificate automation |
 | 11333 | Rspamd | HTTP | Rspamd web dashboard for rule inspection and score tuning |
 | 11334 | Rspamd | Milter | Spam filtering milter endpoint consumed by Postfix |
 
 <Note>
   Do not expose internal fabric ports through your host firewall or a public reverse proxy
   without additional authentication controls. These ports assume a trusted network context
-  inside `songketmail-net` and do not enforce TLS between containers by default. Services
-  such as PostgreSQL (5432), RustFS (9000, 9001), and Rspamd (11333) would be directly
-  accessible to any process on the network if published to the host.
+  inside `songketmail-net` and do not enforce TLS between containers by default.
 </Note>
 
 ---
 
 ## Firewall Configuration
 
-Configure your host firewall to allow only the five public-facing ports before starting the SongketMail fabric. The following example uses UFW, which is available on Ubuntu and Debian-based hosts.
+Configure your host firewall to allow public-facing ports (including UDP 443 for HTTP/3/QUIC) before starting the SongketMail fabric. The following example uses UFW, which is available on Ubuntu and Debian-based hosts.
 
 ```bash
 ufw allow 25/tcp
 ufw allow 80/tcp
 ufw allow 443/tcp
+ufw allow 443/udp
 ufw allow 587/tcp
 ufw allow 993/tcp
+ufw allow 8443/tcp
 ufw enable
 ```
 
@@ -79,8 +79,10 @@ If you are running on a host that uses `firewalld` instead, add the equivalent s
 firewall-cmd --permanent --add-port=25/tcp
 firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --permanent --add-port=443/tcp
+firewall-cmd --permanent --add-port=443/udp
 firewall-cmd --permanent --add-port=587/tcp
 firewall-cmd --permanent --add-port=993/tcp
+firewall-cmd --permanent --add-port=8443/tcp
 firewall-cmd --reload
 ```
 
@@ -116,5 +118,3 @@ ansible-playbook -i inventory/hosts.yml site.yml
   (`podman network rm songketmail-net`), and then re-run the playbook to recreate the
   network with the updated subnet before restarting services.
 </Tip>
-
-The subnet is used exclusively for container-to-container communication. It does not affect which host IP addresses BunkerWeb binds its `PublishPort` listeners on. To restrict public port binding to a specific host interface, add an IP prefix to the `PublishPort` directives in `proxy.container` — for example, `PublishPort=203.0.113.5:443:8443`.

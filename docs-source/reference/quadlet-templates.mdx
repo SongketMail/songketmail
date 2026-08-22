@@ -80,13 +80,18 @@ The following tabs show the `[Container]` block for each service as it appears i
     PublishPort=25:25
     PublishPort=587:587
     PublishPort=993:993
+    PublishPort=8443:8443
     Environment=TZ=UTC
     Environment=MULTISITE=yes
-    Environment=SERVER_NAME=mail.songketmail.internal smtp.songketmail.internal imap.songketmail.internal
+    Environment=SERVER_NAME=mail.songketmail.internal smtp.songketmail.internal imap.songketmail.internal jmap.songketmail.internal
     # Webmail (HTTP/HTTPS)
     Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
     Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://{{ cluster_prefix }}-web:8080
     Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/
+    # JMAP Route
+    Environment=jmap.songketmail.internal_USE_REVERSE_PROXY=yes
+    Environment=jmap.songketmail.internal_REVERSE_PROXY_HOST=http://{{ cluster_prefix }}-dovecot:8080
+    Environment=jmap.songketmail.internal_REVERSE_PROXY_URL=/jmap
     # SMTP Stream (Port 25)
     Environment=smtp.songketmail.internal_SERVER_TYPE=stream
     Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
@@ -113,9 +118,9 @@ The following tabs show the `[Container]` block for each service as it appears i
     **Key field annotations:**
 
     - `Image` — the BunkerWeb all-in-one image combining Nginx, WAF rules, and a built-in ACME client; tag driven by `bunkerweb_image_tag`
-    - `PublishPort` — five host ports bound: 80 (HTTP redirect), 443 TCP+UDP (HTTPS/HTTP3), 25 (SMTP), 587 (Submission), 993 (IMAPS)
+    - `PublishPort` — six host ports bound: 80 (HTTP redirect), 443 TCP+UDP (HTTPS/HTTP3), 25 (SMTP), 587 (Submission), 993 (IMAPS), 8443 (JMAP)
     - `Volume` — a single `/data` volume holds BunkerWeb's certificate cache, WAF databases, and configuration state; path driven by `storage_base_path`
-    - `MULTISITE=yes` — enables per-`SERVER_NAME` configuration blocks for separate virtual hosting of webmail, SMTP, and IMAP
+    - `MULTISITE=yes` — enables per-`SERVER_NAME` configuration blocks for separate virtual hosting of webmail, JMAP, SMTP, and IMAP
     - `GENERATE_SELF_SIGNED_SSL=yes` — auto-generates a self-signed certificate for initial testing; replace with your ACME or provided certificate configuration for production
     - `proxy_protocol on;` — prepends a PROXY header to upstream TCP connections so Postfix and Dovecot see the real client IP rather than the proxy's internal address
   </Tab>
@@ -147,7 +152,7 @@ The following tabs show the `[Container]` block for each service as it appears i
   </Tab>
 
   <Tab title="Dovecot">
-    Dovecot is the Mail Delivery Agent (MDA) and IMAP server. It receives mail from Postfix over LMTP, stores it in the configured mail backend, and serves authenticated IMAP and Sieve connections to mail clients.
+    Dovecot is the Mail Delivery Agent (MDA) and IMAP/JMAP server. It receives mail from Postfix over LMTP, stores it in the configured mail backend, and serves authenticated IMAP, JMAP, and Sieve connections.
 
     ```ini
     [Container]
@@ -167,8 +172,8 @@ The following tabs show the `[Container]` block for each service as it appears i
 
     - `Image` — the official Dovecot image; tag driven by `dovecot_image_tag`; no ports are published to the host
     - `Volume` — three mounts: `/etc/dovecot` for configuration; `/var/vmail/indexes` for Dovecot's high-performance mail index files; `/var/vmail/cache` for cached metadata to reduce repeated S3 lookups; paths driven by `storage_base_path`
-    - Internal ports 24 (LMTP), 143 (IMAP), and 4190 (Sieve) are accessible only within the cluster network
-    - IMAPS (993) is exposed publicly via BunkerWeb's stream proxy with PROXY protocol enabled
+    - Internal ports 24 (LMTP), 143 (IMAP), 8080 (JMAP HTTP), and 4190 (Sieve) are accessible only within the cluster network
+    - IMAPS (993) and JMAP (8443) are exposed publicly via BunkerWeb's proxy configuration
   </Tab>
 
   <Tab title="DB">
@@ -182,18 +187,18 @@ The following tabs show the `[Container]` block for each service as it appears i
     UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
     Volume={{ storage_base_path }}/postgres/data:/var/lib/postgresql/data:Z
     Environment=TZ=UTC
-    Environment=POSTGRES_USER=mail_admin
-    Environment=POSTGRES_PASSWORD=super_secure_db_pass
-    Environment=POSTGRES_DB=mailserver
+    Environment=POSTGRES_USER={{ postgres_user }}
+    Environment=POSTGRES_PASSWORD={{ postgres_password }}
+    Environment=POSTGRES_DB={{ postgres_db }}
     Label=fabric_cluster={{ cluster_prefix }}
     Label=service_type=db
     ```
 
     **Key field annotations:**
 
-    - `Image` — `postgres:16-alpine` for a minimal, security-reduced image footprint; the image tag is pinned directly in the template (no variable)
+    - `Image` — `postgres:16-alpine` for a minimal, security-reduced image footprint
     - `Volume` — a single mount to `/var/lib/postgresql/data` persists all database files on the host under `postgres/data`; path driven by `storage_base_path`
-    - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` — bootstrap credentials; replace the default password with a strong secret before deploying to any non-local environment
+    - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` — parameterized Jinja2 variables supplied via `group_vars/all.yml` or Vault
     - Port 5432 is only reachable within the cluster network; it is never published to the host
   </Tab>
 
@@ -208,8 +213,8 @@ The following tabs show the `[Container]` block for each service as it appears i
     UserNS=keep-id:uid={{ songketmail_uid }},gid={{ songketmail_gid }}
     Volume={{ storage_base_path }}/rustfs/data:/data:Z
     Environment=TZ=UTC
-    Environment=RUSTFS_ACCESS_KEY=rustfs_admin
-    Environment=RUSTFS_SECRET_KEY=rustfs_secure_pass
+    Environment=RUSTFS_ACCESS_KEY={{ rustfs_access_key }}
+    Environment=RUSTFS_SECRET_KEY={{ rustfs_secret_key }}
     Environment=RUSTFS_VOLUMES=/data
     Environment=RUSTFS_ADDRESS=:9000
     Environment=RUSTFS_CONSOLE_ADDRESS=:9001
@@ -219,9 +224,9 @@ The following tabs show the `[Container]` block for each service as it appears i
 
     **Key field annotations:**
 
-    - `Image` — `rustfs/rustfs` image; tag driven by `rustfs_image_tag`; RustFS is a Rust-native, S3-compatible object store
+    - `Image` — `rustfs/rustfs` image; tag driven by `rustfs_image_tag`
     - `Volume` — a single `/data` mount persists all stored objects on the host under `rustfs/data`; path driven by `storage_base_path`
-    - `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` — S3 API credentials used by Dovecot; replace with strong secrets before production deployment
+    - `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` — parameterized Jinja2 variables supplied via `group_vars/all.yml` or Vault
     - `RUSTFS_ADDRESS=:9000` — binds the S3 API inside the container; accessible within the cluster network only
     - `RUSTFS_CONSOLE_ADDRESS=:9001` — binds the RustFS management web console; accessible within the cluster network only
   </Tab>
@@ -244,7 +249,7 @@ The following tabs show the `[Container]` block for each service as it appears i
 
     **Key field annotations:**
 
-    - `Image` — the official Roundcube image with Apache; tag driven by `roundcube_image_tag`; the `-apache` variant handles its own HTTP serving on port 8080
+    - `Image` — the official Roundcube image with Apache; tag driven by `roundcube_image_tag`
     - `Volume` — two mounts: `/var/www/html/config` for Roundcube's PHP configuration files; `/var/www/html/db` for the local SQLite session database; paths driven by `storage_base_path`
     - BunkerWeb reverse-proxies `mail.songketmail.internal` to `http://{{ cluster_prefix }}-web:8080` over the internal network
     - No ports are published to the host directly
@@ -269,9 +274,9 @@ The following tabs show the `[Container]` block for each service as it appears i
     **Key field annotations:**
 
     - `Image` — the official Rspamd image; tag driven by `rspamd_image_tag`
-    - `Volume` — two mounts: `/etc/rspamd/local.d` for local override configuration files (rules, actions, modules); `/var/lib/rspamd` for learned Bayes data, fuzzy hashes, and DKIM keys; paths driven by `storage_base_path`
+    - `Volume` — two mounts: `/etc/rspamd/local.d` for local override configuration files; `/var/lib/rspamd` for learned Bayes data, fuzzy hashes, and DKIM keys; paths driven by `storage_base_path`
     - Port 11334 (milter) is reachable within the cluster network for Postfix's `smtpd_milters` setting
-    - Port 11333 (web dashboard) is reachable within the cluster network only; proxy it through BunkerWeb if you need external access
+    - Port 11333 (web dashboard) is reachable within the cluster network only
   </Tab>
 </Tabs>
 
