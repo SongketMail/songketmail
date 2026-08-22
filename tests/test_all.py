@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 46 Markdown (.md) files in the repository."""
+    """Retrieves all 47 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 46, f"Expected 46 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 47, f"Expected 47 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 28 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 29 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +41,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 28, f"Expected 28 HTML files, found {len(html_files)}"
+    assert len(html_files) == 29, f"Expected 29 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -974,3 +974,361 @@ def test_freebsd_bhyve_solutions_html_content():
     assert 'id="bhyve-hypervisor-deep-dive"' in content
     assert 'id="zfs-storage-integration"' in content
     assert 'href="#executive-overview"' in content
+
+
+# --- Test Group 13: Documentation Sync Pipeline Guide (Part 27) Content Verification ---
+#
+# These tests cover only the new content introduced by this PR: the new Markdown/HTML
+# pair docs/docs-sync-pipeline-guide.{md,html}, the Part 27 sidebar navigation link that
+# was propagated across all previously existing documentation pages, and the associated
+# updates to docs/README.md, docs/SUMMARY.md, and scripts/unify_templates.py.
+
+# The 28 pre-existing HTML pages (as of this PR) into which the new "27. Docs Sync
+# Pipeline" sidebar navigation entry was injected. This list intentionally excludes
+# docs/docs-sync-pipeline-guide.html itself, whose sidebar entry uses the "active" style
+# instead and is covered by a dedicated test below.
+SIDEBAR_UPDATED_HTML_FILES = [
+    "docs/ANSIBLE-ADOPTION-REVIEW.html",
+    "docs/SOP-KNOWLEDGE-FIRST-DISCOVERY.html",
+    "docs/ai-dev.html",
+    "docs/ansible-fqcn.html",
+    "docs/ansible-playbook-map.html",
+    "docs/architectural-blueprint.html",
+    "docs/asimp-hardening-report.html",
+    "docs/bunkerweb-proxy.html",
+    "docs/ceph-ubuntu-deployment.html",
+    "docs/creating-a-github-pages-site-with-jekyll.html",
+    "docs/dockpod-integration.html",
+    "docs/email-security-design.html",
+    "docs/freebsd-bhyve-solutions.html",
+    "docs/github-pages-setup.html",
+    "docs/index.html",
+    "docs/jules-planning.html",
+    "docs/k8s-ceph-design.html",
+    "docs/legal-notice.html",
+    "docs/mail-web-app-verification.html",
+    "docs/podman-rootless.html",
+    "docs/postfix-dovecot.html",
+    "docs/proxmox-ceph-hci.html",
+    "docs/proxmox-datacenter-architecture.html",
+    "docs/references.html",
+    "docs/regional-design-proxmox-ceph.html",
+    "docs/s3-storage.html",
+    "docs/webmail-clients.html",
+    "docs/wsl-development-feedback.html",
+]
+
+# The exact "inactive" sidebar navigation link block that must be injected verbatim into
+# every page in SIDEBAR_UPDATED_HTML_FILES, immediately after the FreeBSD & Bhyve entry.
+INACTIVE_DOCS_SYNC_LINK_BLOCK = (
+    '<a href="docs-sync-pipeline-guide.html" class="flex items-center space-x-2 px-3 py-2 '
+    'rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 '
+    'text-sm transition font-medium">\n'
+    '                        <span>📚</span>\n'
+    '                        <span>27. Docs Sync Pipeline</span>\n'
+    '                    </a>'
+)
+
+# The "active" (currently-selected) styling variant used only within
+# docs/docs-sync-pipeline-guide.html's own sidebar.
+ACTIVE_DOCS_SYNC_LINK_BLOCK = (
+    '<a href="docs-sync-pipeline-guide.html" class="flex items-center space-x-2 px-3 py-2 '
+    'rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 '
+    'font-bold text-sm transition">\n'
+    '                        <span>📚</span>\n'
+    '                        <span>27. Docs Sync Pipeline</span>\n'
+    '                    </a>'
+)
+
+
+def test_sidebar_updated_html_files_list_matches_repository_count():
+    """Sanity-checks that exactly 29 HTML files (28 updated + 1 new) exist in docs/.
+
+    This guards against silently dropping or adding a page to SIDEBAR_UPDATED_HTML_FILES
+    without keeping this test file's fixtures in sync with the rest of the suite.
+    """
+    assert len(SIDEBAR_UPDATED_HTML_FILES) == 28
+    for path in SIDEBAR_UPDATED_HTML_FILES:
+        assert os.path.exists(path), f"Expected pre-existing HTML file {path} to exist."
+
+
+@pytest.mark.parametrize("html_filepath", SIDEBAR_UPDATED_HTML_FILES)
+def test_docs_sync_pipeline_sidebar_link_injected(html_filepath):
+    """Verifies the new Part 27 sidebar navigation entry was added to every existing page.
+
+    Each page must link to docs-sync-pipeline-guide.html using the inactive (non-highlighted)
+    styling, since none of these pages are the docs-sync-pipeline-guide page itself.
+    """
+    content = _read(html_filepath)
+
+    assert INACTIVE_DOCS_SYNC_LINK_BLOCK in content, (
+        f"{html_filepath} is missing the expected inactive Part 27 sidebar link block"
+    )
+    # The active (highlighted) variant must not appear on any other page.
+    assert ACTIVE_DOCS_SYNC_LINK_BLOCK not in content, (
+        f"{html_filepath} unexpectedly contains the active-styled Part 27 sidebar link"
+    )
+
+
+@pytest.mark.parametrize("html_filepath", SIDEBAR_UPDATED_HTML_FILES)
+def test_docs_sync_pipeline_sidebar_link_ordering(html_filepath):
+    """Verifies the new sidebar link is positioned directly after the FreeBSD & Bhyve entry
+    and before the 'Laboratory Modules Section' comment, matching the PR diff placement.
+    """
+    content = _read(html_filepath)
+
+    idx_freebsd = content.find("26. FreeBSD & Bhyve Architecture")
+    idx_docs_sync = content.find('href="docs-sync-pipeline-guide.html"')
+    idx_lab_modules = content.find("<!-- Laboratory Modules Section -->")
+
+    assert idx_freebsd != -1, f"{html_filepath} is missing the FreeBSD & Bhyve sidebar entry"
+    assert idx_docs_sync != -1, f"{html_filepath} is missing the Docs Sync Pipeline sidebar entry"
+    assert idx_lab_modules != -1, f"{html_filepath} is missing the Laboratory Modules Section comment"
+    assert idx_freebsd < idx_docs_sync < idx_lab_modules, (
+        f"{html_filepath}: Part 27 sidebar link must be ordered between the FreeBSD entry "
+        f"and the Laboratory Modules Section comment"
+    )
+
+
+def test_docs_sync_pipeline_guide_html_self_sidebar_link_is_active():
+    """Verifies docs-sync-pipeline-guide.html highlights its own sidebar entry as active."""
+    content = _read("docs/docs-sync-pipeline-guide.html")
+
+    assert ACTIVE_DOCS_SYNC_LINK_BLOCK in content, (
+        "docs-sync-pipeline-guide.html must render its own sidebar entry with active styling"
+    )
+    assert INACTIVE_DOCS_SYNC_LINK_BLOCK not in content, (
+        "docs-sync-pipeline-guide.html must not render its own sidebar entry with inactive styling"
+    )
+
+    idx_freebsd = content.find("26. FreeBSD & Bhyve Architecture")
+    idx_docs_sync = content.find('href="docs-sync-pipeline-guide.html"')
+    idx_lab_modules = content.find("<!-- Laboratory Modules Section -->")
+    assert idx_freebsd < idx_docs_sync < idx_lab_modules
+
+
+def test_docs_sync_pipeline_guide_markdown_frontmatter():
+    """Verifies OKF-compliant frontmatter fields specific to docs-sync-pipeline-guide.md."""
+    content = _read("docs/docs-sync-pipeline-guide.md")
+
+    assert content.startswith("---")
+    parts = content.split("---", 2)
+    assert len(parts) >= 3, "docs/docs-sync-pipeline-guide.md has incomplete frontmatter block"
+    frontmatter = parts[1]
+
+    assert 'okf_version: "0.1"' in frontmatter
+    assert 'type: "documentation"' in frontmatter
+    assert 'title: "Documentation Sync Pipeline & GitHub Actions Setup Guide"' in frontmatter
+    assert "resource: \"file:///docs/docs-sync-pipeline-guide.md\"" in frontmatter
+
+    topics_line = next((l for l in frontmatter.splitlines() if l.strip().startswith("topics:")), "")
+    for topic in ["github-actions", "mintlify", "docs-sync", "secrets", "automation", "songketmail"]:
+        assert topic in topics_line, f"Missing topic '{topic}' in frontmatter topics line"
+
+
+def test_docs_sync_pipeline_guide_markdown_sections():
+    """Verifies all major sections and key technical facts are present in the Markdown source."""
+    content = _read("docs/docs-sync-pipeline-guide.md")
+
+    # Top-level heading and section headers
+    assert "# 📚 Part 27: Documentation Sync Pipeline & GitHub Actions Setup Guide" in content
+    assert "## 📋 Executive Overview" in content
+    assert "## 🏗️ Pipeline Architecture" in content
+    assert "## 🚨 Root Cause Analysis: `ValueError: DOCS_REPO_TOKEN environment variable is not set`" in content
+    assert "## 🛠️ Step-by-Step Setup & Configuration Guide" in content
+    assert "### Option A: Configuration via GitHub REST API (Automated)" in content
+    assert "### Option B: Configuration via GitHub Web UI (Manual)" in content
+    assert "## 🔒 Security Best Practices" in content
+    assert "## 📊 Verification & Operational Summary" in content
+
+    # Key architectural/technical facts that must be documented
+    assert "docs-source/" in content
+    assert ".github/workflows/sync-docs.yml" in content
+    assert "scripts/sync_docs.py" in content
+    assert "songketmail/songketmail-product-pages" in content
+    assert "DOCS_REPO_TOKEN" in content
+    assert "GIT_ASKPASS" in content
+    assert 'raise ValueError("DOCS_REPO_TOKEN environment variable is not set")' in content
+
+    # DSOM footer
+    assert "Harisfazillah Jamel" in content
+    assert "LinuxMalaysia" in content
+    assert "DSOM" in content
+    assert "GNU General Public License v3.0" in content
+
+
+def test_docs_sync_pipeline_guide_markdown_section_ordering():
+    """Ensures sections appear in the correct top-to-bottom order (structural regression check)."""
+    content = _read("docs/docs-sync-pipeline-guide.md")
+
+    idx_overview = content.index("## 📋 Executive Overview")
+    idx_architecture = content.index("## 🏗️ Pipeline Architecture")
+    idx_root_cause = content.index("## 🚨 Root Cause Analysis")
+    idx_setup = content.index("## 🛠️ Step-by-Step Setup & Configuration Guide")
+    idx_security = content.index("## 🔒 Security Best Practices")
+    idx_verification = content.index("## 📊 Verification & Operational Summary")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+
+    assert (idx_overview < idx_architecture < idx_root_cause < idx_setup
+            < idx_security < idx_verification < idx_footer), (
+        "docs-sync-pipeline-guide.md sections are out of the expected order"
+    )
+
+
+def test_docs_sync_pipeline_guide_html_content_and_anchors():
+    """Verifies docs-sync-pipeline-guide.html is unified, has correct heading anchors and TOC links."""
+    content = _read("docs/docs-sync-pipeline-guide.html")
+
+    # Standard unified page structure
+    assert "<!DOCTYPE html>" in content
+    assert "</html>" in content
+    assert "<!-- Column 2: Center Main Content Area" in content
+    assert "<title>Documentation Sync Pipeline & GitHub Actions Setup Guide — SongketMail :: LAB</title>" in content
+
+    expected_ids = [
+        "executive-overview",
+        "pipeline-architecture",
+        "root-cause-analysis-valueerror-docsrepotoken-environment-variable-is-not-set",
+        "step-by-step-setup-amp-configuration-guide",
+        "option-a-configuration-via-github-rest-api-automated",
+        "option-b-configuration-via-github-web-ui-manual",
+        "security-best-practices",
+        "verification-amp-operational-summary",
+    ]
+    for section_id in expected_ids:
+        assert f'id="{section_id}"' in content, f"Missing heading anchor id={section_id}"
+        assert f'href="#{section_id}"' in content, f"Missing TOC link href=#{section_id}"
+
+    # Footer topic pills specific to this page
+    assert "[ TOPIC: 27 ]" in content
+    assert "[ CI_CD: GH_ACTIONS ]" in content
+    assert "[ MINTLIFY: SYNC ]" in content
+
+
+def test_docs_sync_pipeline_guide_html_matches_markdown_root_cause_content():
+    """Cross-checks that the HTML rendering preserves the same root-cause traceback as the Markdown."""
+    md_content = _read("docs/docs-sync-pipeline-guide.md")
+    html_content = _read("docs/docs-sync-pipeline-guide.html")
+
+    assert "ValueError: DOCS_REPO_TOKEN environment variable is not set" in md_content
+    assert "ValueError: DOCS_REPO_TOKEN environment variable is not set" in html_content
+    assert "Process completed with exit code 1." in md_content
+    assert "Process completed with exit code 1." in html_content
+
+
+def test_docs_readme_includes_part_27_entry():
+    """Verifies docs/README.md's Book Structure section links to the new Part 27 guide."""
+    content = _read("docs/README.md")
+
+    assert (
+        "* **[Part 27: Documentation Sync Pipeline Guide](docs-sync-pipeline-guide.md)**: "
+        "Mintlify sync pipeline architecture, GitHub Actions secret configuration "
+        "(`DOCS_REPO_TOKEN`), and troubleshooting guide."
+    ) in content
+
+    # Ensure it is placed within the "Book Structure" section, after Part 9.
+    idx_structure_header = content.index("## 🗂️ Book Structure")
+    idx_part9 = content.index("Part 9: GitHub Pages Automation Setup")
+    idx_part27 = content.index("Part 27: Documentation Sync Pipeline Guide")
+    assert idx_structure_header < idx_part9 < idx_part27
+
+
+def test_docs_summary_includes_part_27_entry():
+    """Verifies docs/SUMMARY.md lists the new Part 27 guide after Part 26."""
+    content = _read("docs/SUMMARY.md")
+
+    assert (
+        "* [Part 27: Documentation Sync Pipeline & GitHub Actions Setup Guide]"
+        "(docs-sync-pipeline-guide.md)"
+    ) in content
+
+    idx_part26 = content.index("Part 26: FreeBSD Options & Bhyve Hypervisor Architecture")
+    idx_part27 = content.index("Part 27: Documentation Sync Pipeline & GitHub Actions Setup Guide")
+    idx_footer = content.index("Deep State of Mind (DSOM) For My AI Protocol")
+    assert idx_part26 < idx_part27 < idx_footer
+
+
+# --- Test Group 14: scripts/unify_templates.py Part 27 Registration Verification ---
+#
+# Tests the static registries and the dynamic sidebar-rendering behaviour of
+# scripts/unify_templates.py that were updated to add the new docs-sync-pipeline-guide.html
+# page (SIDEBAR_ITEMS, TOPIC_MAP, SUBTITLE_MAP, and the make_sidebar() function output).
+
+def test_unify_templates_sidebar_items_registers_docs_sync_entry():
+    """Verifies SIDEBAR_ITEMS contains the correctly-formed Part 27 entry in the right slot."""
+    from scripts import unify_templates
+
+    entry = next(
+        (item for item in unify_templates.SIDEBAR_ITEMS if item.get("href") == "docs-sync-pipeline-guide.html"),
+        None,
+    )
+    assert entry is not None, "SIDEBAR_ITEMS is missing the docs-sync-pipeline-guide.html entry"
+    assert entry["icon"] == "📚"
+    assert entry["label"] == "27. Docs Sync Pipeline"
+    assert entry["section"] == "research"
+
+    # Verify ordering: must come immediately after freebsd-bhyve-solutions.html and before
+    # the "Laboratory Modules" header, matching the PR diff placement.
+    hrefs_and_headers = [item.get("href") or item.get("header") for item in unify_templates.SIDEBAR_ITEMS]
+    idx_freebsd = hrefs_and_headers.index("freebsd-bhyve-solutions.html")
+    idx_docs_sync = hrefs_and_headers.index("docs-sync-pipeline-guide.html")
+    idx_lab_header = hrefs_and_headers.index("Laboratory Modules")
+    assert idx_freebsd < idx_docs_sync < idx_lab_header
+
+
+def test_unify_templates_topic_map_registers_docs_sync_entry():
+    """Verifies TOPIC_MAP contains the expected footer topic pills for the new page."""
+    from scripts import unify_templates
+
+    assert unify_templates.TOPIC_MAP["docs-sync-pipeline-guide.html"] == (
+        "[ TOPIC: 27 ]", "[ CI_CD: GH_ACTIONS ]", "[ MINTLIFY: SYNC ]"
+    )
+
+
+def test_unify_templates_subtitle_map_registers_docs_sync_entry():
+    """Verifies SUBTITLE_MAP contains the expected header subtitle string for the new page."""
+    from scripts import unify_templates
+
+    assert unify_templates.SUBTITLE_MAP["docs-sync-pipeline-guide.html"] == (
+        "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide"
+    )
+
+
+def test_unify_templates_make_sidebar_marks_docs_sync_active_only_for_itself():
+    """Functional test of make_sidebar(): the Part 27 entry is active only when it is the
+    currently-rendered page, and inactive (but still present) on every other page."""
+    from scripts import unify_templates
+
+    active_sidebar = unify_templates.make_sidebar("docs-sync-pipeline-guide.html")
+    assert 'href="docs-sync-pipeline-guide.html"' in active_sidebar
+    assert "bg-violet-50 dark:bg-violet-950/50 text-violet-600" in active_sidebar
+    # Confirm the active markup is tied to the docs-sync-pipeline-guide.html anchor specifically.
+    active_link_start = active_sidebar.index('href="docs-sync-pipeline-guide.html"')
+    active_link_snippet = active_sidebar[active_link_start:active_link_start + 200]
+    assert "bg-violet-50" in active_link_snippet
+
+    other_sidebar = unify_templates.make_sidebar("index.html")
+    assert 'href="docs-sync-pipeline-guide.html"' in other_sidebar
+    other_link_start = other_sidebar.index('href="docs-sync-pipeline-guide.html"')
+    other_link_snippet = other_sidebar[other_link_start:other_link_start + 200]
+    assert "bg-violet-50" not in other_link_snippet
+    assert "hover:bg-slate-50" in other_link_snippet
+
+
+def test_unify_templates_build_unified_html_uses_docs_sync_topic_pills():
+    """Functional test of build_unified_html(): confirms it renders the Part 27 topic pills
+    and subtitle for docs-sync-pipeline-guide.html end-to-end."""
+    from scripts import unify_templates
+
+    rendered = unify_templates.build_unified_html(
+        "docs-sync-pipeline-guide.html",
+        fm={"title": "Documentation Sync Pipeline & GitHub Actions Setup Guide"},
+        center_content="<h2>Executive Overview</h2><p>Test content.</p>",
+        right_sidebar_inner="",
+    )
+
+    assert "[ TOPIC: 27 ]" in rendered
+    assert "[ CI_CD: GH_ACTIONS ]" in rendered
+    assert "[ MINTLIFY: SYNC ]" in rendered
+    assert "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide" in rendered
+    assert "docs-sync-pipeline-guide.html" in rendered
