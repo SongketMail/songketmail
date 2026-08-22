@@ -28,7 +28,15 @@ def run(cmd, cwd=None, env=None):
 
 
 def extract_pages_from_nav(nav_data):
-    """Recursively extracts page paths from docs.json navigation structure."""
+    """
+    Collect page references from a nested documentation navigation structure.
+    
+    Parameters:
+        nav_data: Navigation data containing nested lists and dictionaries.
+    
+    Returns:
+        list: Page reference strings found in the navigation structure.
+    """
     pages = []
     if isinstance(nav_data, list):
         for item in nav_data:
@@ -47,7 +55,7 @@ def extract_pages_from_nav(nav_data):
 
 
 def resolve_page_path(source_dir: Path, page: str) -> bool:
-    """Checks if a page referenced in docs.json navigation exists on disk."""
+    """Determine whether a navigation page reference resolves to an existing source file."""
     if page.startswith("http://") or page.startswith("https://"):
         return True
 
@@ -62,7 +70,19 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
-    """Validates source documentation directory, docs.json, file count, navigation targets, and reports orphans."""
+    """
+    Validate the source documentation directory and its navigation configuration.
+    
+    Parameters:
+    	source_dir (Path): Directory containing the source documentation and `docs.json`.
+    	min_files (int): Minimum number of files required in the source directory.
+    
+    Returns:
+    	files (list[Path]): Files found recursively in the source directory.
+    
+    Raises:
+    	ValueError: If the source directory, configuration file, or navigation targets are invalid, if `docs.json` cannot be parsed, or if the file count is below `min_files`.
+    """
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
 
@@ -112,7 +132,16 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
 
 
 def compute_file_diff(target_dir: Path, source_dir: Path):
-    """Computes file-level diff lists: files_added, files_modified, files_deleted."""
+    """
+    Compare source and target files and identify additions, modifications, and deletions.
+    
+    Parameters:
+    	target_dir (Path): Directory containing the existing target files.
+    	source_dir (Path): Directory containing the source files.
+    
+    Returns:
+    	tuple: Lists of relative paths for added, modified, and deleted files, respectively.
+    """
     target_files = {
         f.relative_to(target_dir): f
         for f in target_dir.rglob("*")
@@ -140,7 +169,15 @@ def compute_file_diff(target_dir: Path, source_dir: Path):
 
 
 def parse_args(args=None):
-    """Parses command-line arguments for sync_docs.py."""
+    """
+    Parse command-line options for the documentation synchronization pipeline.
+    
+    Parameters:
+        args (list[str] | None): Argument values to parse; uses command-line arguments when omitted.
+    
+    Returns:
+        argparse.Namespace: Parsed synchronization configuration.
+    """
     parser = argparse.ArgumentParser(description="Documentation Sync Pipeline Script")
     parser.add_argument(
         "--source-dir",
@@ -188,7 +225,15 @@ def parse_args(args=None):
 
 
 def main(cli_args=None):
-    """Main execution function for syncing source docs to target docs repo."""
+    """
+    Synchronize validated source documentation with the configured target repository.
+    
+    Parameters:
+        cli_args: Optional command-line arguments used to configure the synchronization.
+    
+    Raises:
+        ValueError: If the repository token is missing or the deletion limit is exceeded.
+    """
     parsed_args = parse_args(cli_args)
     source_dir = parsed_args.source_dir
     target_repo = parsed_args.target_repo
