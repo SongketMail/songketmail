@@ -18,7 +18,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Collect all repository Markdown files, excluding generated and cache directories.
+    """
+    Collect all repository Markdown files while excluding generated and cache directories.
     
     Returns:
         list[str]: Sorted, deduplicated Markdown file paths.
