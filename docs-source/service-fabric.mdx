@@ -1,0 +1,255 @@
+---
+title: "SongketMail: Complete Seven-Service Fabric Reference"
+sidebarTitle: "Service Fabric"
+description: "A complete reference to the seven containerized services in SongketMail — proxy, MTA, MDA, spam filter, webmail, database, and object storage."
+---
+
+SongketMail's service fabric is composed of containerised components that communicate exclusively over an isolated internal network (`songketmail-net`). Each service has a clearly bounded role — no service does double duty, and no service exposes more ports than its function demands. Together they form a complete, self-contained email platform: inbound and outbound mail, spam filtering, IMAP and JMAP access, webmail, virtual account management, and S3-compatible object storage. Every container runs under UID/GID `2001:2001` in the `songketmail` user's unprivileged systemd session.
+
+<Tabs>
+  <Tab title="songketmail-proxy">
+
+## songketmail-proxy — Ingress WAF
+
+`songketmail-proxy` is the single entry point for all traffic into the fabric. It runs BunkerWeb, an NGINX-based Web Application Firewall, and is the only container that binds ports on the host network interface. It handles TLS termination, HTTP/JMAP hardening, and protocol proxying for SMTP and IMAP streams before forwarding clean traffic to the appropriate internal service.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-proxy` |
+| **Image** | `bunkerity/bunkerweb-all-in-one:1.6.13` |
+| **Role** | WAF, SSL termination, reverse proxy |
+| **Public ports** | 80 (HTTP), 443 (HTTPS), 25 (SMTP), 587 (Submission), 993 (IMAPS), 8443 (JMAP) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/bunkerweb/data` → `/data` |
+
+```ini
+[Container]
+ContainerName=songketmail-proxy
+Image=bunkerity/bunkerweb-all-in-one:1.6.13
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/bunkerweb/data:/data:Z
+
+[Install]
+WantedBy=default.target
+```
+
+<Warning>
+  `songketmail-proxy` is the only container that should ever bind host-facing ports. If you expose any other service directly to the host interface, you bypass WAF protection entirely.
+</Warning>
+
+  </Tab>
+  <Tab title="songketmail-postfix">
+
+## songketmail-postfix — Mail Transfer Agent
+
+`songketmail-postfix` runs Postfix, responsible for receiving inbound SMTP connections forwarded from `songketmail-proxy` and delivering messages to Dovecot over LMTP on port 24. It also handles outbound mail relay. Postfix looks up virtual domains and aliases from PostgreSQL, so adding a new domain requires no Postfix reload — only a database row.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-postfix` |
+| **Image** | `postfix:3.9.0` |
+| **Role** | Mail Transfer Agent (MTA), inbound SMTP receiver, outbound relay |
+| **Internal port** | 25 (SMTP, fabric-internal only) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/postfix/config` → `/etc/postfix`<br />`/var/srv/songketmail/postfix/spool` → `/var/spool/postfix` |
+
+```ini
+[Container]
+ContainerName=songketmail-postfix
+Image=postfix:3.9.0
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
+Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
+
+[Install]
+WantedBy=default.target
+```
+
+<Tip>
+  Postfix's mail queue spool (`/var/srv/songketmail/postfix/spool`) is host-mounted, so you can inspect queued messages and run `postqueue -p` style diagnostics directly from the `songketmail` user account without entering the container.
+</Tip>
+
+  </Tab>
+  <Tab title="songketmail-dovecot">
+
+## songketmail-dovecot — Mail Delivery Agent
+
+`songketmail-dovecot` is the Mail Delivery Agent (MDA), IMAP, and JMAP server. It accepts LMTP deliveries from Postfix on port 24, stores message bodies and attachments in RustFS over the S3 protocol, and serves IMAP on port 143 and JMAP on port 8080 to authenticated clients via the proxy. It also exposes the ManageSieve protocol on port 4190 for server-side mail filtering rules. User authentication is handled via SQL queries to `songketmail-db`.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-dovecot` |
+| **Image** | `dovecot:2.3.21.1` |
+| **Role** | MDA, IMAP/JMAP server, ManageSieve host |
+| **Internal ports** | 24 (LMTP), 143 (IMAP), 8080 (JMAP API), 4190 (ManageSieve) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/dovecot/config` → `/etc/dovecot`<br />`/var/srv/songketmail/dovecot/indexes` → `/var/vmail/indexes`<br />`/var/srv/songketmail/dovecot/cache` → `/var/vmail/cache` |
+
+```ini
+[Container]
+ContainerName=songketmail-dovecot
+Image=dovecot:2.3.21.1
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/dovecot/config:/etc/dovecot:Z
+Volume=/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z
+Volume=/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z
+
+[Install]
+WantedBy=default.target
+```
+
+  </Tab>
+  <Tab title="songketmail-db">
+
+## songketmail-db — Virtual Account Database
+
+`songketmail-db` runs PostgreSQL and serves as the single source of truth for virtual domains, user accounts, and aliases across the fabric. Both Postfix and Dovecot query it for every routing and authentication decision. Passwords are stored as Argon2id hashes — Dovecot's `auth-sql` driver verifies them natively.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-db` |
+| **Image** | `postgres:16-alpine` |
+| **Role** | Relational database, virtual mail account store |
+| **Internal port** | 5432 (PostgreSQL) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/postgres/data` → `/var/lib/postgresql/data` |
+
+```ini
+[Container]
+ContainerName=songketmail-db
+Image=postgres:16-alpine
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/postgres/data:/var/lib/postgresql/data:Z
+
+[Install]
+WantedBy=default.target
+```
+
+<Note>
+  PostgreSQL is never exposed to the host network. Only `songketmail-postfix` and `songketmail-dovecot` connect to it — both from within `songketmail-net`.
+</Note>
+
+  </Tab>
+  <Tab title="songketmail-s3">
+
+## songketmail-s3 — Object Storage
+
+`songketmail-s3` runs RustFS, a high-performance S3-compatible object store. Dovecot uses it as the durable backend for mail body and attachment storage, keeping the IMAP index files (on the local volume) lean while offloading message data to the object store. The S3 API is available on port 9000, and a browser-based management console is available on port 9001 — both accessible only from within `songketmail-net`.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-s3` |
+| **Image** | `rustfs/rustfs:1.0.0` |
+| **Role** | S3-compatible object store for mail bodies and attachments |
+| **Internal ports** | 9000 (S3 API), 9001 (Management Console) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/rustfs/data` → `/data` |
+
+```ini
+[Container]
+ContainerName=songketmail-s3
+Image=rustfs/rustfs:1.0.0
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/rustfs/data:/data:Z
+
+[Install]
+WantedBy=default.target
+```
+
+<Tip>
+  The RustFS data directory at `/var/srv/songketmail/rustfs/data` is a regular host directory owned by `2001:2001`. You can snapshot or back it up with any standard tool — `rsync`, `restic`, or your preferred backup agent — directly from the `songketmail` user account, without entering the container.
+</Tip>
+
+  </Tab>
+  <Tab title="songketmail-web">
+
+## songketmail-web — Webmail Client
+
+`songketmail-web` runs Roundcube, a browser-based IMAP webmail client. It connects to `songketmail-dovecot` for IMAP access and to `songketmail-db` for its own session and preferences storage. Traffic from the internet reaches it only via `songketmail-proxy`, which terminates TLS and forwards HTTPS requests to Roundcube on port 8080 within the fabric.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-web` |
+| **Image** | `roundcube/roundcubemail:1.6.8-apache` |
+| **Role** | Browser-based webmail client (IMAP frontend) |
+| **Internal port** | 8080 (HTTP, proxied by BunkerWeb) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/roundcube/config` → `/var/www/html/config`<br />`/var/srv/songketmail/roundcube/db` → `/var/www/html/db` |
+
+```ini
+[Container]
+ContainerName=songketmail-web
+Image=roundcube/roundcubemail:1.6.8-apache
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/roundcube/config:/var/www/html/config:Z
+Volume=/var/srv/songketmail/roundcube/db:/var/www/html/db:Z
+
+[Install]
+WantedBy=default.target
+```
+
+  </Tab>
+  <Tab title="songketmail-rspamd">
+
+## songketmail-rspamd — Spam and Milter Filter
+
+`songketmail-rspamd` runs Rspamd, the spam classification and policy enforcement engine. Postfix invokes it as a Milter on port 11334 for every inbound and outbound message. Rspamd applies configurable scoring rules, Bayes classification, DKIM signing, and DMARC evaluation before Postfix accepts or rejects the message. The Rspamd Web UI is available on port 11333 from within the fabric for rule tuning and statistics.
+
+| Property | Value |
+|---|---|
+| **Container name** | `songketmail-rspamd` |
+| **Image** | `rspamd/rspamd:3.9.1` |
+| **Role** | Spam filter, Milter policy agent, DKIM/DMARC handler |
+| **Internal ports** | 11333 (Web UI), 11334 (Milter) |
+| **Internal network** | `songketmail-net` |
+| **Host storage** | `/var/srv/songketmail/rspamd/config` → `/etc/rspamd/local.d`<br />`/var/srv/songketmail/rspamd/data` → `/var/lib/rspamd` |
+
+```ini
+[Container]
+ContainerName=songketmail-rspamd
+Image=rspamd/rspamd:3.9.1
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z
+Volume=/var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z
+
+[Install]
+WantedBy=default.target
+```
+
+<Tip>
+  Rspamd's Bayes training data and statistics persist in `/var/srv/songketmail/rspamd/data`. Back this directory up regularly — it contains your trained spam model and will significantly affect filter accuracy on a fresh deployment.
+</Tip>
+
+  </Tab>
+</Tabs>
+
+## The Shared UID Boundary
+
+Every service in the fabric runs under the same identity: UID/GID `2001:2001`, belonging to the `songketmail` system user. This is a deliberate design constraint that host user namespace mapping (`UserNS=keep-id:uid=2001,gid=2001`) enforces at the container level.
+
+The practical consequence is that every file written to a host-mounted volume by any running container appears on the host with `songketmail:songketmail` ownership. You can list, read, copy, or archive any service's data directory directly from the `songketmail` shell session without reaching for `sudo`.
+
+```bash
+# Check ownership of any service's data directory
+ls -lh /var/srv/songketmail/postfix/config/
+# All entries show: songketmail songketmail
+
+# Inspect running Quadlet units in the user session
+systemctl --user status songketmail-proxy.service
+systemctl --user status songketmail-dovecot.service
+systemctl --user status songketmail-db.service
+
+# Restart a single service without touching the others
+systemctl --user restart songketmail-rspamd.service
+```
+
+<Note>
+  All services run under UID/GID `2001` in the `songketmail` user's systemd session. Systemd lingering (`loginctl enable-linger songketmail`) is enabled during host preparation so that every Quadlet unit starts at boot and persists through logouts — no active SSH session is required for mail services to run.
+</Note>

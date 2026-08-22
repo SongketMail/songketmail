@@ -1,10 +1,93 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "SongketMail Product Pages",
-  "navigation": [
-    {
-      "group": "Getting Started",
-      "pages": ["index", "quickstart"]
+  "name": "SongketMail",
+  "theme": "aspen",
+  "colors": {
+    "primary": "#1E3A5F",
+    "light": "#3B82F6",
+    "dark": "#0F1F33"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "index",
+              "introduction",
+              "quickstart",
+              "architecture-overview",
+              "service-fabric"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/prerequisites",
+              "deployment/configuration",
+              "deployment/running-the-playbook",
+              "deployment/verification"
+            ]
+          },
+          {
+            "group": "Core Services",
+            "pages": [
+              "services/proxy-waf",
+              "services/smtp-imap",
+              "services/spam-filtering",
+              "services/webmail",
+              "services/object-storage"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/rootless-containers",
+              "security/storage-sovereignty",
+              "security/os-hardening"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "operations/service-management",
+              "operations/monitoring",
+              "operations/backups",
+              "operations/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Configuration",
+            "pages": [
+              "reference/global-variables",
+              "reference/quadlet-templates",
+              "reference/network-ports"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "reference/dockpod-integration",
+              "reference/proxmox-ceph",
+              "reference/ansible-modules"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/SongketMail/songketmail"
     }
-  ]
+  }
 }

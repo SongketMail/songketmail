@@ -1,0 +1,103 @@
+---
+title: "SongketMail Architecture, Services, and Network Flow"
+sidebarTitle: "Architecture"
+description: "Explore SongketMail's container fabric, network topology, traffic routing from BunkerWeb WAF through Postfix, Dovecot, Smallstep CA, and object storage."
+---
+
+SongketMail arranges its containerised services into a single, logically isolated deployment fabric. Every service runs inside the `songketmail` unprivileged user namespace, communicates over a dedicated bridge network (`songketmail-net`), and stores state in host directories owned by UID/GID `2001:2001`. No traffic enters the internal fabric without passing through BunkerWeb first, and no service exposes a port directly to the host unless it must accept inbound connections from the internet. The result is a defence-in-depth architecture where each component has the narrowest possible blast radius.
+
+## Traffic and Network Flow
+
+The diagram below traces the journey of a message — whether inbound SMTP from the internet, an IMAP fetch or JMAP API call from a mail client, or a webmail session from a browser — from the public interface through the internal fabric to persistent storage.
+
+```text
+[ Inbound HTTPS Webmail / JMAP Traffic ]   [ Inbound SMTP / IMAP Mail Streams ]
+               │                                       │
+               ▼                                       ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                        songketmail-proxy                            │
+    │                   (SSL Termination & Hardening)                     │
+    └──────────────────────────────────┬──────────────────────────────────┘
+                                       │
+                         Isolated Cluster Network (songketmail-net)
+                                       │
+            ┌──────────────────────────┼──────────────────────────┐
+            ▼                          ▼                          ▼
+┌───────────────────────┐  ┌───────────────────┐  ┌───────────────────────┐
+│   songketmail-web     │  │songketmail-postfix│  │ songketmail-smallstep │
+│  (Roundcube Webmail)  │  │ (Mail Receiver)   │  │  (ACME Private CA)    │
+└───────────┬───────────┘  └─────────┬─────────┘  └───────────────────────┘
+            │                        │ (LMTP, Port 24)
+            ▼                        ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            songketmail-dovecot                            │
+│                  (Mail Store, JMAP & Delivery Agent)                      │
+└─────┬───────────────────────────────────────────────────────────────┬─────┘
+      │                                                               │
+      ▼ (SQL Queries)                                                 ▼ (S3 Protocol)
+┌───────────────────────┐                               ┌───────────────────┐
+│    songketmail-db     │                               │  songketmail-s3   │
+│ (Virtual Accounts Map)│                               │ (Body/Attachments)│
+└───────────────────────┘                               └───────────────────┘
+```
+
+## Network Isolation and Direct Network Attachment
+
+All components attach directly to the virtual bridge network `songketmail-net` (subnet `10.89.0.0/16`) without using `Pod=` wrappers. Host user namespace mapping (`UserNS=keep-id:uid=2001,gid=2001`) ensures a consistent, predictable UID mapping across every service. The cluster-prefix convention — applied to the network name and every container name — means you can safely run multiple independent fabrics (for example, staging and production) on the same hypervisor without risking port or network name collisions.
+
+```ini
+[Network]
+NetworkName=songketmail-net
+Subnet=10.89.0.0/16
+Internal=false
+```
+
+<Note>
+  Services attach directly to `songketmail-net` without `Pod=`. `songketmail-proxy` manages external ingress exposure for public ports (25, 80, 443, 587, 993, and JMAP port 8443). Internal microservices communicate securely over `songketmail-net` and `songketmail-smallstep` runs on port 9000 for internal ACMEv2 certificate automation.
+</Note>
+
+## Service Fabric Matrix
+
+The table below is the canonical reference for every container in the SongketMail fabric: its image pin, host storage mounts, and network exposure.
+
+| Container Name | Image | Host Storage Paths | Ports |
+|---|---|---|---|
+| **songketmail-proxy** | `bunkerity/bunkerweb-all-in-one:1.6.13` | `/var/srv/songketmail/bunkerweb/data:/data:Z` | **Public:** 80, 443, 25, 587, 993, 8443 (JMAP) |
+| **songketmail-postfix** | `postfix:3.9.0` | `/var/srv/songketmail/postfix/config:/etc/postfix:Z`<br />`/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z` | Internal: 25 |
+| **songketmail-dovecot** | `dovecot:2.3.21.1` | `/var/srv/songketmail/dovecot/config:/etc/dovecot:Z`<br />`/var/srv/songketmail/dovecot/indexes:/var/vmail/indexes:Z`<br />`/var/srv/songketmail/dovecot/cache:/var/vmail/cache:Z` | Internal: 24 (LMTP), 143 (IMAP), 8080 (JMAP API), 4190 (Sieve) |
+| **songketmail-db** | `postgres:16-alpine` | `/var/srv/songketmail/postgres/data:/var/lib/postgresql/data:Z` | Internal: 5432 |
+| **songketmail-s3** | `rustfs/rustfs:1.0.0` | `/var/srv/songketmail/rustfs/data:/data:Z` | Internal: 9000 (S3 API), 9001 (Console) |
+| **songketmail-web** | `roundcube/roundcubemail:1.6.8-apache` | `/var/srv/songketmail/roundcube/config:/var/www/html/config:Z`<br />`/var/srv/songketmail/roundcube/db:/var/www/html/db:Z` | Internal: 8080 |
+| **songketmail-rspamd** | `rspamd/rspamd:3.9.1` | `/var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z`<br />`/var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z` | Internal: 11333 (Web UI), 11334 (Milter) |
+| **songketmail-smallstep** | `smallstep/step-ca:latest` | `/var/srv/songketmail/step-ca/data:/home/step:Z` | Internal: 9000 (ACME CA) |
+
+## Storage Path Structure
+
+All host-side persistence lives under a single, predictable root:
+
+```text
+/var/srv/songketmail/
+├── bunkerweb/data/          # BunkerWeb WAF runtime data
+├── nginx/conf/              # NGINX upstream configuration
+├── certs/                   # TLS certificates
+├── postfix/config/          # Postfix main.cf and virtual tables
+├── postfix/spool/           # Mail queue spool
+├── dovecot/config/          # Dovecot configuration
+├── dovecot/indexes/         # Mailbox index files
+├── dovecot/cache/           # Dovecot cache
+├── postgres/data/           # PostgreSQL data directory
+├── rustfs/data/             # RustFS object storage volumes
+├── roundcube/config/        # Roundcube PHP configuration
+├── roundcube/db/            # Roundcube SQLite session store
+├── rspamd/config/           # Rspamd local overrides
+├── rspamd/data/             # Rspamd Bayes and statistics data
+└── step-ca/data/            # Smallstep Private CA PKI data
+```
+
+Every directory is created by the Ansible playbook and assigned `2001:2001` ownership before any container starts. Because `UserNS=keep-id:uid=2001,gid=2001` aligns the container-internal UID to the host UID, files written by a running container appear on the host with correct ownership — no `sudo`, no `chown`, no mystery `nobody:nogroup` entries.
+
+<Tip>
+  To inspect or back up any service's data, log in as the `songketmail` user and navigate directly to `/var/srv/songketmail/{service}/`. You own every file there without needing elevated privileges.
+</Tip>
+
+To explore each service in depth — including its image version, internal ports, and storage layout — see the [Service Fabric reference](/service-fabric).

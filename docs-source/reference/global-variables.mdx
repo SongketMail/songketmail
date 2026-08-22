@@ -1,0 +1,245 @@
+---
+title: "SongketMail Global Configuration Variables Reference"
+sidebarTitle: "Global Variables"
+description: "Complete reference for all variables in group_vars/all.yml — cluster prefix, UID mapping, image tags, storage paths, and service lists."
+---
+
+`group_vars/all.yml` controls every tunable aspect of the SongketMail deployment fabric. Ansible reads these variables at playbook run time and injects them into Quadlet templates, systemd unit files, directory provisioning tasks, and OS tuning plays. You adjust one value here and the change propagates automatically across every component on every host in your inventory.
+
+---
+
+## Fabric Isolation
+
+These variables define the identity boundary for your SongketMail cluster. Every pod, network, and container name is derived from `cluster_prefix`, ensuring that multiple SongketMail instances on the same host never collide.
+
+<ParamField path="cluster_prefix" type="string" default="songketmail">
+  Prefix applied to all pod, network, and container names. Changing this value lets you run
+  multiple isolated clusters on a single Podman host. For example, setting it to `staging`
+  produces `staging_pod`, `staging-proxy`, and `staging-net`.
+</ParamField>
+
+<ParamField path="podman_network_name" type="string" default="songketmail-net">
+  Name of the Podman bridge network that connects all service containers. Every container
+  template references this value in its `Network=` directive so that intra-cluster DNS
+  resolution works by container name.
+</ParamField>
+
+<ParamField path="podman_network_subnet" type="string" default="10.89.0.0/16">
+  Internal CIDR block assigned to the Podman bridge network. All container-to-container
+  traffic flows within this subnet. Do not expose this range through your host firewall.
+  See [Network Ports](/reference/network-ports) for details.
+</ParamField>
+
+---
+
+## User Account
+
+SongketMail runs entirely as an unprivileged OS user. These variables define that account and its UID/GID pair, which is also used for rootless container namespace mapping via `keep-id`.
+
+<ParamField path="songketmail_user" type="string" default="songketmail">
+  Name of the dedicated OS service account. Ansible creates this user, enables systemd
+  linger for it, and deploys all Quadlet files into its `~/.config/containers/systemd/`
+  directory.
+</ParamField>
+
+<ParamField path="songketmail_uid" type="integer" default="2001">
+  UID for the service account. This value is also passed to every container's
+  `UserNS=keep-id:uid=2001,gid=2001` directive, ensuring host volume files are owned
+  by the same UID both inside and outside the container namespace.
+</ParamField>
+
+<ParamField path="songketmail_gid" type="integer" default="2001">
+  GID for the service account. Must match `songketmail_uid` in practice so that all
+  shared volume mounts use a consistent owner pair. Change both together if you need to
+  integrate with an existing UID/GID scheme on your host.
+</ParamField>
+
+<ParamField path="songketmail_home" type="string" default="/home/songketmail">
+  Absolute path to the home directory of the service account. Systemd user unit files,
+  Quadlet definitions, and XDG runtime state are all stored relative to this path.
+  Rendered from the template `/home/{{ songketmail_user }}`.
+</ParamField>
+
+---
+
+## OS Tuning
+
+These variables control kernel parameters and environment detection. They are applied (or skipped) during the OS preparation play that runs before container provisioning.
+
+<ParamField path="vm_max_map_count_value" type="integer" default="262144">
+  Value written to `vm.max_map_count` via `sysctl`. Elasticsearch and some storage engines
+  require a minimum of `262144` virtual memory mappings. SongketMail sets this proactively
+  so that RustFS object storage initialises cleanly on the first run.
+</ParamField>
+
+<ParamField path="is_limited_environment" type="boolean" default="true">
+  When `true`, Ansible skips privileged OS tasks: kernel tuning, system user/group
+  creation, and `loginctl enable-linger`. Enable this flag only when running inside
+  sandboxed CI environments that deny `sysctl` and `useradd`. On real deployment hosts
+  this **must** be `false`.
+</ParamField>
+
+<Warning>
+  `is_limited_environment: true` is the default to protect sandbox and CI runs. Before
+  deploying to any production or staging host, set this to `false` in your
+  `group_vars/all.yml`. Leaving it as `true` will silently skip kernel tuning and user
+  provisioning, causing containers to start with incorrect ownership and potentially
+  degraded performance.
+</Warning>
+
+---
+
+## Container Image Tags
+
+Pin every container to an exact upstream image tag to guarantee reproducible deployments and avoid silent regressions from floating `:latest` references. Update a tag here and re-run the playbook to roll out the new image across the entire fabric.
+
+<ParamField path="bunkerweb_image_tag" type="string" default="1.6.13">
+  Image tag for `docker.io/bunkerity/bunkerweb-all-in-one`. BunkerWeb is the WAF and
+  ingress proxy that terminates SSL and proxies all public-facing ports.
+</ParamField>
+
+<ParamField path="postfix_image_tag" type="string" default="3.9.0">
+  Image tag for `docker.io/library/postfix`. Postfix handles inbound and outbound
+  SMTP mail transfer for the cluster.
+</ParamField>
+
+<ParamField path="dovecot_image_tag" type="string" default="2.3.21.1">
+  Image tag for `docker.io/library/dovecot`. Dovecot stores mail via LMTP delivery
+  from Postfix and serves IMAP and Sieve to clients.
+</ParamField>
+
+<ParamField path="roundcube_image_tag" type="string" default="1.6.8-apache">
+  Image tag for `docker.io/roundcube/roundcubemail`. Roundcube is the webmail front-end
+  proxied by BunkerWeb over HTTPS. SnappyMail is recommended as a lightweight stateless
+  alternative for resource-constrained hosts.
+</ParamField>
+
+<ParamField path="rustfs_image_tag" type="string" default="1.0.0">
+  Image tag for `docker.io/rustfs/rustfs`. RustFS provides S3-compatible object storage
+  for mail body data and attachments, accessed by Dovecot over the S3 protocol.
+</ParamField>
+
+<ParamField path="rspamd_image_tag" type="string" default="3.9.1">
+  Image tag for `docker.io/rspamd/rspamd`. Rspamd performs spam filtering via the milter
+  protocol and exposes a web dashboard for inspection and configuration.
+</ParamField>
+
+---
+
+## Storage
+
+All persistent data lives under a single root path, making it straightforward to back up, snapshot, or migrate the entire fabric with a single directory operation.
+
+<ParamField path="storage_base_path" type="string" default="/var/srv/songketmail">
+  Root path under which all service-specific data directories are created. Ansible
+  provisions every subdirectory listed in `songketmail_storage_dirs` under this path before
+  starting containers. The path must be writable by UID/GID `2001:2001`.
+</ParamField>
+
+<ParamField path="songketmail_services" type="list">
+  Ordered list of logical service names used by Ansible loops to deploy Quadlet files
+  and configure per-service resources. The default list is:
+
+  ```yaml
+  songketmail_services:
+    - proxy
+    - postfix
+    - dovecot
+    - db
+    - s3
+    - web
+    - rspamd
+  ```
+</ParamField>
+
+<ParamField path="songketmail_storage_dirs" type="list">
+  All subdirectories created under `storage_base_path`. Ansible creates each path and
+  applies `chown 2001:2001` before containers start, ensuring volume mounts succeed
+  under the rootless `keep-id` namespace. The default set is:
+
+  ```yaml
+  songketmail_storage_dirs:
+    - "bunkerweb/data"
+    - "nginx/conf"
+    - "certs"
+    - "postfix/config"
+    - "postfix/spool"
+    - "dovecot/config"
+    - "dovecot/indexes"
+    - "dovecot/cache"
+    - "postgres/data"
+    - "rustfs/data"
+    - "roundcube/config"
+    - "roundcube/db"
+    - "rspamd/config"
+    - "rspamd/data"
+  ```
+</ParamField>
+
+---
+
+## Complete group_vars/all.yml
+
+The following listing shows the full default file as shipped in the repository. Copy it into your inventory and edit the values that differ from your environment before running any playbook.
+
+```yaml
+---
+# Global configuration variables for SongketMail fabric deployment
+
+# Environment constraints toggle
+# Set to true when running inside unprivileged environments/sandboxes (like Google Jules)
+# to bypass OS kernel tuning, system user/group creation, and other privileged tasks.
+is_limited_environment: true
+
+# Fabric Isolation settings
+cluster_prefix: "songketmail"
+podman_network_name: "songketmail-net"
+podman_network_subnet: "10.89.0.0/16"
+
+# Host details & Rootless run configurations
+songketmail_user: "songketmail"
+songketmail_uid: 2001
+songketmail_gid: 2001
+songketmail_home: "/home/{{ songketmail_user }}"
+
+# OS Tuning parameters
+vm_max_map_count_value: 262144
+
+# Container Image Tags (Security Hardening: avoid :latest tags)
+bunkerweb_image_tag: "1.6.13"
+postfix_image_tag: "3.9.0"
+dovecot_image_tag: "2.3.21.1"
+roundcube_image_tag: "1.6.8-apache"
+rustfs_image_tag: "1.0.0"
+rspamd_image_tag: "3.9.1"
+
+# Storage Base
+storage_base_path: "/var/srv/songketmail"
+
+# Service names list (modern decoupled SongketMail equivalents)
+songketmail_services:
+  - proxy
+  - postfix
+  - dovecot
+  - db
+  - s3
+  - web
+  - rspamd
+
+# Subdirectories for keep-id mapping (UID/GID 2001:2001) host persistence
+songketmail_storage_dirs:
+  - "bunkerweb/data"
+  - "nginx/conf"
+  - "certs"
+  - "postfix/config"
+  - "postfix/spool"
+  - "dovecot/config"
+  - "dovecot/indexes"
+  - "dovecot/cache"
+  - "postgres/data"
+  - "rustfs/data"
+  - "roundcube/config"
+  - "roundcube/db"
+  - "rspamd/config"
+  - "rspamd/data"
+```

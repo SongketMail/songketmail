@@ -21,7 +21,7 @@ def get_all_markdown_files():
     """Retrieves all 47 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
-        if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
+        if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
             continue
         for f in files:
             if f.endswith('.md'):

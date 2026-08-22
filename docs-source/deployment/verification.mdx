@@ -1,0 +1,160 @@
+---
+title: "Verify Your SongketMail Deployment"
+sidebarTitle: "Verification"
+description: "Confirm all SongketMail services are running, that ports are bound correctly, and the Roundcube webmail interface is accessible after deployment."
+---
+
+After the playbook completes, spend a few minutes verifying that every service started correctly, all expected ports are bound, and the Roundcube webmail interface loads over HTTPS. These checks catch the most common post-deployment issues — misconfigured storage ownership, a missing `subuid` entry, or a Quadlet file that failed to parse — before your users notice anything.
+
+## Section 1: Check Service Status
+
+All SongketMail services run under the `songketmail` user's systemd session. Switch to that user (or set the environment variables for your current session) before using `systemctl --user`:
+
+```bash
+# Set the correct runtime directory for the songketmail user session
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+```
+
+Check the main Pod service first — if the Pod is not running, no containers will start:
+
+```bash
+systemctl --user status songketmail_pod-pod.service
+```
+
+List all SongketMail unit files and their current state in one view:
+
+```bash
+systemctl --user list-units 'songketmail_*'
+```
+
+You should see eight units in `active (running)` state: the Pod service plus one service for each of the seven containers (`proxy`, `postfix`, `dovecot`, `db`, `s3`, `web`, `rspamd`).
+
+If a service shows `failed` or `activating`, inspect its journal:
+
+```bash
+journalctl --user -u songketmail_postfix.service --since "5 minutes ago"
+```
+
+<Note>
+  If you see all tasks skipped and no running units after deployment, check
+  the value of `is_limited_environment` in your `group_vars/all.yml`. When
+  this flag is set to `true`, privileged OS tasks and service management are
+  skipped. Set it to `false` and re-run the playbook for a full deployment.
+</Note>
+
+## Section 2: Verify Port Bindings
+
+With the BunkerWeb proxy container running, the following ports should be bound on the host's network interfaces:
+
+| Port | Protocol | Service |
+|------|----------|---------|
+| 25 | SMTP | Postfix (MTA — inbound mail from the internet) |
+| 80 | HTTP | BunkerWeb (redirects to HTTPS) |
+| 443 | HTTPS | BunkerWeb (Roundcube webmail, reverse-proxied) |
+| 587 | Submission | Postfix (MSA — mail client submission) |
+| 993 | IMAPS | Dovecot (encrypted IMAP retrieval) |
+
+Verify all five ports are listening:
+
+```bash
+ss -tlnp | grep -E ':25|:80|:443|:587|:993'
+```
+
+Expected output (addresses may vary):
+
+```text
+LISTEN 0  128  0.0.0.0:25   0.0.0.0:*
+LISTEN 0  128  0.0.0.0:80   0.0.0.0:*
+LISTEN 0  128  0.0.0.0:443  0.0.0.0:*
+LISTEN 0  128  0.0.0.0:587  0.0.0.0:*
+LISTEN 0  128  0.0.0.0:993  0.0.0.0:*
+```
+
+If a port is missing, check whether the corresponding container started and whether `net.ipv4.ip_unprivileged_port_start` is set to `25`:
+
+```bash
+sysctl net.ipv4.ip_unprivileged_port_start
+# Expected: net.ipv4.ip_unprivileged_port_start = 25
+```
+
+## Section 3: Access Roundcube Webmail
+
+Open your browser and navigate to your mail domain over HTTPS:
+
+```text
+https://<your-domain>/
+```
+
+Roundcube listens internally on port 8080 and is reverse-proxied through BunkerWeb on port 443. You should see the Roundcube login page secured by your TLS certificate.
+
+<Steps>
+  <Step title="Confirm the TLS certificate is valid">
+    Check that the browser shows a valid certificate for your domain. If you see
+    a certificate warning, verify that the certificate files are present and
+    correctly configured under `/var/srv/songketmail/certs/`.
+  </Step>
+
+  <Step title="Log in with an admin account">
+    Use the administrator credentials configured in your Postfix and Dovecot
+    virtual mailbox tables. On a fresh deployment, create your first mailbox
+    user before attempting to log in.
+  </Step>
+
+  <Step title="Send a test message">
+    Once logged in, send a test email to an external address and confirm
+    delivery. Check the Postfix mail log for SMTP transaction details:
+
+    ```bash
+    podman logs songketmail-postfix | tail -50
+    ```
+  </Step>
+
+  <Step title="Verify IMAP connectivity">
+    Connect an email client (Thunderbird, Apple Mail, or similar) to your
+    server using these settings:
+
+    | Setting | Value |
+    |---------|-------|
+    | IMAP server | `<your-domain>` |
+    | IMAP port | `993` |
+    | Security | SSL/TLS |
+    | SMTP server | `<your-domain>` |
+    | SMTP port | `587` |
+    | Security | STARTTLS |
+  </Step>
+</Steps>
+
+## Section 4: Check Container Logs
+
+Use `podman logs` to inspect the output of individual containers. Run these commands as the `songketmail` user:
+
+```bash
+# BunkerWeb reverse proxy — check for TLS errors and upstream routing issues
+podman logs songketmail-proxy
+
+# Postfix MTA — check for queue build-up or relay rejections
+podman logs songketmail-postfix
+
+# Dovecot IMAP — check for authentication failures or index corruption
+podman logs songketmail-dovecot
+
+# Rspamd — check spam filter startup and DKIM key loading
+podman logs songketmail-rspamd
+
+# PostgreSQL — check for connection errors from Postfix, Dovecot, or Roundcube
+podman logs songketmail-db
+```
+
+To follow a log in real time, add the `-f` flag:
+
+```bash
+podman logs -f songketmail-postfix
+```
+
+<Tip>
+  All container names follow the pattern `songketmail-<service>`, derived from
+  `cluster_prefix` and the service name in `songketmail_services`. If you
+  changed `cluster_prefix` in `group_vars/all.yml`, substitute your custom
+  prefix in the `podman logs` commands above.
+</Tip>

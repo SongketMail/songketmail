@@ -1,0 +1,147 @@
+---
+title: "Run the SongketMail Deployment Playbook"
+sidebarTitle: "Run Playbook"
+description: "Execute the Ansible playbook to prepare your host, deploy all Quadlet unit files, and start every SongketMail service in one command."
+---
+
+With your inventory updated and `group_vars/all.yml` reviewed, you are ready to run the SongketMail deployment. The single `site.yml` playbook orchestrates everything: OS hardening, system user creation, storage provisioning, Quadlet file generation, and service activation. The entire process typically completes in under five minutes on a provisioned node.
+
+## Dry-Run First
+
+Before making any changes to your nodes, run the playbook in check mode. Ansible will simulate every task and report what it would change without actually modifying anything:
+
+```bash
+ansible-playbook -i inventory/hosts.ini site.yml --check
+```
+
+Review the output carefully. Tasks marked `changed` will modify the host; tasks marked `ok` are already in the desired state; tasks marked `skipped` are gated by `is_limited_environment` or conditional flags. Fix any `FAILED` tasks before proceeding.
+
+<Warning>
+  Ensure `is_limited_environment` is set to `false` in `group_vars/all.yml`
+  before running against real nodes. When this flag is `true`, the playbook
+  skips all privileged OS-level tasks — kernel tuning, user creation, and
+  systemd linger — and your containers will not start correctly on a
+  full-featured host.
+</Warning>
+
+## Full Deployment
+
+Run the complete playbook against your inventory:
+
+```bash
+ansible-playbook -i inventory/hosts.ini site.yml
+```
+
+For verbose output that shows each task's full diff and remote command output, add the `-v` flag:
+
+```bash
+ansible-playbook -i inventory/hosts.ini site.yml -v
+```
+
+Use `-vv` or `-vvv` for progressively more detail when troubleshooting a specific task.
+
+## Playbook Phases
+
+The playbook executes in four sequential phases, each building on the last. All phases run for every host in the `[email_servers]` group.
+
+<Steps>
+  <Step title="Host Preparation (host_prepare role)">
+    The `host_prepare` role performs all privileged OS-level work using
+    `become: yes` (root). This includes:
+
+    - **Kernel sysctl tuning**: Sets `vm.max_map_count=262144` for
+      database containers, enables `net.ipv4.ip_forward=1` for bridge
+      networking, and — critically — sets
+      `net.ipv4.ip_unprivileged_port_start=25` so the rootless
+      `songketmail` user can bind SMTP on port 25 without elevated
+      privileges.
+    - **Kernel module persistence**: Loads `br_netfilter` and writes
+      `/etc/modules-load.d/br_netfilter.conf` so the module survives
+      reboots.
+    - **System user creation**: Creates the `songketmail` group (GID
+      2001) and user (UID 2001) with a home directory at
+      `/home/songketmail`.
+    - **User namespace mapping**: Appends
+      `songketmail:100000:65536` to both `/etc/subuid` and
+      `/etc/subgid`, granting the user a private UID range for
+      rootless containers.
+    - **Systemd linger**: Runs `loginctl enable-linger songketmail`
+      so the user's systemd session starts at boot even without an
+      interactive login — this is what keeps your mail services alive
+      after a reboot.
+    - **Podman version assertion**: Confirms the installed Podman
+      version is `≥ 5.0.0` and fails fast if it is not.
+  </Step>
+
+  <Step title="Storage Setup">
+    Still within the `host_prepare` role (but now creating directories for
+    both privileged and limited environments), the playbook:
+
+    - Creates the base directory `/var/srv/songketmail/` with mode
+      `0700`, owned by `songketmail:songketmail`.
+    - Iterates over all 14 service subdirectories defined in
+      `songketmail_storage_dirs` and creates each one with the same
+      ownership and permissions.
+    - Creates `~/.config/containers/systemd/` in the `songketmail`
+      home directory — the path that Podman's systemd generator scans
+      for Quadlet unit files.
+
+    All directories inherit UID/GID `2001:2001`, which matches the
+    `UserNS=keep-id:uid=2001,gid=2001` declaration in the shared Pod
+    Quadlet. This ensures containerized processes own their volume
+    mounts on the host without any UID remapping surprises.
+  </Step>
+
+  <Step title="Quadlet Deployment (podman_quadlet role)">
+    The `podman_quadlet` role switches to `become_user: songketmail`
+    and deploys all declarative Quadlet unit files to
+    `~/.config/containers/systemd/`. The role templates and writes:
+
+    | File | Purpose |
+    |------|---------|
+    | `songketmail_net.network` | Defines the rootless bridge network (`10.89.0.0/16`) |
+    | `songketmail_pod.pod` | Shared Pod with `UserNS=keep-id:uid=2001,gid=2001` |
+    | `songketmail_proxy.container` | BunkerWeb WAF — ingress proxy, ports 25/80/443/587/993 |
+    | `songketmail_postfix.container` | Postfix MTA — mail transfer agent |
+    | `songketmail_dovecot.container` | Dovecot MDA — IMAP/LMTP server |
+    | `songketmail_db.container` | PostgreSQL — virtual domain and mailbox database |
+    | `songketmail_s3.container` | RustFS — S3-compatible object storage |
+    | `songketmail_web.container` | Roundcube — webmail client (port 8080 internal) |
+    | `songketmail_rspamd.container` | Rspamd — spam filtering and DKIM signing |
+
+    All file names are prefixed with `cluster_prefix` (default:
+    `songketmail`), so you can rename the prefix in `all.yml` to
+    co-host multiple fabric instances on one machine.
+  </Step>
+
+  <Step title="Service Start">
+    With Quadlet files in place, the role triggers the user-level
+    systemd daemon reload and starts every service:
+
+    - **Daemon reload**: Calls `systemctl --user daemon-reload` (via
+      `ansible.builtin.systemd_service` with `scope: user`). This
+      causes systemd to read the new `.container`, `.pod`, and
+      `.network` files and generate transient unit files from them.
+    - **Pod start**: Enables and starts
+      `songketmail_pod-pod.service`. Starting the Pod service pulls
+      up the shared network namespace that all containers share.
+    - **Container start**: Iterates over `songketmail_services` and
+      enables and starts each `songketmail_<service>.service` in
+      turn.
+
+    Both the daemon-reload and service management tasks pass
+    `XDG_RUNTIME_DIR=/run/user/2001` and
+    `DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/2001/bus` in the
+    task environment block, ensuring the rootless systemd bus is
+    targeted correctly.
+  </Step>
+</Steps>
+
+## Privilege Escalation Model
+
+The playbook uses a symmetric privilege strategy to keep host-level changes isolated from container-level changes:
+
+- `become: yes` (root) — OS kernel tuning, package installation, user/group creation, `subuid`/`subgid` mapping, and systemd linger.
+- `become: yes` + `become_user: songketmail` — Quadlet file deployment, daemon reload, and service management. Nothing in this phase requires root.
+
+This separation means your container configuration never has root-level write access to host OS files, and your OS hardening steps never run as an unprivileged user that might lack the necessary capabilities.

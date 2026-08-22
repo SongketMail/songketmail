@@ -1,0 +1,95 @@
+---
+title: "Storage Sovereignty via keep-id UID Namespace Mapping"
+sidebarTitle: "Storage Sovereignty"
+description: "SongketMail enforces UID/GID 2001 keep-id namespace mapping so all mail data on the host is owned by the songketmail user — no sudo needed for backups."
+---
+
+Every rootless container deployment faces the same operational friction: files written inside a container often appear on the host owned by obscure high-range UIDs like `100023` or `nobody:nogroup`, making backups, audits, and configuration edits impossible without root. SongketMail solves this permanently through **storage sovereignty** — a combination of fixed UID/GID assignment, deliberate user namespace mapping, and a structured host storage layout that keeps every byte of mail data owned by the `songketmail` system account at UID/GID 2001. You can `rsync`, `ls`, and `tail` any mail directory as `songketmail` without reaching for `sudo`.
+
+## The Problem with Default Rootless UID Remapping
+
+When Podman runs a rootless container without explicit namespace configuration, it uses the Linux kernel's subuid/subgid mechanism to map container UIDs into a range delegated to the host user. For the `songketmail` account with a subuid range starting at `100000`, a container process running as UID 2001 inside the container is mapped to **host UID 102000** (100000 + 2001 - 1). The container appears to write files as itself, but on the host those files are owned by a UID that does not correspond to any named account.
+
+The practical consequences are severe for a production mail server:
+
+- **Backups fail** — your backup script runs as `songketmail` (UID 2001) but cannot read files owned by UID 102000 without `sudo`.
+- **Audit tools break** — log rotation, monitoring agents, and file integrity checkers cannot access data directories.
+- **Config edits require root** — rewriting a Postfix `main.cf` on the host means escalating privileges, defeating the purpose of rootless containers.
+
+<Note>
+The subuid/subgid delegation range (`songketmail:100000:65536`) is still registered in `/etc/subuid` and `/etc/subgid` and is required by the kernel for user namespace creation. The playbook writes these entries automatically. The `keep-id` mapping does not remove this requirement — it simply overrides which UID inside the namespace corresponds to which host UID for the specific UID you specify.
+</Note>
+
+## The keep-id Solution
+
+SongketMail overrides the default remapping at the Pod level using the `UserNS=keep-id:uid=2001,gid=2001` Quadlet directive. The `keep-id` mode instructs Podman to map the container's UID 2001 **directly** to the host's UID 2001 — no offset arithmetic, no high-range subuid translation. Files written by a container process running as UID 2001 inside the container appear on the host owned by `songketmail:songketmail`.
+
+Declaring this at the Pod level means every container that joins the pod inherits the same namespace mapping automatically, without needing to repeat the directive in each individual `.container` file.
+
+```ini
+[Pod]
+PodName=skm_fabric_pod
+Network=skm_fabric_net.network
+UserNS=keep-id:uid=2001,gid=2001
+```
+
+The result is a clean, one-to-one identity between the container process and the host filesystem owner. A Postfix worker writing to `/var/spool/postfix` inside the container writes to `/var/srv/songketmail/postfix/spool` on the host, and `ls -la` shows `songketmail songketmail` as the owner — exactly what you expect from a well-administered server.
+
+## Host Storage Layout
+
+The playbook creates the base storage tree at `/var/srv/songketmail/` with mode `0700`, owned by `songketmail:songketmail`. All 14 service subdirectories are created beneath it with the same ownership and permissions. No other system user can read or traverse this tree.
+
+```text
+/var/srv/songketmail/
+├── bunkerweb/
+│   └── data/          # BunkerWeb proxy runtime data
+├── nginx/
+│   └── conf/          # Nginx configuration overrides
+├── certs/             # TLS certificates (shared across services)
+├── postfix/
+│   ├── config/        # Postfix main.cf, master.cf, maps
+│   └── spool/         # Postfix mail queue
+├── dovecot/
+│   ├── config/        # Dovecot configuration files
+│   ├── indexes/       # Dovecot mailbox index files
+│   └── cache/         # Dovecot mailbox cache
+├── postgres/
+│   └── data/          # PostgreSQL virtual account database
+├── rustfs/
+│   └── data/          # S3-compatible object storage (mail bodies)
+├── roundcube/
+│   ├── config/        # Roundcube webmail configuration
+│   └── db/            # Roundcube SQLite session database
+├── rspamd/
+│   ├── config/        # Rspamd local policy overrides
+│   └── data/          # Rspamd statistical data and Bayes tokens
+```
+
+Every directory in this tree maps directly to a container volume mount. The Ansible variable `songketmail_storage_dirs` drives the loop that creates all 14 paths, so adding a new service directory is a single-line change to `group_vars/all.yml`.
+
+## Day-2 Operations Without Root
+
+Because every file on the host is owned by `songketmail:songketmail`, you can perform all standard operational tasks directly as that user. There is no `sudo`, no root shell, and no risk of accidentally modifying system files.
+
+```bash
+# Inspect the Postfix mail queue on the host
+ls -lh /var/srv/songketmail/postfix/spool/
+
+# Back up the Dovecot configuration to a remote host
+rsync -av /var/srv/songketmail/dovecot/config/ backup-host:/backups/dovecot/
+
+# View the Roundcube SQLite database directory
+ls -lh /var/srv/songketmail/roundcube/db/
+
+# Check Rspamd statistical data size
+du -sh /var/srv/songketmail/rspamd/data/
+
+# Tail the Postfix spool for incoming mail activity
+ls -lt /var/srv/songketmail/postfix/spool/incoming/ | head -20
+```
+
+The same principle applies to TLS certificate renewal. When your ACME client writes a new certificate to `/var/srv/songketmail/certs/`, the owning containers automatically have access on their next read because the file is owned by UID 2001 — the same identity the container runs as.
+
+<Note>
+Storage sovereignty makes your backup strategy straightforward: any backup tool that can authenticate as `songketmail` — whether via SSH key, a service account token, or a local cron job — has full read access to the entire mail data tree. You do not need to run backups as root or wrap them in `sudo` escalation rules.
+</Note>

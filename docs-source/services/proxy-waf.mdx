@@ -1,0 +1,161 @@
+---
+title: "BunkerWeb WAF: Secure Reverse Proxy for SongketMail"
+sidebarTitle: "Proxy & WAF"
+description: "BunkerWeb WAF handles SSL termination, HTTPS webmail proxying, JMAP API routing, TCP mail stream routing, and client IP preservation for SongketMail."
+---
+
+BunkerWeb is a security-hardened Web Application Firewall (WAF) and reverse proxy built on top of Nginx. In SongketMail, it acts as the sole public-facing ingress layer — terminating SSL/TLS, enforcing hardened HTTP security headers, and stream-proxying raw TCP mail protocols (SMTP, Submission, and IMAPS) to the correct backend containers inside `songketmail-net`. Running BunkerWeb as a rootless Podman Quadlet means no process in the proxy stack ever holds root privileges on the host.
+
+## Exposed Ports
+
+The table below lists every port BunkerWeb publishes to the host network.
+
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 25 | TCP | Inbound SMTP from the public internet |
+| 80 | TCP | HTTP (redirected to HTTPS by BunkerWeb) |
+| 443 | TCP / UDP | HTTPS webmail and HTTP/3 (QUIC) |
+| 587 | TCP | Authenticated SMTP Submission |
+| 993 | TCP | IMAPS (TLS-wrapped IMAP) |
+| 8443 | TCP | JMAP API HTTPS Endpoint (RFC 8620) |
+
+## HTTPS Webmail and JMAP Reverse Proxy
+
+BunkerWeb terminates HTTPS for the Roundcube webmail interface and forwards plain HTTP traffic to `songketmail-web:8080` inside the isolated cluster network. It also reverse proxies the modern JMAP API (RFC 8620) endpoint on port 8443 to `songketmail-dovecot:8080/jmap`. It automatically injects hardened response headers — including `Strict-Transport-Security`, `X-Frame-Options`, and `X-Content-Type-Options` — so backend containers never need to manage them.
+
+Configure webmail and JMAP reverse proxying by setting the following environment variables in the Quadlet `[Container]` block:
+
+```ini
+# Webmail (HTTP/HTTPS) ingress
+Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://songketmail-web:8080
+Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/
+
+# JMAP API (RFC 8620) ingress
+Environment=jmap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=jmap.songketmail.internal_REVERSE_PROXY_HOST=http://songketmail-dovecot:8080
+Environment=jmap.songketmail.internal_REVERSE_PROXY_URL=/jmap
+```
+
+BunkerWeb's multisite mode (`MULTISITE=yes`) lets you host additional virtual servers under separate `SERVER_NAME` entries (`mail.songketmail.internal`, `smtp.songketmail.internal`, `imap.songketmail.internal`, `jmap.songketmail.internal`) without deploying a second proxy container.
+
+## TCP Mail Stream Proxying
+
+BunkerWeb uses Nginx's `stream` module to proxy raw TCP connections for mail protocols. Each mail service is declared as a separate stream server entry. Enable reverse proxying and set `SERVER_TYPE=stream` to switch a virtual host into stream mode:
+
+```ini
+# SMTP inbound — port 25
+Environment=smtp.songketmail.internal_SERVER_TYPE=stream
+Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST=songketmail-postfix:25
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT=25
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+
+# SMTP Submission — port 587
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT_1=587
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST_1=songketmail-postfix:587
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol_1=proxy_protocol on;
+
+# IMAPS — port 993
+Environment=imap.songketmail.internal_SERVER_TYPE=stream
+Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=imap.songketmail.internal_REVERSE_PROXY_HOST=songketmail-dovecot:993
+Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
+Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+```
+
+The `CUSTOM_CONF_SERVER_STREAM_proxy-protocol` key injects a raw Nginx `proxy_protocol on;` directive into the generated stream server block, enabling the PROXY protocol header on every upstream connection.
+
+## Client IP Preservation
+
+When BunkerWeb accepts a raw TCP mail connection and forwards it upstream, the backend container would normally see only BunkerWeb's internal container IP (`10.89.1.1`) as the remote address — not the real public client IP. This breaks IP-based rate limiting, fail2ban rules, and audit logging on Postfix and Dovecot.
+
+Enabling `proxy_protocol on;` instructs BunkerWeb to prepend a PROXY protocol header to each upstream TCP connection before the mail handshake begins. The header follows this format:
+
+```text
+PROXY TCP4 203.0.113.50 10.89.1.1 43212 25
+```
+
+Breaking that line down:
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| Protocol | `TCP4` | IPv4 TCP connection |
+| Source IP | `203.0.113.50` | Real public client address |
+| Dest IP | `10.89.1.1` | BunkerWeb's internal container IP |
+| Source port | `43212` | Ephemeral client port |
+| Dest port | `25` | Target service port |
+
+Postfix and Dovecot must each have their listeners configured to parse this header (`postscreen_upstream_proxy_protocol = haproxy` and `haproxy_trusted_networks` on the Postfix side; `haproxy_trusted_networks` in Dovecot) before they accept connections from the proxy.
+
+## SSL Certificate Management
+
+BunkerWeb manages SSL certificates centrally for all virtual hosts. During initial deployment, set `GENERATE_SELF_SIGNED_SSL=yes` to bootstrap a working HTTPS environment immediately while you validate DNS records. Switch to Let's Encrypt for production:
+
+```ini
+# Switch from self-signed to Let's Encrypt
+Environment=AUTO_LETS_ENCRYPT=yes
+Environment=EMAIL_LETS_ENCRYPT=admin@example.com
+```
+
+All certificates, ACME challenge tokens, and renewal state are stored in the BunkerWeb data volume at `/var/srv/songketmail/bunkerweb/data` on the host, which persists across container restarts and upgrades.
+
+## Quadlet Container Configuration
+
+The full Ansible-rendered Quadlet unit file for the BunkerWeb proxy service is shown below. Ansible substitutes `{{ cluster_prefix }}`, `{{ bunkerweb_image_tag }}`, and related variables from `group_vars/all.yml` at deployment time.
+
+```ini
+[Unit]
+Description=SongketMail Ingress and Mail Proxy Container (BunkerWeb All-In-One WAF and Reverse Proxy)
+After=network-online.target
+
+[Container]
+ContainerName=songketmail-proxy
+Image=docker.io/bunkerity/bunkerweb-all-in-one:1.6.13
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/bunkerweb/data:/data:Z
+PublishPort=80:8080
+PublishPort=443:8443
+PublishPort=443:8443/udp
+PublishPort=25:25
+PublishPort=587:587
+PublishPort=993:993
+PublishPort=8443:8443
+Environment=TZ=UTC
+Environment=MULTISITE=yes
+Environment=SERVER_NAME=mail.songketmail.internal smtp.songketmail.internal imap.songketmail.internal jmap.songketmail.internal
+# Webmail (HTTP/HTTPS)
+Environment=mail.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=mail.songketmail.internal_REVERSE_PROXY_HOST=http://songketmail-web:8080
+Environment=mail.songketmail.internal_REVERSE_PROXY_URL=/
+# JMAP Route
+Environment=jmap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=jmap.songketmail.internal_REVERSE_PROXY_HOST=http://songketmail-dovecot:8080
+Environment=jmap.songketmail.internal_REVERSE_PROXY_URL=/jmap
+# SMTP Stream (Port 25)
+Environment=smtp.songketmail.internal_SERVER_TYPE=stream
+Environment=smtp.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST=songketmail-postfix:25
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT=25
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# SMTP Submission Stream (Port 587)
+Environment=smtp.songketmail.internal_LISTEN_STREAM_PORT_1=587
+Environment=smtp.songketmail.internal_REVERSE_PROXY_HOST_1=songketmail-postfix:587
+Environment=smtp.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol_1=proxy_protocol on;
+# IMAP Stream (Port 143/993)
+Environment=imap.songketmail.internal_SERVER_TYPE=stream
+Environment=imap.songketmail.internal_USE_REVERSE_PROXY=yes
+Environment=imap.songketmail.internal_REVERSE_PROXY_HOST=songketmail-dovecot:993
+Environment=imap.songketmail.internal_LISTEN_STREAM_PORT_SSL=993
+Environment=imap.songketmail.internal_CUSTOM_CONF_SERVER_STREAM_proxy-protocol=proxy_protocol on;
+# SSL/TLS Settings
+Environment=GENERATE_SELF_SIGNED_SSL=yes
+Label=fabric_cluster=songketmail
+Label=service_type=proxy
+
+[Install]
+WantedBy=default.target
+```
+
+`UserNS=keep-id:uid=2001,gid=2001` maps the container process to the `songketmail` system account (UID/GID 2001) in the rootless user namespace, ensuring the data volume on the host is always owned by a non-root account.

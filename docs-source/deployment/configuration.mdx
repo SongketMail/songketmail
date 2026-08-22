@@ -1,0 +1,155 @@
+---
+title: "Configure SongketMail before deployment"
+sidebarTitle: "Configuration"
+description: "Set up your inventory file, global variables, pinned image tags, and storage paths before you run the SongketMail Ansible playbook."
+---
+
+You drive SongketMail deployment using two configuration files: an Ansible inventory file that specifies your target nodes, and a `group_vars/all.yml` file that controls tunable parameters — from container image versions to storage paths and network subnets. Review and update both files before you run the playbook.
+
+## Inventory setup
+
+The inventory file lives at `inventory/hosts.ini` (or `inventory/hosts.yml` if you prefer YAML syntax). It defines the nodes that belong to the `email_servers` group, which is the target group for the main `site.yml` playbook.
+
+### INI inventory format (`inventory/hosts.ini`)
+
+```ini
+[email_servers]
+node1.example.com ansible_host=10.0.1.11 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/songketmail_deploy
+node2.example.com ansible_host=10.0.1.12 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/songketmail_deploy
+```
+
+### YAML inventory format (`inventory/hosts.yml`)
+
+```yaml
+all:
+  children:
+    email_servers:
+      hosts:
+        node1.example.com:
+          ansible_host: 10.0.1.11
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/songketmail_deploy
+        node2.example.com:
+          ansible_host: 10.0.1.12
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/songketmail_deploy
+```
+
+Replace the example hostnames and IP addresses with your real servers.
+
+| Variable | Purpose |
+|----------|---------|
+| `ansible_host` | The actual IP address or resolvable hostname Ansible connects to |
+| `ansible_user` | The SSH user on the remote node (must have `sudo` access) |
+| `ansible_ssh_private_key_file` | Path to the private key used for SSH authentication |
+| `ansible_connection=local` | Use for localhost-only testing without a real remote host |
+
+## Global variables
+
+You consolidate all tunable parameters in `group_vars/all.yml`. The complete file with default values looks like this:
+
+```yaml
+# Environment constraints toggle
+# Set to true when running inside unprivileged sandboxes (e.g. CI runners)
+# Set to false for all real node deployments
+is_limited_environment: false
+
+# Fabric Isolation — all resources are namespaced by this prefix
+cluster_prefix: "songketmail"
+podman_network_name: "songketmail-net"
+podman_network_subnet: "10.89.0.0/16"
+
+# Dedicated system user for rootless container execution
+songketmail_user: "songketmail"
+songketmail_uid: 2001
+songketmail_gid: 2001
+songketmail_home: "/home/{{ songketmail_user }}"
+
+# OS kernel tuning
+vm_max_map_count_value: 262144
+
+# Container image tags — pin to specific versions for production
+bunkerweb_image_tag: "1.6.13"
+postfix_image_tag:   "3.9.0"
+dovecot_image_tag:   "2.3.21.1"
+roundcube_image_tag: "1.6.8-apache"
+rustfs_image_tag:    "1.0.0"
+rspamd_image_tag:    "3.9.1"
+
+# Storage base path on the host (owned by UID/GID 2001)
+storage_base_path: "/var/srv/songketmail"
+
+# Services managed by the playbook
+songketmail_services:
+  - proxy
+  - postfix
+  - dovecot
+  - db
+  - s3
+  - web
+  - rspamd
+```
+
+### Key variables explained
+
+<CardGroup cols={2}>
+  <Card title="cluster_prefix" icon="tag">
+    Prepended to every pod, network, and container name. Changing this value
+    lets you run multiple independent SongketMail fabrics on one hypervisor
+    without naming conflicts.
+  </Card>
+  <Card title="songketmail_uid / songketmail_gid" icon="user">
+    Fixed at **2001** on both host and container. This enables the `keep-id`
+    UserNS mapping that preserves Storage Sovereignty — never change these
+    values after initial deployment.
+  </Card>
+  <Card title="storage_base_path" icon="folder">
+    The root of all persistent mail data on the host. The playbook creates the
+    full subdirectory tree here and assigns ownership to UID/GID 2001:2001.
+  </Card>
+  <Card title="podman_network_subnet" icon="network-wired">
+    The internal CIDR range used by the rootless Podman bridge network. Change
+    this only if `10.89.0.0/16` conflicts with an existing network on your
+    hosts.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Always pin container image tags to explicit version numbers in production —
+  never use `:latest`. The defaults in `group_vars/all.yml` are already pinned.
+  When you upgrade a service, update the specific tag, re-run the playbook, and
+  verify the new container starts cleanly before proceeding to the next node.
+</Tip>
+
+<Note>
+  The `is_limited_environment` flag exists for CI runners and unprivileged
+  sandboxes where tasks like `sysctl` tuning, system user creation, and
+  `loginctl enable-linger` would fail without root access. When this flag is
+  `true`, those privileged tasks are skipped and storage paths are redirected
+  to `$HOME/var/srv/songketmail`. **Set this to `false` for every real
+  deployment.**
+</Note>
+
+## Storage layout
+
+The playbook creates a structured directory tree under `storage_base_path` (`/var/srv/songketmail` by default). Every directory is owned by `2001:2001` with mode `0700`, ensuring that only the `songketmail` user can access mail data on the host.
+
+```text
+/var/srv/songketmail/
+├── bunkerweb/data       # BunkerWeb WAF runtime data
+├── nginx/conf           # Nginx configuration managed by BunkerWeb
+├── certs/               # TLS certificates
+├── postfix/config       # Postfix main.cf, virtual maps, and aliases
+├── postfix/spool        # Postfix mail queue (active, deferred, corrupt)
+├── dovecot/config       # Dovecot dovecot.conf and conf.d/
+├── dovecot/indexes      # Dovecot index files for fast mailbox access
+├── dovecot/cache        # Dovecot state cache
+├── postgres/data        # PostgreSQL data directory (WAL, tables, indexes)
+├── rustfs/data          # RustFS S3-compatible object storage data
+├── roundcube/config     # Roundcube config.inc.php and custom plugins
+├── roundcube/db         # Roundcube SQLite or PostgreSQL session database
+├── rspamd/config        # Rspamd local.d/ and override.d/ configuration
+└── rspamd/data          # Rspamd statistics, DKIM keys, and Bayes database
+```
+
+All 14 subdirectories are created automatically by the `host_prepare` role. You do not need to create them manually; however, if you want to pre-populate configuration files (for example, placing your Postfix `virtual_mailbox_maps` or Dovecot `dovecot.conf`), you can drop files into the appropriate path before running the playbook and they will be picked up on the first container start.

@@ -1,0 +1,111 @@
+{
+  "projectType": "infrastructure",
+  "projectName": "SongketMail",
+  "projectDescription": "An enterprise-grade, rootless email server deployment fabric orchestrated with Ansible and Podman 5+ Quadlets, delivering secure, scalable, and storage-sovereign mail services.",
+  "theme": "aspen",
+  "primaryColor": "#1E3A5F",
+  "lightColor": "#3B82F6",
+  "darkColor": "#0F1F33",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "introduction",
+              "architecture-overview",
+              "service-fabric"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/prerequisites",
+              "deployment/configuration",
+              "deployment/running-the-playbook",
+              "deployment/verification"
+            ]
+          },
+          {
+            "group": "Core Services",
+            "pages": [
+              "services/proxy-waf",
+              "services/smtp-imap",
+              "services/spam-filtering",
+              "services/webmail",
+              "services/object-storage"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/rootless-containers",
+              "security/storage-sovereignty",
+              "security/os-hardening"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "operations/service-management",
+              "operations/monitoring",
+              "operations/backups",
+              "operations/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Configuration",
+            "pages": [
+              "reference/global-variables",
+              "reference/quadlet-templates",
+              "reference/network-ports"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "reference/dockpod-integration",
+              "reference/proxmox-ceph",
+              "reference/ansible-modules"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Rootless Podman 5+ Quadlet orchestration with native systemd integration",
+    "Seven-service containerized email fabric: proxy, MTA, MDA, spam filter, webmail, database, object storage",
+    "Storage Sovereignty via keep-id UID/GID 2001 namespace mapping",
+    "BunkerWeb WAF as hardened SSL ingress with PROXY protocol client IP preservation",
+    "Postfix MTA + Dovecot MDA with PostgreSQL virtual mailbox accounts",
+    "RustFS S3-compatible object storage for mail bodies and attachments",
+    "Rspamd spam and policy filtering via milter integration",
+    "Roundcube webmail with persistent PostgreSQL-backed sessions",
+    "Fabric isolation via cluster-prefixed pod and network namespacing",
+    "ASIMP OS hardening pipeline (Lynis + OpenSCAP + Debsums)",
+    "Ansible FQCN-compliant, fully declarative deployment automation",
+    "Ansible-driven symmetric privilege strategy separating rootful tuning from rootless containers"
+  ],
+  "publicApiSurface": [
+    "ansible-playbook -i inventory/hosts.ini site.yml",
+    "systemctl --user status songketmail_pod-pod.service",
+    "systemctl --user start|stop|restart songketmail_<service>.service",
+    "group_vars/all.yml — cluster_prefix, storage_base_path, image tags",
+    "inventory/hosts.ini — target node definitions",
+    "roles/podman_quadlet/templates/ — Quadlet .container, .pod, .network files",
+    "roles/host_prepare/tasks/main.yml — host preparation tasks",
+    "roles/host_prepare/tasks/audit.yml — ASIMP security audit tasks",
+    "loginctl enable-linger songket",
+    "XDG_RUNTIME_DIR=/run/user/2001",
+    "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/2001/bus",
+    "UserNS=keep-id:uid=2001,gid=2001 (Quadlet pod-level namespace)"
+  ]
+}

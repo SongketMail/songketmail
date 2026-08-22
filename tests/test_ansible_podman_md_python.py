@@ -44,7 +44,7 @@ def get_markdown_files():
     """Retrieves all Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
-        if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
+        if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
             continue
         for f in files:
             if f.endswith('.md'):
@@ -441,7 +441,116 @@ def test_sync_docs_missing_token_raises_value_error():
 
     with patch.dict(os.environ, {}, clear=True):
         with pytest.raises(ValueError, match="DOCS_REPO_TOKEN"):
-            sync_docs.main()
+            sync_docs.main([])
+
+
+def test_sync_docs_missing_source_dir_raises_value_error(tmp_path):
+    """Verifies validate_source_docs raises ValueError if source_dir does not exist."""
+    import pytest
+    from scripts import sync_docs
+
+    non_existent_dir = tmp_path / "non_existent_source"
+    with pytest.raises(ValueError, match="does not exist"):
+        sync_docs.validate_source_docs(non_existent_dir)
+
+
+def test_sync_docs_missing_docs_json_raises_value_error(tmp_path):
+    """Verifies validate_source_docs raises ValueError if docs.json is missing."""
+    import pytest
+    from scripts import sync_docs
+
+    source_dir = tmp_path / "empty_source"
+    source_dir.mkdir()
+    with pytest.raises(ValueError, match="docs.json"):
+        sync_docs.validate_source_docs(source_dir)
+
+
+def test_sync_docs_file_count_below_floor_raises_value_error(tmp_path):
+    """Verifies validate_source_docs raises ValueError if file count is below min_files."""
+    import pytest
+    import json
+    from scripts import sync_docs
+
+    source_dir = tmp_path / "sparse_source"
+    source_dir.mkdir()
+    docs_json = source_dir / "docs.json"
+    docs_json.write_text(json.dumps({"navigation": []}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="fewer than the required minimum threshold"):
+        sync_docs.validate_source_docs(source_dir, min_files=5)
+
+
+def test_sync_docs_unresolved_nav_page_raises_value_error(tmp_path):
+    """Verifies validate_source_docs raises ValueError if a page in docs.json fails to resolve."""
+    import pytest
+    import json
+    from scripts import sync_docs
+
+    source_dir = tmp_path / "missing_page_source"
+    source_dir.mkdir()
+    docs_json = source_dir / "docs.json"
+    docs_json.write_text(json.dumps({"navigation": [{"pages": ["nonexistent_page"]}]}), encoding="utf-8")
+
+    # Create dummy MDX files to exceed min_files threshold
+    for i in range(5):
+        (source_dir / f"dummy_{i}.mdx").write_text("content", encoding="utf-8")
+
+    with pytest.raises(ValueError, match=r"references page\(s\) that do not exist"):
+        sync_docs.validate_source_docs(source_dir, min_files=5)
+
+
+def test_sync_docs_dry_run_mode_success():
+    """Verifies sync_docs.main(["--dry-run"]) passes validation with token and dry-run flag."""
+    from scripts import sync_docs
+    from pathlib import Path
+
+    mock_target = MagicMock()
+    mock_target.exists.return_value = True
+
+    with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
+         patch("scripts.sync_docs.Path") as mock_path, \
+         patch("scripts.sync_docs.run"), \
+         patch("scripts.sync_docs.shutil.rmtree"), \
+         patch("scripts.sync_docs.validate_source_docs", return_value=[Path("docs-source/docs.json")]), \
+         patch("scripts.sync_docs.compute_file_diff", return_value=([], [], [])):
+
+        def path_side_effect(arg):
+            if str(arg) == "/tmp/docs-repo":
+                return mock_target
+            return Path(arg)
+
+        mock_path.side_effect = path_side_effect
+        sync_docs.main(["--dry-run"])
+
+
+def test_sync_docs_deletion_cap_exceeded_raises_value_error():
+    """Verifies sync_docs.main() raises ValueError if deletion count exceeds max_deletions cap."""
+    import pytest
+    from scripts import sync_docs
+    from pathlib import Path
+
+    mock_target = MagicMock()
+    mock_target.exists.return_value = True
+
+    # Return 15 target files to trigger deletion cap (since source has 0 target matches)
+    target_items = [MagicMock(is_file=lambda: True, parts=["file_" + str(i)], relative_to=lambda t, i=i: Path(f"target_file_{i}.mdx")) for i in range(15)]
+    mock_target.rglob.return_value = target_items
+
+    with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
+         patch("scripts.sync_docs.Path") as mock_path, \
+         patch("scripts.sync_docs.run"), \
+         patch("scripts.sync_docs.shutil.rmtree"), \
+         patch("scripts.sync_docs.validate_source_docs", return_value=[Path("docs-source/docs.json")]), \
+         patch("scripts.sync_docs.compute_file_diff", return_value=([], [], [Path(f"del_{i}.mdx") for i in range(15)])):
+
+        def path_side_effect(arg):
+            if str(arg) == "/tmp/docs-repo":
+                return mock_target
+            return Path(arg)
+
+        mock_path.side_effect = path_side_effect
+        with pytest.raises(ValueError, match="Deletion cap exceeded"):
+            sync_docs.main([])
 
 
 @patch("scripts.sync_docs.run")
@@ -475,8 +584,15 @@ def test_sync_docs_main_success_flow(mock_sub_run, mock_copytree, mock_rmtree, m
     fake_tmp.iterdir.return_value = [git_item, dir_item, file_item]
 
     with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
-         patch("scripts.sync_docs.Path", return_value=fake_tmp):
-        sync_docs.main()
+         patch("scripts.sync_docs.Path") as mock_path:
+        # Redirect /tmp/docs-repo Path instantiation to fake_tmp
+        def path_side_effect(arg):
+            if str(arg) == "/tmp/docs-repo":
+                return fake_tmp
+            return Path(arg)
+
+        mock_path.side_effect = path_side_effect
+        sync_docs.main([])
 
     # Verify run calls include git clone, git config, git add, git commit, git push
     run_cmds = [call.args[0] for call in mock_run.call_args_list]

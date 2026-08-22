@@ -1,0 +1,139 @@
+---
+title: "SongketMail Deployment Prerequisites"
+sidebarTitle: "Prerequisites"
+description: "Everything you need before deploying SongketMail: Podman 5+, Ansible 9+, required collections, a dedicated system user, and supported Linux hosts."
+---
+
+Before you deploy SongketMail, verify that every node in your cluster meets the software, hardware, and network requirements listed on this page. Missing any of these prerequisites is the most common cause of failed deployments — work through the pre-flight checklist at the bottom before you run a single Ansible command.
+
+## Software Requirements
+
+SongketMail relies on Podman Quadlets, which are native systemd unit files generated from declarative `.container`, `.pod`, and `.network` files. Quadlet support was introduced in Podman 4.4 and reached production maturity in Podman 5. You must have **Podman 5.0.0 or later** on every target node.
+
+| Component | Minimum Version | Where Required |
+|-----------|----------------|----------------|
+| Podman | 5.0.0 | All target nodes |
+| Ansible | 9.0.0 | Ansible control machine |
+| Python 3 | 3.9+ | All target nodes |
+
+### Ansible Collections
+
+The playbook uses fully qualified collection names (FQCN) throughout. Install all three required collections on your control machine before proceeding:
+
+```bash
+ansible-galaxy collection install \
+  community.general \
+  ansible.posix \
+  containers.podman
+```
+
+| Collection | Purpose |
+|------------|---------|
+| `community.general` | `modprobe` for kernel module loading |
+| `ansible.posix` | `sysctl` for kernel parameter tuning |
+| `containers.podman` | Rootless Podman network management |
+
+## Host OS Requirements
+
+SongketMail targets Linux distributions that ship with **systemd** and support rootless containers via user-namespaced Podman.
+
+- **Ubuntu 22.04 LTS** or later (recommended)
+- Any equivalent Linux distribution with systemd 248+ and `loginctl enable-linger` support
+- `subuid` / `subgid` delegation support in `/etc/subuid` and `/etc/subgid` (the playbook configures this automatically)
+
+<Warning>
+  CentOS Stream 8 and older RHEL 8 variants ship Podman 4.x in their default
+  repositories. You must enable a newer module stream or install Podman 5+ from
+  an upstream source before running the playbook. The playbook asserts the
+  installed version and will fail fast if the minimum is not met.
+</Warning>
+
+## Network Requirements
+
+Every target node must be reachable from your Ansible control machine over SSH, and the following inbound ports must be open on the host firewall:
+
+| Port | Protocol | Service |
+|------|----------|---------|
+| 22 | TCP | SSH (Ansible control access) |
+| 25 | TCP | SMTP — Postfix MTA |
+| 80 | TCP | HTTP — BunkerWeb (redirect to HTTPS) |
+| 443 | TCP | HTTPS — BunkerWeb (webmail) |
+| 587 | TCP | Submission — Postfix MSA |
+| 993 | TCP | IMAPS — Dovecot |
+
+Because SongketMail runs rootless, the playbook sets `net.ipv4.ip_unprivileged_port_start=25` via `sysctl` so the unprivileged `songketmail` user can bind to low-numbered ports without `CAP_NET_BIND_SERVICE`.
+
+## Dedicated System User
+
+SongketMail runs all container workloads as a dedicated, non-privileged user named `songketmail` with **UID/GID 2001**. You do not need to create this user manually — the `host_prepare` role creates the user, group, home directory, and `subuid`/`subgid` namespace mappings automatically during the first playbook run.
+
+The fixed UID/GID is not arbitrary. SongketMail enforces `UserNS=keep-id:uid=2001,gid=2001` at the Pod level so that host mount directory ownership matches the in-container process identity exactly. This "Storage Sovereignty" pattern means you can inspect, back up, and manage mail data under `/var/srv/songketmail/` as the `songketmail` user without ever needing `sudo`.
+
+## Hardware Sizing
+
+These are baseline recommendations for a single node. Scale up based on your message volume and number of mailboxes.
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| CPU | 2 vCPUs | 4 vCPUs |
+| RAM | 4 GB | 8 GB+ |
+| Disk (OS) | 20 GB | 40 GB |
+| Disk (mail data) | 20 GB | 100 GB+ |
+| Disk type | HDD | SSD / NVMe |
+
+<Note>
+  The playbook sets `vm.max_map_count=262144` to meet the requirements of
+  Elasticsearch-compatible database containers. Hosts with less than 4 GB RAM
+  may exhibit OOM-killer activity under normal mail load.
+</Note>
+
+## Pre-Flight Checklist
+
+Work through each step before running the deployment playbook.
+
+<Steps>
+  <Step title="Verify Podman version on every target node">
+    SSH into each node and confirm Podman 5+ is installed:
+
+    ```bash
+    podman --version
+    # Expected: podman version 5.x.x
+    ```
+  </Step>
+
+  <Step title="Install Ansible 9+ on your control machine">
+    ```bash
+    pip install --upgrade "ansible>=9.0.0"
+    ansible --version
+    ```
+  </Step>
+
+  <Step title="Install the required Ansible collections">
+    ```bash
+    ansible-galaxy collection install \
+      community.general \
+      ansible.posix \
+      containers.podman
+    ```
+  </Step>
+
+  <Step title="Confirm SSH connectivity to all nodes">
+    ```bash
+    ansible -i inventory/hosts.ini email_servers -m ping
+    # Expected: node1 | SUCCESS => pong
+    ```
+  </Step>
+
+  <Step title="Verify inbound ports are open on each node">
+    From your control machine, use `nc` or `nmap` to check that ports 25, 80,
+    443, 587, and 993 are reachable. If you are behind a cloud security group or
+    hardware firewall, open those ports before proceeding.
+  </Step>
+
+  <Step title="Confirm sufficient disk space">
+    ```bash
+    df -h /var/srv
+    # Ensure at least 40 GB available before deployment
+    ```
+  </Step>
+</Steps>

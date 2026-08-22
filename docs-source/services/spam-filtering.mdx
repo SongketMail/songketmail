@@ -1,0 +1,134 @@
+---
+title: "Rspamd: Spam Filtering and Email Policy Management"
+sidebarTitle: "Spam Filtering"
+description: "Rspamd provides milter-based spam scoring, DKIM signing, greylisting, and a web dashboard for real-time mail policy management in SongketMail."
+---
+
+Rspamd is the spam filtering and mail policy engine at the heart of SongketMail's inbound pipeline. It connects to Postfix as a milter — a mail filter protocol that lets Rspamd inspect, modify, and accept or reject messages during the SMTP transaction, before any message is queued or delivered. Every inbound message passes through a scoring pipeline that checks SPF alignment, verifies DKIM signatures, enforces DMARC policy, runs a Bayesian classifier, and optionally invokes a neural network model, producing a composite spam score that drives accept, reject, or greylist decisions. Rspamd also handles outbound DKIM signing, so your sent mail is correctly signed without any Postfix-side milter configuration for signing.
+
+## How Rspamd Integrates
+
+Postfix connects to Rspamd's milter endpoint at `songketmail-rspamd:11334` over the internal `songketmail-net` network. Add these directives to `main.cf` to wire the milter:
+
+```ini
+# Rspamd milter integration
+smtpd_milters       = inet:songketmail-rspamd.songketmail-net:11334
+non_smtpd_milters   = inet:songketmail-rspamd.songketmail-net:11334
+milter_default_action = accept
+```
+
+`milter_default_action = accept` ensures mail is still delivered if Rspamd is temporarily unavailable — change this to `tempfail` if you prefer hard rejection during outages.
+
+### Scoring Pipeline
+
+Rspamd evaluates each message through a layered set of checks in this order:
+
+<Steps>
+  <Step title="SPF check">
+    Validates that the sending IP is authorised to send for the envelope sender domain. An SPF authentication failure increases the message's spam score (positive delta pushing towards spam thresholds), whereas a valid SPF pass can reduce the score.
+  </Step>
+  <Step title="DKIM verification">
+    Verifies the cryptographic DKIM signature in the message headers. A valid signature from a trusted domain reduces the spam score (negative delta reward); a broken or failing signature increases the spam score.
+  </Step>
+  <Step title="DMARC policy enforcement">
+    Combines the SPF and DKIM results against the domain's published DMARC `p=` policy. Failure can trigger reject or quarantine actions depending on your `actions.conf` thresholds.
+  </Step>
+  <Step title="Bayesian classifier">
+    A statistical model trained on your local spam and ham corpora. Feed it examples by learning from the Rspamd web dashboard or via the `rspamc` CLI inside the container.
+  </Step>
+  <Step title="Neural network scoring">
+    An optional pre-trained neural module that generalises across patterns the Bayes model may miss, particularly for novel spam campaigns. Enabled in `neural.conf`.
+  </Step>
+</Steps>
+
+The final composite score is compared against thresholds in `actions.conf`. Messages above the `reject` threshold are refused during the SMTP transaction; those between `add_header` and `reject` thresholds receive a `X-Spam-Status` header; those below `add_header` are delivered unchanged.
+
+## Rspamd Web Dashboard
+
+Rspamd exposes a built-in web dashboard on internal port **11333** inside `songketmail-net`. You access it through the BunkerWeb proxy — add a dedicated virtual host entry to the proxy Quadlet pointing to `http://songketmail-rspamd:11333` and protect it with HTTP basic authentication or IP allowlisting.
+
+The dashboard provides:
+
+<CardGroup cols={2}>
+  <Card title="Real-Time Scan Statistics" icon="chart-bar">
+    Live counters for ham, spam, and rejected messages with throughput graphs updated every few seconds.
+  </Card>
+  <Card title="Scan History" icon="clock">
+    A searchable log of recent message scoring decisions including per-symbol breakdowns, enabling rapid investigation of false positives.
+  </Card>
+  <Card title="Fuzzy Hash Learning" icon="brain">
+    Submit messages to the fuzzy hash storage to build fingerprint-based reputation for known spam campaigns across your user base.
+  </Card>
+  <Card title="Bayesian Learning" icon="graduation-cap">
+    Mark messages as spam or ham directly in the UI to retrain the Bayesian classifier without touching the CLI.
+  </Card>
+</CardGroup>
+
+## DKIM Signing Setup
+
+Rspamd handles outbound DKIM signing via its `dkim_signing` module. Place your private key files under `/var/srv/songketmail/rspamd/config/` (mounted into the container at `/etc/rspamd/local.d/`) and create `dkim_signing.conf`:
+
+```ini
+# /var/srv/songketmail/rspamd/config/dkim_signing.conf
+enabled = true;
+
+sign_authenticated  = true;
+sign_local          = true;
+
+use_domain = "header";
+
+path        = "/etc/rspamd/local.d/keys/$domain.$selector.key";
+selector    = "mail2026";
+```
+
+Generate a 2048-bit RSA keypair for each domain you host:
+
+```bash
+# Run inside the rspamd container or on the host before mounting
+openssl genrsa -out /var/srv/songketmail/rspamd/config/keys/example.com.mail2026.key 2048
+openssl rsa -in /var/srv/songketmail/rspamd/config/keys/example.com.mail2026.key \
+            -pubout \
+            -out /var/srv/songketmail/rspamd/config/keys/example.com.mail2026.pub
+```
+
+Publish the public key in your DNS as a `TXT` record at `mail2026._domainkey.example.com`.
+
+## Configuration Files
+
+All Rspamd local override files live in `/var/srv/songketmail/rspamd/config/` on the host, which is bind-mounted into the container at `/etc/rspamd/local.d/`. Files placed here override upstream Rspamd defaults without patching the image.
+
+| File | Purpose |
+|------|---------|
+| `milter.conf` | Milter bind address and timeout settings |
+| `dkim_signing.conf` | Outbound DKIM signing key paths and selector |
+| `actions.conf` | Score thresholds for `greylist`, `add_header`, `reject` |
+| `neural.conf` | Neural network module enable/disable and model paths |
+| `classifier-bayes.conf` | Bayesian backend (Redis or SQLite) configuration |
+
+## Quadlet Container Configuration
+
+```ini
+[Unit]
+Description=SongketMail Anti-Spam Container (Rspamd)
+After=network-online.target
+
+[Container]
+ContainerName=songketmail-rspamd
+Image=docker.io/rspamd/rspamd:3.9.1
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/rspamd/config:/etc/rspamd/local.d:Z
+Volume=/var/srv/songketmail/rspamd/data:/var/lib/rspamd:Z
+Environment=TZ=UTC
+Label=fabric_cluster=songketmail
+Label=service_type=rspamd
+
+[Install]
+WantedBy=default.target
+```
+
+Two volumes are mounted: the `config` directory for your local override files and the `data` directory for Rspamd's runtime state.
+
+<Note>
+The `data` volume at `/var/srv/songketmail/rspamd/data` (mounted as `/var/lib/rspamd` inside the container) stores trained Bayesian classifier data, fuzzy hash tables, and greylisting state. This directory persists across container restarts and image upgrades — back it up alongside your configuration files to avoid retraining from scratch after a host migration.
+</Note>

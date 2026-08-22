@@ -1,0 +1,97 @@
+---
+title: "Host OS Hardening with ASIMP for SongketMail Hosts"
+sidebarTitle: "OS Hardening"
+description: "SongketMail runs the ASIMP hardening pipeline — Lynis, OpenSCAP CIS Level 2, and Debsums — to audit and harden each host before containers deploy."
+---
+
+Before a single container starts, SongketMail's Ansible playbook runs the **Ansible System Integrity Management Platform (ASIMP)** against the host operating system. ASIMP is a structured hardening pipeline that audits the host with two independent security scanners, applies a layered set of OS-level remediations, and then re-audits to verify the improvements. This host preparation phase runs entirely before the Quadlet deployment phase, meaning your containers launch on a kernel and OS configuration that already meets CIS Level 2 requirements and Lynis hardening targets.
+
+<Warning>
+The global variable `is_limited_environment` is set to `true` by default in `group_vars/all.yml` to allow safe playbook testing inside unprivileged test environments and sandboxes. On a real production host you **must** set `is_limited_environment: false`. Without this change, the playbook skips all kernel tuning, system user creation, subuid registration, linger configuration, and ASIMP hardening — leaving your host completely un-hardened before container deployment.
+</Warning>
+
+## The Measure-Harden-Re-Measure Pipeline
+
+ASIMP implements a deterministic three-phase cycle. Each phase has a defined entry and exit condition, so the playbook can report a concrete before/after compliance delta rather than relying on untested assumptions about the starting state.
+
+<Steps>
+  <Step title="Phase 1: Baseline Auditing (Measure)">
+    Before applying any changes, ASIMP runs three independent auditing tools against the live host configuration and records the results as the baseline.
+
+    - **OpenSCAP** evaluates the host against the CIS Security Linux Level 2 XCCDF profile, producing a percentage compliance score.
+    - **Lynis** scans kernel parameters, directory permissions, installed packages, active services, and system configuration files, producing a Hardening Index score between 0 and 100.
+    - **Debsums** performs package-level file integrity verification, checking every managed system file against the checksums recorded in the package database. Any modified or missing file is flagged.
+
+    The audit tasks in `roles/host_prepare/tasks/audit.yml` run each tool only if it is already installed, making the baseline scan non-destructive and safe to run on systems that do not yet have the full security toolchain present.
+  </Step>
+  <Step title="Phase 2: Hardening (Harden)">
+    With the baseline recorded, ASIMP applies a structured set of remediations. Each remediation targets a specific finding category rather than applying a single monolithic policy.
+
+    - **OS package tuning** — updates package repository metadata and installs integrity-checking packages.
+    - **Kernel parameter hardening** — writes sysctl settings for memory mapping limits, IPv4 forwarding, and unprivileged port binding (see [Kernel Hardening Applied](#kernel-hardening-applied) below).
+    - **SSH hardening** — deploys the Dev-Sec `ssh-hardening` role, which disables legacy ciphers, enforces strong key exchange algorithms, and removes insecure SSH options.
+    - **File permission constraints** — tightens permissions on sensitive configuration files and disables world-readable paths that Lynis flags as risks.
+    - **Audit logging** — configures `auditd` rules for file access monitoring, privilege escalation events, and network socket operations.
+  </Step>
+  <Step title="Phase 3: Post-Hardening Audit (Re-Measure)">
+    After all remediations are applied, ASIMP re-runs the same OpenSCAP and Lynis scans used in Phase 1. The delta between the baseline and post-hardening scores is the quantified security improvement. The playbook surfaces both scores in the Ansible output so you have a documented audit trail in your deployment run logs.
+
+    <Tip>
+    Re-run the audit playbook any time you make changes to the host OS, install new packages, or modify system configuration files. The audit tasks are safe to execute independently — they are read-only and produce no side effects on the running system:
+
+    ```bash
+    ansible-playbook site.yml --tags audit
+    ```
+    </Tip>
+  </Step>
+</Steps>
+
+## Security Tools Used
+
+<CardGroup cols={3}>
+  <Card title="Lynis" icon="shield-check">
+    A host-based security auditing tool that inspects system configuration, installed software, running services, kernel parameters, and file permissions. Lynis produces a **Hardening Index** — a single integer score from 0 to 100 — that gives you an at-a-glance measure of the host's security posture. Higher scores reflect more restrictive, better-configured systems.
+  </Card>
+  <Card title="OpenSCAP" icon="file-shield">
+    An open-source implementation of the Security Content Automation Protocol (SCAP). SongketMail uses OpenSCAP to evaluate the host against the **CIS Security Linux Level 2** XCCDF profile — the benchmark most widely accepted for production Linux server hardening. OpenSCAP produces a percentage compliance score based on how many CIS rules the host currently satisfies.
+  </Card>
+  <Card title="Debsums" icon="magnifying-glass">
+    A Debian/Ubuntu package integrity tool that compares every installed package's managed files against the MD5 checksums shipped by the package maintainer. Any file that has been silently modified since installation — whether by an attacker, a misconfigured script, or a manual edit — is flagged. Debsums gives you confidence that your OS binaries and configuration files have not been tampered with at the package level.
+  </Card>
+</CardGroup>
+
+## Privilege Levels
+
+The SongketMail playbook uses a symmetric privilege model that keeps OS-level operations rootful and container operations rootless, with no mixing between the two layers.
+
+**Rootful tasks (`become: yes`)** cover all operations that require kernel or filesystem access beyond the `songketmail` account: sysctl tuning, kernel module loading, system user creation, subuid/subgid registration, package installation, and the ASIMP hardening remediations. These tasks run as root via Ansible's `become` mechanism and complete entirely during the host preparation phase.
+
+**Rootless tasks (`become_user: songketmail`)** cover all Quadlet deployment, systemd user session management, and container lifecycle operations. These tasks run as UID 2001 and explicitly set `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` in their environment blocks so they bind correctly to the `songketmail` user session.
+
+The `is_limited_environment` flag acts as a safety gate. When `true`, the playbook skips every rootful task — including ASIMP — so the entire playbook can run safely inside an unprivileged test environment without requiring elevated privileges or risking system modification.
+
+## Kernel Hardening Applied
+
+The `host_prepare` role writes four critical kernel parameters via `ansible.posix.sysctl` during the hardening phase. Each parameter directly enables or protects a specific aspect of the SongketMail container fabric.
+
+| Parameter | Value | Purpose |
+|---|---|---|
+| `vm.max_map_count` | `262144` | Required by Elasticsearch-style database containers that use memory-mapped files. Without this, containers that rely on `mmap` for index structures fail to start. |
+| `net.ipv4.ip_forward` | `1` | Enables IP forwarding for container network routing. Required for inter-container traffic to flow through the `songketmail-net` virtual network inside the pod. |
+| `net.ipv4.ip_unprivileged_port_start` | `25` | Lowers the privileged port boundary so the rootless `songketmail` process can bind directly to port 25 (SMTP) and other mail ports below 1024 without kernel capability grants. |
+| `br_netfilter` (module) | loaded | Enables netfilter processing for bridged network traffic. Required for iptables and nftables rules to inspect packets crossing the container bridge interface. |
+
+The `br_netfilter` module is loaded immediately via `community.general.modprobe` and persisted across reboots by writing a file to `/etc/modules-load.d/br_netfilter.conf`.
+
+## Security Scorecard
+
+The table below shows the audit results from the ASIMP evaluation run on the reference test environment. When running inside unprivileged sandboxes with `is_limited_environment: true`, systemd services are restricted and score thresholds are flagged for remediation before production deployment.
+
+| Tool / Metric | Target Threshold | Reference Sandbox Result | Post-Hardening Target | Status |
+|:---|:---|:---|:---|:---|
+| **Lynis Hardening Index** | 75 | 59 | 85+ | NON-COMPLIANT (Sandbox Evaluation) |
+| **OpenSCAP CIS Level 2** | 75.0% | 0.0% | 90%+ | NON-COMPLIANT (Requires Full OS Run) |
+
+<Note>
+The reference scores above reflect an unprivileged sandbox evaluation environment where systemd services (`auditd`, `sshd`, `chrony`) were skipped. On a production system with `is_limited_environment: false`, ASIMP executes full rootful remediation to achieve Lynis 85+ and OpenSCAP CIS Level 2 compliance.
+</Note>

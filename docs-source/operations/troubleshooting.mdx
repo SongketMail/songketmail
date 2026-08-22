@@ -1,0 +1,261 @@
+---
+title: "Troubleshooting Common SongketMail Operational Issues"
+sidebarTitle: "Troubleshooting"
+description: "Diagnose and fix common SongketMail problems: services not starting, mail delivery failures, IMAP connection errors, and storage permission issues."
+---
+
+When something goes wrong with SongketMail, the most efficient first step is always to check the logs. Container logs (`podman logs`), the systemd journal (`journalctl --user`), and the output of `systemctl --user status <unit>` together surface the vast majority of issues within seconds. Resist the temptation to change configuration before you have read the error message — most problems have a clear cause once the logs are in front of you.
+
+<Note>
+Always read the logs before making configuration changes. A misconfigured fix applied without understanding the root cause can mask the original error and create new ones. Run `podman logs --tail 50 <container-name>` and `journalctl --user -n 50 -u <unit-name>` as your first two commands whenever something is not behaving as expected.
+</Note>
+
+<AccordionGroup>
+
+<Accordion title="Services fail to start after reboot">
+**Cause:** systemd linger is not enabled for the `songketmail` user. Without linger, the user's systemd session — and all of its Quadlet services — only starts when the user logs in interactively. After a reboot with no active session, the containers remain stopped.
+
+**Fix:** Enable linger for the `songketmail` user:
+
+```bash
+sudo loginctl enable-linger songketmail
+```
+
+**Verify** that linger is now active:
+
+```bash
+loginctl show-user songketmail | grep Linger
+```
+
+The output should read `Linger=yes`. If it reads `Linger=no`, the command did not take effect — check that you ran it with sufficient privileges.
+
+After enabling linger, start the services manually for this boot cycle:
+
+```bash
+sudo -u songketmail -s
+systemctl --user start 'songketmail-*'
+```
+
+Future reboots will bring services up automatically.
+</Accordion>
+
+<Accordion title="systemctl --user commands fail with 'Failed to connect to bus'">
+**Cause:** The `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` environment variables are not set in your current shell. These variables tell systemd which user session D-Bus socket to connect to. Without them, `systemctl --user` cannot locate the `songketmail` session.
+
+**Fix — Option A:** Export the required variables in your current shell before running `systemctl --user`:
+
+```bash
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+```
+
+**Fix — Option B:** Switch into the `songketmail` user shell, which inherits the correct session environment automatically:
+
+```bash
+sudo -u songketmail -s
+```
+
+All subsequent `systemctl --user` and `podman` commands in that shell will operate against the correct user session without needing additional exports.
+
+**Verify** the session is reachable:
+
+```bash
+systemctl --user status
+```
+
+You should see a summary of the `songketmail` user session units rather than a bus connection error.
+</Accordion>
+
+<Accordion title="Mail is not being delivered">
+Start by establishing where in the delivery pipeline the message is getting stuck. SongketMail's mail flow moves from Postfix → Rspamd (milter) → Dovecot via LMTP. A failure at any stage will stop delivery.
+
+**Step 1 — Check Postfix logs** for SMTP acceptance and LMTP handoff errors:
+
+```bash
+podman logs --tail 100 songketmail-postfix
+```
+
+Look for `status=bounced`, `status=deferred`, or `Connection refused` to the LMTP port.
+
+**Step 2 — Check whether Rspamd is rejecting messages:**
+
+```bash
+podman logs --tail 100 songketmail-rspamd
+```
+
+A high spam score action of `reject` will stop delivery before it reaches Dovecot. Lower the reject threshold temporarily in your Rspamd configuration if legitimate mail is being refused.
+
+**Step 3 — Verify the mail queue** inside the Postfix container:
+
+```bash
+podman exec -it songketmail-postfix /bin/sh
+postqueue -p
+```
+
+A non-empty deferred queue with `Connection refused (port 24)` errors indicates that Postfix cannot reach Dovecot's LMTP listener.
+
+**Step 4 — Check Dovecot is accepting LMTP connections:**
+
+```bash
+podman logs --tail 100 songketmail-dovecot
+```
+
+Look for LMTP listener startup confirmation and any `Permission denied` or `Authentication failed` errors. Confirm that both containers are members of the same network (`songketmail-net`).
+</Accordion>
+
+<Accordion title="IMAP clients cannot connect">
+IMAP clients connect on port 993 (IMAPS). The connection path is: external client → BunkerWeb (port 993, SSL termination) → Dovecot (internal port 143 or directly on 993 depending on your proxy config).
+
+**Step 1 — Verify the host is listening on port 993:**
+
+```bash
+ss -tlnp | grep 993
+```
+
+If port 993 does not appear, BunkerWeb is not binding the port. Check that the proxy container is running:
+
+```bash
+podman ps --filter name=songketmail-proxy
+```
+
+**Step 2 — Check BunkerWeb proxy logs** for TLS or routing errors:
+
+```bash
+podman logs --tail 100 songketmail-proxy
+```
+
+Look for certificate errors, upstream connection failures, or explicit `deny` entries for IMAPS traffic.
+
+**Step 3 — Check Dovecot's IMAPS listener:**
+
+```bash
+podman logs --tail 100 songketmail-dovecot
+```
+
+Confirm the IMAPS listener started successfully and look for authentication backend errors (usually SSL certificate mismatches or missing `ssl_cert` / `ssl_key` configuration).
+
+**Step 4 — Test connectivity directly** from the host to confirm the port is reachable:
+
+```bash
+openssl s_client -connect localhost:993
+```
+
+A successful TLS handshake confirms the proxy and Dovecot are wired correctly. An immediate `Connection refused` confirms BunkerWeb is not binding the port.
+</Accordion>
+
+<Accordion title="Host storage shows nobody:nogroup ownership">
+**Cause:** The `UserNS=keep-id:uid=2001,gid=2001` directive is missing or misconfigured in the Quadlet definition files. Without this directive, Podman uses its default rootless UID remapping, which maps the internal UID `2001` to a high-range subuid on the host (typically in the `100000+` range). The host filesystem then displays those files as owned by `nobody:nogroup`.
+
+**Check the container Quadlet files** for the correct `UserNS` setting:
+
+```bash
+cat ~/.config/containers/systemd/songketmail-postfix.container | grep UserNS
+```
+
+The output must read:
+
+```ini
+UserNS=keep-id:uid=2001,gid=2001
+```
+
+If this line is missing or the UID/GID values differ, re-run the deployment playbook to regenerate the Quadlet from the correct template.
+
+**Verify** that the `songketmail` user exists with UID and GID `2001` on the host:
+
+```bash
+id songketmail
+```
+
+Expected output: `uid=2001(songketmail) gid=2001(songketmail) groups=2001(songketmail)`
+
+After correcting the Quadlet and restarting the services, newly written files will appear with `songketmail:songketmail` ownership. Existing files with the wrong ownership must be corrected manually with `chown -R 2001:2001 /var/srv/songketmail/`.
+</Accordion>
+
+<Accordion title="Roundcube shows a database error">
+Roundcube stores its session data and user preferences in a SQLite database inside `/var/srv/songketmail/roundcube/db/`. A database error at startup usually means either that directory is not writable by UID 2001, or the service needs a clean restart after a failed initialisation.
+
+**Step 1 — Check the directory permissions:**
+
+```bash
+ls -la /var/srv/songketmail/roundcube/db/
+```
+
+The directory and its contents must be owned by `2001:2001`. If they are not, fix ownership:
+
+```bash
+sudo chown -R 2001:2001 /var/srv/songketmail/roundcube/db/
+```
+
+**Step 2 — Restart the web service** to trigger a fresh initialisation attempt:
+
+```bash
+systemctl --user restart songketmail-web.service
+```
+
+**Step 3 — Check the container logs** for the specific database error:
+
+```bash
+podman logs --tail 50 songketmail-web
+```
+
+Look for `PDOException`, `SQLSTATE`, or `permission denied` messages. If Roundcube reports that the database file cannot be created, the fix is almost always the directory ownership correction above.
+</Accordion>
+
+<Accordion title="RustFS S3 not accessible">
+Dovecot writes mail bodies and attachments to RustFS via the S3 protocol on the internal fabric network. If RustFS is unreachable, mail delivery will stall at the Dovecot storage layer.
+
+**Step 1 — Confirm the container is running:**
+
+```bash
+podman ps --filter name=songketmail-s3
+```
+
+If it is absent from the output, check why it failed to start:
+
+```bash
+journalctl --user -n 50 -u songketmail-s3.service
+```
+
+**Step 2 — Verify that the required environment variable keys are present** without outputting secret values:
+
+```bash
+grep -E 'RUSTFS_ACCESS_KEY|RUSTFS_SECRET_KEY' ~/.config/containers/systemd/songketmail-s3.container | sed 's/=.*/=[REDACTED]/'
+```
+
+Both `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY` must be defined. If either key is missing, update `group_vars/all.yml` with the required vault parameters and re-run the playbook to regenerate the Quadlet.
+
+**Step 3 — Check the data directory permissions:**
+
+```bash
+ls -la /var/srv/songketmail/rustfs/data/
+```
+
+The directory must be owned by `2001:2001`. If it is owned by a different UID, RustFS will fail to initialise its storage backend on startup. Fix ownership with:
+
+```bash
+sudo chown -R 2001:2001 /var/srv/songketmail/rustfs/data/
+```
+
+Then restart the service:
+
+```bash
+systemctl --user restart songketmail-s3.service
+podman logs --tail 50 songketmail-s3
+```
+
+</Accordion>
+
+</AccordionGroup>
+
+## Getting Help
+
+If you have worked through the relevant accordion above and the issue persists, the following resources are available:
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/SongketMail/songketmail/issues">
+    Open a bug report or feature request on the SongketMail GitHub repository. Include the output of `podman logs <container>` and `journalctl --user -n 100 -u <unit>` in your report.
+  </Card>
+  <Card title="Architectural Blueprint" icon="map" href="/architecture-overview">
+    Review the full system architecture, network flow diagrams, and Quadlet configuration matrix to understand how each service connects to the others.
+  </Card>
+</CardGroup>

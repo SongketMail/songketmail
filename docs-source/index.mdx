@@ -1,14 +1,68 @@
 ---
-title: Welcome to SongketMail
-description: Enterprise-grade, highly secure, and horizontally scalable email server fabric.
+title: "SongketMail: Secure Self-Hosted Email Fabric"
+sidebarTitle: "Home"
+description: "SongketMail is an enterprise-grade, rootless email server stack orchestrated with Ansible and Podman 5+ Quadlets. Deploy secure, scalable mail services in minutes."
 ---
 
-# Welcome to SongketMail
+SongketMail gives you a complete, production-ready email server stack that runs entirely as unprivileged containers on your own infrastructure. Powered by Ansible automation and Podman 5+ Quadlets, it wires together seven hardened services — from SMTP ingress to webmail — with zero root dependencies and absolute storage sovereignty.
 
-SongketMail is an enterprise-grade email server fabric orchestrated via Ansible and Podman 5+ using systemd Quadlets.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/deployment/prerequisites">
+    Get your email fabric deployed in four steps: install prerequisites, configure inventory, run the playbook, and verify.
+  </Card>
+  <Card title="Architecture Overview" icon="sitemap" href="/architecture-overview">
+    Understand the seven-service fabric, network flows, and the Persistence Trinity that powers SongketMail.
+  </Card>
+  <Card title="Core Services" icon="server" href="/services/proxy-waf">
+    Explore BunkerWeb WAF, Postfix, Dovecot, Rspamd, Roundcube, RustFS, and PostgreSQL.
+  </Card>
+  <Card title="Security Model" icon="shield-halved" href="/security/rootless-containers">
+    Learn about rootless Podman, UID namespace mapping, and OS hardening with ASIMP.
+  </Card>
+</CardGroup>
 
-## Features
+## What's Inside
 
-- **Decoupled Architecture**: Rootless container services for Proxy, MTA, IMAP, DB, S3 Storage, Webmail, and Spam Filtering.
-- **Persistence Trinity**: Cluster-prefixed networks, systemd Quadlets, and node-isolated host storage.
-- **S3 Object Storage**: Dovecot Obox driver with RustFS backend and compressed message blocks.
+SongketMail assembles a battle-tested, open-source email stack into a single, declarative Ansible deployment. Every service runs rootless, on a dedicated bridge network, with host storage owned by a single unprivileged user.
+
+<CardGroup cols={3}>
+  <Card title="BunkerWeb WAF" icon="shield" href="/services/proxy-waf">
+    Hardened SSL ingress with Web Application Firewall and PROXY protocol client IP preservation.
+  </Card>
+  <Card title="Postfix + Dovecot" icon="envelope" href="/services/smtp-imap">
+    Full MTA/MDA stack with PostgreSQL virtual mailboxes and LMTP delivery.
+  </Card>
+  <Card title="Rspamd" icon="filter" href="/services/spam-filtering">
+    Policy-driven spam and virus filtering via milter integration.
+  </Card>
+  <Card title="Roundcube Webmail" icon="globe" href="/services/webmail">
+    Feature-rich browser-based mail client with persistent session storage.
+  </Card>
+  <Card title="RustFS S3 Storage" icon="database" href="/services/object-storage">
+    High-performance, Apache-licensed S3-compatible storage for mail bodies and attachments.
+  </Card>
+  <Card title="Operations Guide" icon="wrench" href="/operations/service-management">
+    Manage, monitor, back up, and troubleshoot your running fabric with systemd tooling.
+  </Card>
+</CardGroup>
+
+## How Deployment Works
+
+<Steps>
+  <Step title="Prepare your host">
+    Install Podman 5+ and Ansible 9+ on each target node. SongketMail handles all kernel tuning and user provisioning automatically.
+  </Step>
+  <Step title="Configure inventory and variables">
+    Add your server hostnames to `inventory/hosts.ini` and review `group_vars/all.yml` to set your cluster prefix, image tags, and storage paths.
+  </Step>
+  <Step title="Run the Ansible playbook">
+    Execute `ansible-playbook -i inventory/hosts.ini site.yml`. The playbook prepares the OS, deploys all Quadlet unit files, and starts every service.
+  </Step>
+  <Step title="Verify and access">
+    Check service status with `systemctl --user status`, then open the Roundcube webmail interface at your configured domain.
+  </Step>
+</Steps>
+
+<Note>
+  SongketMail runs all mail services as the unprivileged `songketmail` user (UID/GID 2001). Root access is only used for one-time host tuning tasks during initial setup.
+</Note>

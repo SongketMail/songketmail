@@ -1,0 +1,112 @@
+---
+title: "RustFS: S3 Object Storage for Mail and Attachments"
+sidebarTitle: "Object Storage"
+description: "SongketMail uses RustFS as its S3-compatible storage engine for mail bodies and attachments, delivering 2.3x MinIO performance with Apache 2.0 licensing."
+---
+
+Traditional mail servers write message bodies and attachments to local Maildir directories on the same host that runs the IMAP and SMTP processes. This tightly couples storage capacity to compute resources and creates a single point of failure. SongketMail breaks that coupling by routing all message payloads through an S3-compatible object storage cluster — Dovecot's obox plugin streams each message body directly to RustFS over the internal `songketmail-net` network while keeping lightweight index metadata on fast local NVMe storage. The result is an IMAP server that can grow your mail storage independently of the host disk, with message bodies compressed and durably stored in a purpose-built Rust binary that never touches a garbage collector.
+
+## Why RustFS over MinIO
+
+RustFS was selected after evaluating every major open-source S3-compatible engine. The table below summarises the key tradeoffs:
+
+| Software | Licence | Pros | Cons |
+|----------|---------|------|------|
+| **RustFS** | Apache-2.0 | Written in Rust — memory-safe by design; 2.3× faster than MinIO for 4 KB payloads; zero telemetry; GDPR-compliant; permissive business-friendly licence; strong edge and IoT support | Newer ecosystem; some advanced distributed features still under active testing |
+| **MinIO** | AGPL-3.0 | Extremely popular; rich UI; highly optimised S3 API compatibility | AGPL-3.0 copyleft risk for enterprise and SaaS use; heavy memory footprint under multi-bucket load; telemetry and external licence-server calls create data sovereignty concerns |
+| **SeaweedFS** | Apache-2.0 | Blazing fast for small files via a Haystack-like model; low metadata overhead | Less widely known; minimal UI dashboard |
+| **Garage S3** | AGPL-3.0 | Written in Rust; lightweight; designed for multi-region mesh replication | AGPL-3.0 licence; not suitable for multi-petabyte datasets |
+| **Ceph RADOS** | LGPL-2.1 | Enterprise standard; massive scalability; robust high-availability | Huge administrative overhead; requires dedicated disks and deep resource tuning |
+
+MinIO's AGPL-3.0 licence introduces a copyleft trap: any service that links against or wraps MinIO in a network-accessible product may be required to publish its source code. Combined with MinIO's mandatory telemetry calls to external licence servers — a compliance concern under GDPR, CCPA, and APPI — and its Go runtime's garbage-collection latency spikes under small-payload load, MinIO is unsuitable for a privacy-conscious, enterprise-grade deployment. RustFS eliminates all three problems under a permissive Apache 2.0 licence.
+
+## Dovecot to RustFS Integration
+
+Dovecot separates mail index metadata from message payloads. Indexes (the `dovecot.index` family) reside on high-speed host NVMe storage at `/var/srv/songketmail/dovecot/indexes`. Message bodies and attachments are handled by the **obox / s3** driver plugin, which streams payloads directly to RustFS at `songketmail-s3:9000`.
+
+Three performance mechanisms work in concert inside this pipeline:
+
+<Steps>
+  <Step title="Local fscache on NVMe (layer 1)">
+    A ring-buffer cache mounted from `/var/srv/songketmail/dovecot/cache` (recommended size: 512 MB) holds recently accessed message bodies on fast local storage. During active IMAP sync loops, Dovecot serves most reads from this cache rather than making round-trips to RustFS, dramatically reducing S3 API call volume.
+  </Step>
+  <Step title="Zstandard compression (layer 2)">
+    Before writing a message body to the S3 object, Dovecot's compress plugin encodes it with Zstandard at compression level 3 (`compress:zstd:3`). Zstandard offers near-LZ4 decompression speed with significantly better compression ratios, reducing both storage utilisation and network transfer overhead on every S3 PUT and GET.
+  </Step>
+  <Step title="Dispersion prefix hashing (layer 3)">
+    The S3 object key for each message is prefixed with the first 8 characters of an MD5 hash of the recipient's username (`%8Mu/%u/...`). This dispersion prefix prevents lexicographic object key clustering, allowing RustFS to distribute object listings and block-level I/O evenly across all storage disks rather than hotspotting on a single prefix shard.
+  </Step>
+</Steps>
+
+Configure the obox driver in `/var/srv/songketmail/dovecot/config/dovecot.conf`:
+
+```ini
+mail_location = obox:%8Mu/%u:INDEX=/var/vmail/indexes/%u:CONTROL=/var/vmail/indexes/%u
+
+plugin {
+  obox_fs = fscache:512M:/var/vmail/cache:compress:zstd:3:s3:http://songketmail-s3:9000/mail-bucket/
+  obox_index_fs = compress:zstd:3:s3:http://songketmail-s3:9000/mail-bucket/
+  fts_dovecot_fs = fts-cache:fscache:512M:/var/vmail/fts-cache:s3:http://songketmail-s3:9000/fts-bucket/
+
+  aws_access_key_id     = rustfs_admin
+  aws_secret_access_key = rustfs_secure_pass
+}
+```
+
+Replace `rustfs_admin` and `rustfs_secure_pass` with the values you set in the RustFS Quadlet environment variables.
+
+## RustFS Quadlet Configuration
+
+The full Quadlet unit file for the RustFS object storage service is shown below. Ansible renders `{{ cluster_prefix }}`, `{{ rustfs_image_tag }}`, and `{{ storage_base_path }}` from `group_vars/all.yml` at deployment time.
+
+```ini
+[Unit]
+Description=SongketMail Object Storage Container (RustFS S3-compatible Object Storage Engine)
+After=network-online.target
+
+[Container]
+ContainerName=songketmail-s3
+Image=docker.io/rustfs/rustfs:1.0.0
+Network=songketmail-net
+UserNS=keep-id:uid=2001,gid=2001
+Volume=/var/srv/songketmail/rustfs/data:/data:Z
+Environment=TZ=UTC
+Environment=RUSTFS_ACCESS_KEY=rustfs_admin
+Environment=RUSTFS_SECRET_KEY=rustfs_secure_pass
+Environment=RUSTFS_VOLUMES=/data
+Environment=RUSTFS_ADDRESS=:9000
+Environment=RUSTFS_CONSOLE_ADDRESS=:9001
+Label=fabric_cluster=songketmail
+Label=service_type=s3
+
+[Install]
+WantedBy=default.target
+```
+
+The key environment variables and their roles:
+
+| Variable | Example Value | Purpose |
+|----------|---------------|---------|
+| `RUSTFS_ACCESS_KEY` | `rustfs_admin` | S3 API access key ID used by Dovecot and any S3 clients |
+| `RUSTFS_SECRET_KEY` | `rustfs_secure_pass` | S3 API secret key — treat this like a root password |
+| `RUSTFS_VOLUMES` | `/data` | Comma-separated list of host directories RustFS manages as storage volumes |
+| `RUSTFS_ADDRESS` | `:9000` | S3 API listen address inside the container |
+| `RUSTFS_CONSOLE_ADDRESS` | `:9001` | Web console listen address inside the container |
+
+## Storage Paths
+
+RustFS stores all object data in the single host directory mapped into the container:
+
+| Host Path | Container Path | Contents |
+|-----------|---------------|---------|
+| `/var/srv/songketmail/rustfs/data` | `/data` | All S3 object data, bucket metadata, and erasure-coding shards |
+
+Because `UserNS=keep-id:uid=2001,gid=2001` maps the container process to UID/GID 2001 on the host, you can run `rsync`, `du`, and backup tools against `/var/srv/songketmail/rustfs/data` without elevated privileges.
+
+## RustFS Console
+
+RustFS exposes a browser-based management console on internal port **9001** inside `songketmail-net`. Use it to create buckets, browse objects, configure lifecycle policies, and manage access keys. Access it by adding a dedicated BunkerWeb reverse proxy entry pointing to `http://songketmail-s3:9001` and restricting it to trusted IP ranges.
+
+<Warning>
+Change `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY` away from the default values (`rustfs_admin` / `rustfs_secure_pass`) before your first deployment. These credentials grant full read and write access to every mail body and attachment stored in RustFS. Store the production values in Ansible Vault and never commit them to version control. Any process inside `songketmail-net` that knows these credentials can read or delete all mail data in the cluster.
+</Warning>

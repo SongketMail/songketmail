@@ -1,0 +1,120 @@
+---
+title: "SongketMail Network Ports and Protocol Reference Guide"
+sidebarTitle: "Network Ports"
+description: "Complete reference for all public and internal network ports used by SongketMail — inbound mail, webmail, management, and inter-service communication."
+---
+
+SongketMail distinguishes clearly between public-facing ports, which BunkerWeb exposes on the host network interface, and internal fabric ports, which are reachable only within the `songketmail-net` bridge network. This separation means your host firewall needs to permit only five core ports (plus UDP 443 for HTTP/3) for normal operation, while all inter-service communication — database queries, spam filtering, LMTP delivery, and object storage — remains invisible to the outside world.
+
+---
+
+## Public-Facing Ports
+
+These ports are bound directly on the host by the BunkerWeb proxy container via `PublishPort` directives in `proxy.container`. BunkerWeb applies WAF rules and SSL termination before forwarding traffic to the appropriate backend service inside the cluster network.
+
+| Port | Protocol | Service | Direction |
+|------|----------|---------|-----------|
+| 25 | TCP / SMTP | BunkerWeb → Postfix MTA | Inbound mail from the internet |
+| 80 | TCP / HTTP | BunkerWeb | HTTP to HTTPS redirect |
+| 443 | TCP & UDP / HTTPS & QUIC | BunkerWeb | Webmail and admin UI (HTTP/1.1, HTTP/2, HTTP/3) |
+| 587 | TCP / Submission | BunkerWeb → Postfix MSA | Authenticated client mail submission |
+| 993 | TCP / IMAPS | BunkerWeb → Dovecot | Mail client retrieval over TLS |
+| 8443 | TCP / JMAP | BunkerWeb → Dovecot | JMAP mail protocol endpoint (RFC 8620) |
+
+<Note>
+  Port 443 is bound as both TCP and UDP (`PublishPort=443:8443/udp`) to support HTTP/3 (QUIC) connections for webmail clients that negotiate it.
+</Note>
+
+---
+
+## Internal Fabric Ports
+
+These ports are bound inside containers within `songketmail-net` and are never published to the host. Containers resolve each other by name — for example, Postfix connects to `songketmail-dovecot:24` for LMTP delivery without any host-level routing.
+
+| Port | Service | Protocol | Purpose |
+|------|---------|----------|---------|
+| 24 | Dovecot | LMTP | Mail delivery from Postfix into Dovecot mail store |
+| 143 | Dovecot | IMAP | Unencrypted IMAP (internal use; TLS handled at BunkerWeb) |
+| 4190 | Dovecot | ManageSieve | Client Sieve filter script management |
+| 5432 | PostgreSQL | SQL | Virtual domain, user, and alias queries from Postfix and Dovecot |
+| 8080 | Roundcube | HTTP | Webmail HTTP served by Apache; reverse-proxied by BunkerWeb |
+| 9000 | RustFS | S3 API | Object storage API used by Dovecot for mail body and attachment storage |
+| 9001 | RustFS | HTTP | RustFS management console |
+| 9000 | Smallstep | HTTPS | ACMEv2 CA service for internal certificate automation |
+| 11333 | Rspamd | HTTP | Rspamd web dashboard for rule inspection and score tuning |
+| 11334 | Rspamd | Milter | Spam filtering milter endpoint consumed by Postfix |
+
+<Note>
+  Do not expose internal fabric ports through your host firewall or a public reverse proxy
+  without additional authentication controls. These ports assume a trusted network context
+  inside `songketmail-net` and do not enforce TLS between containers by default.
+</Note>
+
+---
+
+## Firewall Configuration
+
+Configure your host firewall to allow public-facing ports (including UDP 443 for HTTP/3/QUIC) before starting the SongketMail fabric. The following example uses UFW, which is available on Ubuntu and Debian-based hosts.
+
+```bash
+ufw allow 25/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 443/udp
+ufw allow 587/tcp
+ufw allow 993/tcp
+ufw allow 8443/tcp
+ufw enable
+```
+
+Verify your active rules after enabling UFW:
+
+```bash
+ufw status verbose
+```
+
+If you are running on a host that uses `firewalld` instead, add the equivalent service rules:
+
+```bash
+firewall-cmd --permanent --add-port=25/tcp
+firewall-cmd --permanent --add-port=80/tcp
+firewall-cmd --permanent --add-port=443/tcp
+firewall-cmd --permanent --add-port=443/udp
+firewall-cmd --permanent --add-port=587/tcp
+firewall-cmd --permanent --add-port=993/tcp
+firewall-cmd --permanent --add-port=8443/tcp
+firewall-cmd --reload
+```
+
+<Warning>
+  Port 25 (SMTP) is blocked outbound by most cloud providers and residential ISPs to
+  prevent spam. Confirm that your hosting provider permits outbound port 25 before
+  deploying SongketMail. Many providers offer a formal unblocking request process for
+  legitimate mail server operators.
+</Warning>
+
+---
+
+## Network Subnet Configuration
+
+The default cluster subnet is `10.89.0.0/16`, defined by `podman_network_subnet` in `group_vars/all.yml`. Podman uses the `10.89.0.0/16` range by default for rootless networks, making this value safe for most single-server deployments.
+
+To change the subnet — for example, if `10.89.0.0/16` conflicts with an existing network on your host — update the variable before running the provisioning playbook:
+
+```yaml
+# group_vars/all.yml
+podman_network_subnet: "10.91.0.0/16"
+```
+
+Re-run the playbook to recreate the network unit with the new CIDR:
+
+```bash
+ansible-playbook -i inventory/hosts.yml site.yml
+```
+
+<Tip>
+  If you change `podman_network_subnet` on a host that already has running containers,
+  you must stop all SongketMail services, delete the existing Podman network
+  (`podman network rm songketmail-net`), and then re-run the playbook to recreate the
+  network with the updated subnet before restarting services.
+</Tip>

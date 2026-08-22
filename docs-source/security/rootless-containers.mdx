@@ -1,0 +1,115 @@
+---
+title: "Rootless Podman Container Security for SongketMail"
+sidebarTitle: "Rootless Containers"
+description: "SongketMail runs all mail services as unprivileged containers using Podman 5+ Quadlets and systemd user sessions, eliminating root daemon exposure."
+---
+
+Running a mail server as a root-owned daemon is one of the most common vectors for full host compromise — a single exploited vulnerability in Postfix or Dovecot can yield a root shell. SongketMail eliminates this exposure entirely by deploying every service as a rootless Podman container managed by a dedicated unprivileged system account. There is no Docker daemon, no root-owned container process, and no `sudo` required for day-to-day operations. All service lifecycle management flows through standard `systemctl --user` commands backed by Podman 5+ Quadlets.
+
+## How Podman Quadlets Work
+
+Podman 5+ introduces **Quadlets** — a declarative, file-based approach to defining containers, networks, and volumes as native systemd units. You place `.container` and `.network` files inside `~/.config/containers/systemd/` for the target user account. On the next daemon reload, the `podman-systemd-generator` reads those files and produces fully functional systemd unit files, wiring container lifecycle directly into systemd's supervision tree.
+
+This design means containers start on boot, restart on failure, and log to journald — all without any background daemon holding a root socket. The generator runs as a standard systemd unit generator, and because it operates entirely within the user session, the kernel never grants elevated privileges.
+
+<Note>
+Rootless Podman is fundamentally different from rootful Docker. Docker requires a persistent root-owned daemon (`dockerd`) that all container commands route through. Rootless Podman has no daemon at all — each `podman` invocation is an unprivileged process that uses Linux user namespace kernel features directly. This means a compromised container process can only ever reach the privileges of the `songketmail` system account, not root.
+</Note>
+
+## The songketmail User
+
+The Ansible playbook creates a dedicated non-privileged system account — `songketmail` — with a fixed UID and GID of **2001**. Every container service in the fabric runs under this identity. The user's home directory is `/home/songketmail`, and its shell is `/bin/bash` to support Ansible's `become_user` task delegation.
+
+```yaml
+songketmail_user: "songketmail"
+songketmail_uid: 2001
+songketmail_gid: 2001
+songketmail_home: "/home/{{ songketmail_user }}"
+```
+
+Because mail services must survive SSH session disconnections and host reboots, the playbook enables **systemd linger** for this account. Linger instructs systemd to start the user's session manager at boot time and keep it running even when no interactive session is open.
+
+```bash
+loginctl enable-linger songketmail
+```
+
+Once linger is enabled, the file `/var/lib/systemd/linger/songketmail` is created on the host. The Ansible task uses `creates:` to make this operation idempotent — re-running the playbook never re-executes the command if that file already exists.
+
+## Systemd User Session Requirements
+
+Interacting with a rootless systemd user session requires two environment variables to be set correctly. Without them, `systemctl --user` commands fail with a "connection refused" or "no such file" error, even when run as the correct user.
+
+**`XDG_RUNTIME_DIR`** tells systemd and D-Bus where to find the user's runtime socket directory. For UID 2001, this path is `/run/user/2001`. The directory is created automatically by `systemd-logind` when the user session starts (or when linger is active).
+
+**`DBUS_SESSION_BUS_ADDRESS`** points the D-Bus client library to the user-level message bus socket. Systemd's control interface requires a valid D-Bus connection to authenticate and route `systemctl` API calls for unprivileged sessions.
+
+Set both variables before running any user-scoped systemd commands:
+
+```bash
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+```
+
+In the SongketMail Ansible playbook, all tasks that target the `songketmail` user session define these variables explicitly via the task `environment:` key, so you never need to set them manually during automated deployment.
+
+<Tip>
+To manage services interactively as the `songketmail` user, switch to that account and set the variables in one step:
+
+```bash
+sudo -i -u songketmail
+export XDG_RUNTIME_DIR="/run/user/2001"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/2001/bus"
+systemctl --user list-units 'songketmail-*'
+```
+</Tip>
+
+## Quadlet File Locations
+
+The `podman-systemd-generator` scans a fixed search path within the user's home directory. All SongketMail Quadlet definitions are deployed to:
+
+```text
+/home/songketmail/.config/containers/systemd/
+```
+
+The fabric is composed of Quadlet files attached directly to the bridge network:
+
+| File | Type | Purpose |
+|---|---|---|
+| `songketmail-net.network` | Network | Defines the isolated internal container bridge network |
+| `songketmail-{service}.container` | Container | One file per service (postfix, dovecot, proxy, db, etc.) |
+
+### Example: Container Quadlet (`songketmail-postfix.container`)
+
+Each service has its own `.container` file attached directly to `songketmail-net.network`. The Postfix container mounts two host directories for configuration and spool data. The `:Z` SELinux label flag ensures the container has correct access to the bind-mounted volumes.
+
+```ini
+[Container]
+ContainerName=songketmail-postfix
+Network=songketmail-net.network
+Image=docker.io/library/postfix:3.9.0
+Volume=/var/srv/songketmail/postfix/config:/etc/postfix:Z
+Volume=/var/srv/songketmail/postfix/spool:/var/spool/postfix:Z
+UserNS=keep-id:uid=2001,gid=2001
+
+[Service]
+Restart=always
+```
+
+After placing these files and running `systemctl --user daemon-reload`, systemd generates the corresponding unit files and makes them available for management. You can then start, stop, enable, and inspect the entire mail fabric without ever invoking `sudo`.
+
+<Tip>
+Use `systemctl --user` for all day-to-day service management as the `songketmail` user:
+
+```bash
+# Check status of all SongketMail units
+systemctl --user status 'songketmail-*'
+
+# Restart the Postfix container
+systemctl --user restart songketmail-postfix.service
+
+# View real-time container logs
+journalctl --user -u songketmail-postfix.service -f
+```
+
+All output flows through journald, giving you a unified log stream for every service in the fabric.
+</Tip>
