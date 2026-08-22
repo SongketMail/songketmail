@@ -3,9 +3,9 @@
 scripts/sync_docs.py - Documentation Sync Pipeline Script
 
 Clones the target docs repository (songketmail/songketmail-product-pages),
-validates source content and docs.json navigation integrity, wipes downstream
-docs content while preserving the .git folder, copies updated Mintlify documentation
-from docs-source/, and commits/pushes changes back.
+validates source content and docs.json navigation integrity, checks deletion caps,
+wipes downstream docs content while preserving the .git folder, copies updated
+Mintlify documentation from docs-source/, and commits/pushes changes back.
 """
 
 import argparse
@@ -13,6 +13,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -61,7 +62,7 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
-    """Validates source documentation directory, docs.json, file count, and navigation targets."""
+    """Validates source documentation directory, docs.json, file count, navigation targets, and reports orphans."""
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
 
@@ -70,6 +71,8 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
         raise ValueError(f"Required configuration file '{docs_json_path}' is missing.")
 
     files = [f for f in source_dir.rglob("*") if f.is_file()]
+    mdx_files = [f for f in files if f.suffix == ".mdx"]
+
     if len(files) < min_files:
         raise ValueError(
             f"Source directory '{source_dir}' contains {len(files)} file(s), "
@@ -92,7 +95,48 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
             f"Navigation in '{docs_json_path}' references page(s) that do not exist: {missing_str}"
         )
 
+    # Orphan .mdx detection warning
+    referenced_set = set()
+    for p in referenced_pages:
+        referenced_set.add(p)
+        referenced_set.add(f"{p}.mdx")
+
+    for mdx_file in mdx_files:
+        rel_path = mdx_file.relative_to(source_dir)
+        rel_str = str(rel_path)
+        stem_str = str(rel_path.with_suffix(""))
+        if rel_str not in referenced_set and stem_str not in referenced_set:
+            print(f"Warning: Orphan MDX file found (not referenced in docs.json navigation): {rel_path}")
+
     return files
+
+
+def compute_file_diff(target_dir: Path, source_dir: Path):
+    """Computes file-level diff lists: files_added, files_modified, files_deleted."""
+    target_files = {
+        f.relative_to(target_dir): f
+        for f in target_dir.rglob("*")
+        if f.is_file() and ".git" not in f.parts
+    }
+    source_files = {
+        f.relative_to(source_dir): f
+        for f in source_dir.rglob("*")
+        if f.is_file()
+    }
+
+    files_added = [rel for rel in source_files if rel not in target_files]
+    files_deleted = [rel for rel in target_files if rel not in source_files]
+    files_modified = []
+
+    for rel in source_files:
+        if rel in target_files:
+            try:
+                if source_files[rel].read_bytes() != target_files[rel].read_bytes():
+                    files_modified.append(rel)
+            except Exception:
+                files_modified.append(rel)
+
+    return files_added, files_modified, files_deleted
 
 
 def parse_args(args=None):
@@ -119,12 +163,25 @@ def parse_args(args=None):
     parser.add_argument(
         "--min-files",
         type=int,
-        default=5,
-        help="Minimum required file count in source directory (default: 5)",
+        default=int(os.environ.get("MIN_MDX_FILES") or os.environ.get("MIN_FILES") or "5"),
+        help="Minimum required file count in source directory (default: 5 or MIN_MDX_FILES env)",
+    )
+    parser.add_argument(
+        "--max-deletions",
+        type=int,
+        default=int(os.environ.get("MAX_DELETIONS") or "10"),
+        help="Maximum allowed deletion count before requiring explicit override (default: 10 or MAX_DELETIONS env)",
+    )
+    parser.add_argument(
+        "--allow-large-deletions",
+        action="store_true",
+        default=os.environ.get("ALLOW_LARGE_DELETIONS", "").lower() in ("true", "1", "yes"),
+        help="Override deletion cap when deleting more than max-deletions files",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
+        default=os.environ.get("DRY_RUN", "").lower() in ("true", "1", "yes"),
         help="Validate source and preview changes without modifying downstream repository",
     )
     return parser.parse_args(args)
@@ -137,9 +194,11 @@ def main(cli_args=None):
     target_repo = parsed_args.target_repo
     branch = parsed_args.branch
     min_files = parsed_args.min_files
+    max_deletions = parsed_args.max_deletions
+    allow_large_deletions = parsed_args.allow_large_deletions
     dry_run = parsed_args.dry_run
 
-    # Safety Guard Validation Check
+    # Guard A, B, C Validation Checks
     source_files = validate_source_docs(source_dir, min_files=min_files)
 
     if dry_run:
@@ -147,7 +206,8 @@ def main(cli_args=None):
         print(f"Source Directory: {source_dir} ({len(source_files)} files verified)")
         print(f"Target Repository: {target_repo} (branch: {branch})")
         print(f"Minimum File Floor Threshold: {min_files}")
-        print("Safety guards passed successfully! No downstream modifications performed.")
+        print(f"Max Allowed Deletions Threshold: {max_deletions} (Allow Large Deletions: {allow_large_deletions})")
+        print("Safety guards A, B, C passed successfully! No downstream modifications performed.")
         return
 
     token = os.environ.get("DOCS_REPO_TOKEN")
@@ -173,9 +233,23 @@ def main(cli_args=None):
         url = f"https://github.com/{target_repo}.git"
         run(["git", "clone", "--branch", branch, url, str(tmp)], env=git_env)
 
-        # Print Pre-Wipe Summary
-        existing_items = [item for item in tmp.iterdir() if item.name != ".git"]
-        print(f"Pre-wipe check: target repository has {len(existing_items)} top-level items.")
+        # Guard D: Diff Preview & Deletion Cap Check
+        added, modified, deleted = compute_file_diff(tmp, source_dir)
+        print(f"Diff Summary: {len(added)} added, {len(modified)} modified, {len(deleted)} deleted.")
+        if added:
+            print(f"Files to add ({len(added)}):", [str(a) for a in added[:5]])
+        if modified:
+            print(f"Files to modify ({len(modified)}):", [str(m) for m in modified[:5]])
+        if deleted:
+            print(f"Files to delete ({len(deleted)}):", [str(d) for d in deleted[:5]])
+
+        if len(deleted) > max_deletions and not allow_large_deletions:
+            raise ValueError(
+                f"Deletion cap exceeded: {len(deleted)} file(s) would be deleted, "
+                f"which exceeds the maximum allowed threshold of {max_deletions}. "
+                "Set ALLOW_LARGE_DELETIONS=true to override."
+            )
+
         print(f"Wiping target repository and copying {len(source_files)} files from {source_dir}...")
 
         # Wipe old docs content (keep .git)

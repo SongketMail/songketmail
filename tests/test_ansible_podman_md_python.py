@@ -508,6 +508,36 @@ def test_sync_docs_dry_run_mode_success():
         sync_docs.main(["--dry-run"])
 
 
+def test_sync_docs_deletion_cap_exceeded_raises_value_error():
+    """Verifies sync_docs.main() raises ValueError if deletion count exceeds max_deletions cap."""
+    import pytest
+    from scripts import sync_docs
+    from pathlib import Path
+
+    mock_target = MagicMock()
+    mock_target.exists.return_value = True
+
+    # Return 15 target files to trigger deletion cap (since source has 0 target matches)
+    target_items = [MagicMock(is_file=lambda: True, parts=["file_" + str(i)], relative_to=lambda t, i=i: Path(f"target_file_{i}.mdx")) for i in range(15)]
+    mock_target.rglob.return_value = target_items
+
+    with patch.dict(os.environ, {"DOCS_REPO_TOKEN": "test_token_123"}), \
+         patch("scripts.sync_docs.Path") as mock_path, \
+         patch("scripts.sync_docs.run"), \
+         patch("scripts.sync_docs.shutil.rmtree"), \
+         patch("scripts.sync_docs.validate_source_docs", return_value=[Path("docs-source/docs.json")]), \
+         patch("scripts.sync_docs.compute_file_diff", return_value=([], [], [Path(f"del_{i}.mdx") for i in range(15)])):
+
+        def path_side_effect(arg):
+            if str(arg) == "/tmp/docs-repo":
+                return mock_target
+            return Path(arg)
+
+        mock_path.side_effect = path_side_effect
+        with pytest.raises(ValueError, match="Deletion cap exceeded"):
+            sync_docs.main([])
+
+
 @patch("scripts.sync_docs.run")
 @patch("scripts.sync_docs.shutil.rmtree")
 @patch("scripts.sync_docs.shutil.copytree")

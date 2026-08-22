@@ -5,6 +5,24 @@ on:
     branches: [main]
     paths:
       - "docs-source/**"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (validate only, do not commit/push)"
+        type: boolean
+        default: true
+      allow_large_deletions:
+        description: "Allow deleting more than max_deletions threshold"
+        type: boolean
+        default: false
+      min_mdx_files:
+        description: "Minimum required MDX files threshold"
+        type: string
+        default: "5"
+      max_deletions:
+        description: "Maximum allowed deletion threshold"
+        type: string
+        default: "10"
 
 concurrency:
   group: sync-docs-${{ github.ref }}
@@ -25,4 +43,8 @@ jobs:
       - name: Sync docs
         env:
           DOCS_REPO_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+          ALLOW_LARGE_DELETIONS: ${{ inputs.allow_large_deletions || false }}
+          MIN_MDX_FILES: ${{ inputs.min_mdx_files || '5' }}
+          MAX_DELETIONS: ${{ inputs.max_deletions || '10' }}
         run: python scripts/sync_docs.py
