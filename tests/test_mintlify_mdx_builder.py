@@ -3,9 +3,8 @@
 tests/test_mintlify_mdx_builder.py - Unit test suite for tools/build_mintlify_mdx.py
 """
 
-import sys
 import os
-from pathlib import Path
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

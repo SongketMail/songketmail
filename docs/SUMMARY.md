@@ -40,6 +40,7 @@ topics: [summary, index, navigation]
 * [Part 26: FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)
 * [Part 27: Documentation Sync Pipeline & GitHub Actions Setup Guide](docs-sync-pipeline-guide.md)
 * [Part 28: Persistent Volume (PV) Storage Server Setup for RKE2](rke2-pv-storage-setup.md)
+* [Part 29: NFS v4.2 and Ceph RBD Performance Tuning Guide](nfs-ceph-performance-tuning.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*

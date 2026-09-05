@@ -9,7 +9,7 @@ and Python utility helper functions inside scripts/.
 import os
 import re
 import sys
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, mock_open, patch
 
 # Add the project root to sys.path so that 'scripts' module can be imported cleanly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -61,7 +61,7 @@ def test_ansible_playbooks_yaml_validity():
 
     for filepath in yaml_files:
         # Check basic bracket/brace and colon formatting of YAML structure
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             lines = f.readlines()
 
         # Verify document contains basic structure (e.g. YAML separator or indented lists/maps)
@@ -110,7 +110,7 @@ def test_ansible_playbooks_fqcn_compliance():
         if "group_vars" in filepath or "defaults" in filepath:
             continue
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             task_indent = None
             module_indent = None
 
@@ -118,9 +118,6 @@ def test_ansible_playbooks_fqcn_compliance():
                 stripped = line.strip()
                 if not stripped or stripped.startswith('#'):
                     continue
-
-                # Compute current line indentation
-                current_indent = len(line) - len(line.lstrip())
 
                 # Check if it starts a new list item (typically starts a task)
                 m_task = pattern_task_item.match(line)
@@ -172,7 +169,7 @@ def test_podman_quadlet_sections_and_syntax():
     assert len(quadlet_files) > 0, "No Podman Quadlet template files found."
 
     for filepath in quadlet_files:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
 
         # Quadlet files must have at least one valid systemd section header
@@ -189,7 +186,7 @@ def test_podman_quadlet_keep_id_mapping():
     pod_template = "roles/podman_quadlet/templates/skm_pod.pod"
     assert os.path.exists(pod_template), "skm_pod.pod template file not found."
 
-    with open(pod_template, 'r', encoding='utf-8') as f:
+    with open(pod_template, encoding='utf-8') as f:
         content = f.read()
 
     # The UserNS keep-id mapping directive must be defined
@@ -213,7 +210,7 @@ def test_podman_quadlet_no_hardcoded_passwords():
     for filepath in quadlet_files:
         if not filepath.endswith('.container'):
             continue
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             for line_num, line in enumerate(f, 1):
                 m = password_env_pattern.search(line)
                 if m:
@@ -233,7 +230,7 @@ def test_markdown_okf_standard():
     assert len(md_files) > 0, "No Markdown documentation files found."
 
     for filepath in md_files:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, encoding='utf-8', errors='ignore') as f:
             content = f.read().strip()
 
         # Must start with frontmatter block
@@ -268,7 +265,7 @@ def test_markdown_footer_compliance():
     """
     md_files = get_markdown_files()
     for filepath in md_files:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, encoding='utf-8', errors='ignore') as f:
             content = f.read()
 
         # The document should end with licensing and constitution references
@@ -399,7 +396,7 @@ def test_agent_skills_compliance():
         skill_md_path = os.path.join(skill_path, "SKILL.md")
         assert os.path.exists(skill_md_path), f"SKILL.md not found for skill '{skill}'."
 
-        with open(skill_md_path, "r", encoding="utf-8") as f:
+        with open(skill_md_path, encoding="utf-8") as f:
             content = f.read().strip()
 
         # Check frontmatter
@@ -437,6 +434,7 @@ def test_agent_skills_compliance():
 def test_sync_docs_missing_token_raises_value_error():
     """Verifies sync_docs.main() raises ValueError when DOCS_REPO_TOKEN is unset."""
     import pytest
+
     from scripts import sync_docs
 
     with patch.dict(os.environ, {}, clear=True):
@@ -447,6 +445,7 @@ def test_sync_docs_missing_token_raises_value_error():
 def test_sync_docs_missing_source_dir_raises_value_error(tmp_path):
     """Verifies validate_source_docs raises ValueError if source_dir does not exist."""
     import pytest
+
     from scripts import sync_docs
 
     non_existent_dir = tmp_path / "non_existent_source"
@@ -457,6 +456,7 @@ def test_sync_docs_missing_source_dir_raises_value_error(tmp_path):
 def test_sync_docs_missing_docs_json_raises_value_error(tmp_path):
     """Verifies validate_source_docs raises ValueError if docs.json is missing."""
     import pytest
+
     from scripts import sync_docs
 
     source_dir = tmp_path / "empty_source"
@@ -467,8 +467,10 @@ def test_sync_docs_missing_docs_json_raises_value_error(tmp_path):
 
 def test_sync_docs_file_count_below_floor_raises_value_error(tmp_path):
     """Verifies validate_source_docs raises ValueError if file count is below min_files."""
-    import pytest
     import json
+
+    import pytest
+
     from scripts import sync_docs
 
     source_dir = tmp_path / "sparse_source"
@@ -482,8 +484,10 @@ def test_sync_docs_file_count_below_floor_raises_value_error(tmp_path):
 
 def test_sync_docs_unresolved_nav_page_raises_value_error(tmp_path):
     """Verifies validate_source_docs raises ValueError if a page in docs.json fails to resolve."""
-    import pytest
     import json
+
+    import pytest
+
     from scripts import sync_docs
 
     source_dir = tmp_path / "missing_page_source"
@@ -501,8 +505,9 @@ def test_sync_docs_unresolved_nav_page_raises_value_error(tmp_path):
 
 def test_sync_docs_dry_run_mode_success():
     """Verifies sync_docs.main(["--dry-run"]) passes validation with token and dry-run flag."""
-    from scripts import sync_docs
     from pathlib import Path
+
+    from scripts import sync_docs
 
     mock_target = MagicMock()
     mock_target.exists.return_value = True
@@ -525,9 +530,11 @@ def test_sync_docs_dry_run_mode_success():
 
 def test_sync_docs_deletion_cap_exceeded_raises_value_error():
     """Verifies sync_docs.main() raises ValueError if deletion count exceeds max_deletions cap."""
-    import pytest
-    from scripts import sync_docs
     from pathlib import Path
+
+    import pytest
+
+    from scripts import sync_docs
 
     mock_target = MagicMock()
     mock_target.exists.return_value = True
@@ -559,8 +566,9 @@ def test_sync_docs_deletion_cap_exceeded_raises_value_error():
 @patch("subprocess.run")
 def test_sync_docs_main_success_flow(mock_sub_run, mock_copytree, mock_rmtree, mock_run):
     """Verifies sync_docs.main() cloning, copying, committing, and pushing workflow."""
-    from scripts import sync_docs
     from pathlib import Path
+
+    from scripts import sync_docs
 
     mock_diff_res = MagicMock()
     mock_diff_res.returncode = 1

@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Guide: Setting up GitHub Pages for SongketMail — SongketMail :: LAB</title>
+    <title>NFS v4.2 and Ceph RBD Performance Tuning Guide — SongketMail :: LAB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -57,7 +57,7 @@
                     <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
                 </div>
                 <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
-                    Deep Research // Topic 9b: GitHub Pages Deployment Automation
+                    Deep Research // Topic 29: NFS v4.2 & Ceph RBD Performance Tuning Guide
                 </div>
             </div>
 
@@ -140,7 +140,7 @@
                         <span>🌐</span>
                         <span>9a. Jekyll Site Creation</span>
                     </a>
-                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
                         <span>⚙️</span>
                         <span>9b. GH Pages Automation</span>
                     </a>
@@ -212,7 +212,7 @@
                         <span>💾</span>
                         <span>28. RKE2 PV Storage Setup</span>
                     </a>
-                    <a href="nfs-ceph-performance-tuning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                    <a href="nfs-ceph-performance-tuning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
                         <span>⚡</span>
                         <span>29. NFS & Ceph Performance</span>
                     </a>
@@ -240,116 +240,97 @@
 
         <!-- Column 2: Center Main Content Area (span 6) -->
         <section class="lg:col-span-6 space-y-8">
-<!-- Intro -->
-        <div class="prose prose-invert max-w-none text-slate-300">
-            <p class="text-lg leading-relaxed">
-                This repository includes pre-built static assets inside the <code>docs/</code> directory and an automated deployment pipeline. You can choose to deploy your site using two methods: automated <strong>GitHub Actions</strong> or manual <strong>Direct Branch Deployment</strong>.
-            </p>
-        </div>
+<section class="space-y-6">
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    🚀 NFS v4.2 & Ceph RBD Performance Tuning Guide
+                </h1>
 
-        <!-- Method 1 -->
-        <section id="method-actions" class="scroll-mt-24 space-y-6">
-            <h2 id="method-1-automated-github-actions-deployment-recommended" class="text-2xl font-bold text-white flex items-center gap-2">
-                <span class="px-2.5 py-0.5 text-sm bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">Method 1</span>
-                Automated GitHub Actions Deployment (Recommended)
-            </h2>
-            <p class="text-slate-300">
-                This repository includes a predefined, production-ready workflow in <code>.github/workflows/deploy-pages.yml</code> that builds and deploys your static pages securely and natively via GitHub Actions on every push.
-            </p>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    This guide provides an enterprise-grade performance tuning specification for NFS v4.2 server/client configurations and Ceph RADOS Block Device (RBD) burst IOPS benchmarking against NVMe pools on Proxmox VE hypervisor nodes.
+                </p>
 
-            <div class="space-y-6 mt-6">
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500 text-blue-400 font-bold mr-4 text-sm">1</span>
-                    <div>
-                        <strong class="text-slate-200">Enable Workflow Permissions</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Go to your GitHub repository -> <strong>Settings</strong> -> <strong>Actions</strong> -> <strong>General</strong>. Scroll to <strong>Workflow permissions</strong>, select <strong>Read and write permissions</strong>, and click <strong>Save</strong>.
-                        </p>
-                    </div>
-                </div>
+                <hr class="border-slate-200 dark:border-slate-800" />
 
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500 text-blue-400 font-bold mr-4 text-sm">2</span>
-                    <div>
-                        <strong class="text-slate-200">Configure Build Source</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Go to <strong>Settings</strong> -> <strong>Pages</strong>. Under <strong>Build and deployment</strong>, set <strong>Source</strong> to <strong>GitHub Actions</strong>.
-                        </p>
-                    </div>
-                </div>
+                <h2 id="executive-summary-architecture-overview">⚡ Executive Summary & Architecture Overview</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    High-throughput email servers, container orchestrators, and database workloads demand low latency and high concurrent IOPS. Optimizing Linux storage stacks requires a multi-layered approach:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-base text-slate-600 dark:text-slate-300 pl-4">
+                    <li><strong>NFS v4.2 Protocol Tuning</strong>: Utilizing modern kernel capabilities such as <code>nconnect</code> TCP stream multiplexing, <code>noatime</code> inode access optimization, 1MB block transfers (<code>rsize=1048576,wsize=1048576</code>), and elevated Sun RPC slot capacity (<code>sunrpc.tcp_slot_table_entries=128</code>).</li>
+                    <li><strong>Ceph RBD NVMe Pool Optimization</strong>: Leveraging direct <code>librbd</code> or <code>ioengine=libaio</code> with <code>fio</code> benchmarking to measure 4K burst IOPS and 1M sequential throughput across Proxmox VE storage clusters.</li>
+                    <li><strong>Client-Side FS-Cache Integration</strong>: Utilizing <code>cachefilesd</code> under modern Linux Kernel 5.17+ re-architected caching layers to eliminate network round-trips for read-heavy operations.</li>
+                </ul>
 
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500 text-blue-400 font-bold mr-4 text-sm">3</span>
-                    <div>
-                        <strong class="text-slate-200">Push to Trigger</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Push any commit to <code>main</code> or <code>master</code>. Alternatively, navigate to the <strong>Actions</strong> tab, click <strong>Deploy GitHub Pages</strong>, and run the workflow manually.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
+                <hr class="border-slate-200 dark:border-slate-800" />
 
-        <!-- Method 2 -->
-        <section id="method-branch" class="scroll-mt-24 space-y-6">
-            <h2 id="method-2-direct-branch-deployment-docs-folder" class="text-2xl font-bold text-white flex items-center gap-2">
-                <span class="px-2.5 py-0.5 text-sm bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded">Method 2</span>
-                Direct Branch Deployment (`/docs` folder)
-            </h2>
-            <p class="text-slate-300">
-                If you prefer not to use workflows and want GitHub to serve files directly from a static folder on your branch:
-            </p>
+                <h2 id="1-nfs-server-client-sysctl-kernel-tuning">🖥️ 1. NFS Server & Client Sysctl Kernel Tuning</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    To eliminate network socket buffering bottlenecks and maximize concurrent Remote Procedure Call (RPC) request capacity, apply the following sysctl parameters across NFS Server and Client nodes:
+                </p>
 
-            <div class="space-y-6 mt-6">
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500 text-indigo-400 font-bold mr-4 text-sm">1</span>
-                    <div>
-                        <strong class="text-slate-200">Push the Directory</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Ensure the <code>docs/</code> folder containing <code>index.html</code> is pushed to your default branch.
-                        </p>
-                    </div>
-                </div>
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+# --- Memory & I/O Optimizations ---
+vm.max_map_count = 262144
+vm.overcommit_memory = 1
+vm.swappiness = 10
+vm.dirty_bytes = 629145600
+vm.dirty_background_bytes = 314572800
+vm.vfs_cache_pressure = 200
+fs.file-max = 65536000
+fs.inotify.max_user_watches = 500000
+fs.aio-max-nr = 1000000
 
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500 text-indigo-400 font-bold mr-4 text-sm">2</span>
-                    <div>
-                        <strong class="text-slate-200">Configure Pages settings</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Navigate to <strong>Settings</strong> -> <strong>Pages</strong>. Under <strong>Build and deployment</strong>, select <strong>Deploy from a branch</strong> as the Source.
-                        </p>
-                    </div>
-                </div>
+# --- TCP/IP Network Stack Optimizations ---
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+net.ipv4.tcp_notsent_lowat = 16384
+net.core.rmem_max = 134217728
+net.core.wmem_max = 134217728
+net.ipv4.tcp_rmem = 4096 87380 67108864
+net.ipv4.tcp_wmem = 4096 65536 67108864
+net.ipv4.tcp_mtu_probing = 1
+net.core.somaxconn = 2147483647
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_max_syn_backlog = 3240000
 
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500 text-indigo-400 font-bold mr-4 text-sm">3</span>
-                    <div>
-                        <strong class="text-slate-200">Select Branch and Folder</strong>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Set Branch to your target branch (e.g. <code>main</code>), select the folder dropdown as <strong><code>/docs</code></strong>, and click <strong>Save</strong>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
+# --- Sun RPC Slot Table Optimization ---
+sunrpc.tcp_slot_table_entries = 128
+                </pre>
 
-        <!-- Troubleshooting -->
-        <section id="troubleshooting" class="scroll-mt-24 space-y-6 bg-slate-950 p-6 rounded-xl border border-slate-800">
-            <h2 id="troubleshooting-tips" class="text-xl font-bold text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                Troubleshooting Tips
-            </h2>
-            <div class="space-y-4 text-sm text-slate-300">
-                <div>
-                    <h4 class="font-bold text-slate-100">Site returns a 404 error?</h4>
-                    <p class="text-slate-400 mt-1">Verify that your homepage is named exactly <code>index.html</code> (fully lowercase) and is directly inside the <code>docs/</code> folder. Note that files/folders starting with underscores may be ignored by default unless a <code>.nojekyll</code> file is present.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-100">Workflow fails with Permission Denied?</h4>
-                    <p class="text-slate-400 mt-1">Check your <strong>Workflow permissions</strong> inside Actions settings. They must be set to <strong>Read and write permissions</strong> to allow the runner to push deploy artifacts.</p>
-                </div>
-            </div>
-        </section>
+                <hr class="border-slate-200 dark:border-slate-800" />
+
+                <h2 id="2-nfs-client-side-caching-with-cachefilesd">💾 2. NFS Client-Side Caching with cachefilesd</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    FS-Cache allows NFS clients to cache read-frequently data locally on flash or NVMe drives, reducing network latency.
+                </p>
+
+                <hr class="border-slate-200 dark:border-slate-800" />
+
+                <h2 id="3-tuned-nfs-v42-mount-configuration-etcfstab">🛠️ 3. Tuned NFS v4.2 Mount Configuration (/etc/fstab)</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    To maximize I/O throughput and eliminate metadata access write amplification, mount NFS exports using tuned parameters:
+                </p>
+
+                <pre class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+nfsserver:/export/data /mnt/songketmail nfs4 rw,fsc,sync,noatime,vers=4.2,rsize=1048576,wsize=1048576,hard,proto=tcp,nconnect=4,timeo=600,retrans=2,sec=sys,local_lock=none,noresvport,_netdev 0 0
+                </pre>
+
+                <hr class="border-slate-200 dark:border-slate-800" />
+
+                <h2 id="4-deep-dive-technical-analysis-nconnect-rpc-concurrency">🔬 4. Deep-Dive Technical Analysis: nconnect & RPC Concurrency</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    By specifying <code>nconnect=4</code>, the client creates 4 parallel TCP streams per mount point, allowing per-CPU socket load balancing and multiplying total concurrent in-flight RPC slots to $4 \times 128 = 512$.
+                </p>
+
+                <hr class="border-slate-200 dark:border-slate-800" />
+
+                <h2 id="5-ceph-rbd-burst-iops-benchmarking-with-fio">📊 5. Ceph RBD Burst IOPS Benchmarking with fio</h2>
+                <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                    To validate Ceph RADOS Block Device (RBD) performance on Proxmox VE hypervisors with NVMe storage pools, execute automated synthetic benchmarks using <code>scripts/benchmark_ceph_rbd_fio.sh</code>.
+                </p>
+
+            </section>
         </section>
 
         <!-- Column 3: Right Sidebar (span 3) -->
@@ -360,18 +341,33 @@
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
                 <ul class="space-y-2 text-sm">
                     <li class="pl-0">
-                        <a href="#method-1-automated-github-actions-deployment-recommended" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            Method 1 Automated GitHub Actions Deployment (Recommended)
+                        <a href="#executive-summary-architecture-overview" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚡ Executive Summary & Architecture Overview
                         </a>
                     </li>
                     <li class="pl-0">
-                        <a href="#method-2-direct-branch-deployment-docs-folder" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            Method 2 Direct Branch Deployment (`/docs` folder)
+                        <a href="#1-nfs-server-client-sysctl-kernel-tuning" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🖥️ 1. NFS Server & Client Sysctl Kernel Tuning
                         </a>
                     </li>
                     <li class="pl-0">
-                        <a href="#troubleshooting-tips" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
-                            Troubleshooting Tips
+                        <a href="#2-nfs-client-side-caching-with-cachefilesd" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            💾 2. NFS Client-Side Caching with cachefilesd
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-tuned-nfs-v42-mount-configuration-etcfstab" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🛠️ 3. Tuned NFS v4.2 Mount Configuration (/etc/fstab)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#4-deep-dive-technical-analysis-nconnect-rpc-concurrency" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🔬 4. Deep-Dive Technical Analysis: nconnect & RPC Concurrency
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#5-ceph-rbd-burst-iops-benchmarking-with-fio" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📊 5. Ceph RBD Burst IOPS Benchmarking with fio
                         </a>
                     </li>
                 </ul>
@@ -391,11 +387,11 @@
             <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
         </div>
         <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
-<span>[ TOPIC: 9B ]</span>
+<span>[ TOPIC: 29 ]</span>
             <span>|</span>
-            <span>[ CI_CD: GH_ACTIONS ]</span>
+            <span>[ TUNING: NFS_V42 ]</span>
             <span>|</span>
-            <span>[ DEPLOY: AUTOMATED ]</span>
+            <span>[ CEPH: NVME_FIO ]</span>
         </div>
     </footer>
 

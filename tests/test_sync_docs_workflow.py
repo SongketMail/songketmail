@@ -22,7 +22,7 @@ SYNC_SCRIPT_PATH = os.path.join("scripts", "sync_docs.py")
 
 def _read(path: str) -> str:
     """Reads and returns the UTF-8 text content of the given repository-relative path."""
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 

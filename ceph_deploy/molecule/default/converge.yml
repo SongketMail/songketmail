@@ -1,0 +1,10 @@
+---
+- name: Converge Ceph Deploy Roles
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Include ceph_prep role task
+      ansible.builtin.include_role:
+        name: ceph_prep
+      vars:
+        is_limited_environment: true

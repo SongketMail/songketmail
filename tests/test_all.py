@@ -8,9 +8,9 @@ ingress port mappings, privilege & safety checks with mocks, and local relative 
 import os
 import re
 import sys
-import socket
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add the project root to sys.path so that 'scripts' module can be imported
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 50 Markdown (.md) files in the repository."""
+    """Retrieves all 51 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 50, f"Expected 50 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 51, f"Expected 51 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 30 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 31 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +41,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 30, f"Expected 30 HTML files, found {len(html_files)}"
+    assert len(html_files) == 31, f"Expected 31 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -86,7 +86,7 @@ def get_all_internal_links():
     root_files = ["AGENTS.md", "README.md"]
     for rf in root_files:
         if os.path.exists(rf):
-            with open(rf, "r", encoding="utf-8", errors="ignore") as f:
+            with open(rf, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
             links = markdown_link_pattern.findall(content)
             for link in links:
@@ -104,7 +104,7 @@ def get_all_internal_links():
             for file in files:
                 if file.endswith((".html", ".md")):
                     filepath = os.path.join(root, file)
-                    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                    with open(filepath, encoding="utf-8", errors="ignore") as f:
                         content = f.read()
 
                     if file.endswith(".html"):
@@ -146,7 +146,7 @@ def get_all_internal_links():
 @pytest.mark.parametrize("md_filepath", get_all_markdown_files())
 def test_markdown_okf_frontmatter(md_filepath):
     """Verifies that every Markdown file adopts OKF v0.1 by checking frontmatter fields."""
-    with open(md_filepath, "r", encoding="utf-8", errors="ignore") as f:
+    with open(md_filepath, encoding="utf-8", errors="ignore") as f:
         content = f.read().strip()
 
     assert content.startswith("---"), f"{md_filepath} does not start with YAML frontmatter markers (---)"
@@ -180,7 +180,7 @@ def test_markdown_okf_frontmatter(md_filepath):
 @pytest.mark.parametrize("html_filepath", get_all_html_files())
 def test_html_document_validity(html_filepath):
     """Verifies that HTML files have standard layout tags and footer references."""
-    with open(html_filepath, "r", encoding="utf-8", errors="ignore") as f:
+    with open(html_filepath, encoding="utf-8", errors="ignore") as f:
         content = f.read()
 
     # Check for core HTML indicators
@@ -196,7 +196,7 @@ def test_html_document_validity(html_filepath):
 @pytest.mark.parametrize("tpl_filepath", get_all_template_files())
 def test_quadlet_template_integrity(tpl_filepath):
     """Verifies that Quadlet container configuration templates are well-structured."""
-    with open(tpl_filepath, "r", encoding="utf-8") as f:
+    with open(tpl_filepath, encoding="utf-8") as f:
         content = f.read()
 
     # Ensure file has content
@@ -217,7 +217,7 @@ def test_ingress_ports_definition(port):
     proxy_tpl = "roles/podman_quadlet/templates/proxy.container"
     assert os.path.exists(proxy_tpl), "BunkerWeb proxy.container template must exist"
 
-    with open(proxy_tpl, "r", encoding="utf-8") as f:
+    with open(proxy_tpl, encoding="utf-8") as f:
         content = f.read()
 
     # Verify the port is mentioned as Published Port
@@ -387,7 +387,7 @@ def test_privilege_safety_scenarios(scenario_id):
         # Scenario 14: _check_port_availability when port is occupied
         priv_info = {"uid": 0, "has_sudo": True, "privilege_level": "FULL_PRIVILEGES"}
         mock_socket_inst = MagicMock()
-        mock_socket_inst.bind.side_effect = socket.error("Port occupied")
+        mock_socket_inst.bind.side_effect = OSError("Port occupied")
         with patch('socket.socket', return_value=mock_socket_inst):
             privilege_and_safety_test._check_port_availability(priv_info, issues, warnings, passed)
             assert any(i["vector"] == "PORT_25_OCCUPIED" for i in issues)
@@ -396,7 +396,7 @@ def test_privilege_safety_scenarios(scenario_id):
         # Scenario 15: _check_port_availability privileged port sandbox
         priv_info = {"uid": 1001, "has_sudo": False, "privilege_level": "UNPRIVILEGED_SANDBOX"}
         mock_socket_inst = MagicMock()
-        mock_socket_inst.bind.side_effect = socket.error("Permission denied")
+        mock_socket_inst.bind.side_effect = OSError("Permission denied")
         # connect_ex returns 111 (Connection refused - i.e. port not actively listening)
         mock_socket_inst.connect_ex.return_value = 111
         with patch('socket.socket', return_value=mock_socket_inst):
@@ -407,8 +407,8 @@ def test_privilege_safety_scenarios(scenario_id):
         # Scenario 16: _check_storage_safety writable by root
         priv_info = {"uid": 0, "has_sudo": True, "privilege_level": "FULL_PRIVILEGES"}
         with patch('os.getuid', return_value=0), \
-             patch('os.makedirs') as mock_mkdir, \
-             patch('os.rmdir') as mock_rmdir:
+             patch('os.makedirs'), \
+             patch('os.rmdir'):
             privilege_and_safety_test._check_storage_safety(priv_info, issues, warnings, passed)
             assert any(p["vector"] == "STORAGE_WRITE_SUCCESS" for p in passed)
 
@@ -467,7 +467,7 @@ def test_proxmox_ceph_hci_manpower_markdown_content():
     md_file = "docs/proxmox-ceph-hci.md"
     assert os.path.exists(md_file), f"File {md_file} must exist."
 
-    with open(md_file, "r", encoding="utf-8") as f:
+    with open(md_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify the new section title and the scenarios exist
@@ -490,7 +490,7 @@ def test_proxmox_ceph_hci_manpower_html_content():
     html_file = "docs/proxmox-ceph-hci.html"
     assert os.path.exists(html_file), f"File {html_file} must exist."
 
-    with open(html_file, "r", encoding="utf-8") as f:
+    with open(html_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify matching HTML ID anchors
@@ -521,7 +521,7 @@ def test_proxmox_ceph_hci_deployment_flow_markdown_content():
     md_file = "docs/proxmox-ceph-hci.md"
     assert os.path.exists(md_file), f"File {md_file} must exist."
 
-    with open(md_file, "r", encoding="utf-8") as f:
+    with open(md_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify section title and deployment stages exist in markdown format
@@ -546,7 +546,7 @@ def test_proxmox_ceph_hci_deployment_flow_html_content():
     html_file = "docs/proxmox-ceph-hci.html"
     assert os.path.exists(html_file), f"File {html_file} must exist."
 
-    with open(html_file, "r", encoding="utf-8") as f:
+    with open(html_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify matching HTML ID anchors are generated and linked correctly
@@ -566,7 +566,7 @@ def test_k8s_ceph_design_markdown_content():
     md_file = "docs/k8s-ceph-design.md"
     assert os.path.exists(md_file), f"File {md_file} must exist."
 
-    with open(md_file, "r", encoding="utf-8") as f:
+    with open(md_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify OKF frontmatter
@@ -596,7 +596,7 @@ def test_k8s_ceph_design_html_content():
     html_file = "docs/k8s-ceph-design.html"
     assert os.path.exists(html_file), f"File {html_file} must exist."
 
-    with open(html_file, "r", encoding="utf-8") as f:
+    with open(html_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify unified template center column marker and anchors
@@ -617,7 +617,7 @@ def test_proxmox_datacenter_architecture_markdown_content():
     md_file = "docs/proxmox-datacenter-architecture.md"
     assert os.path.exists(md_file), f"File {md_file} must exist."
 
-    with open(md_file, "r", encoding="utf-8") as f:
+    with open(md_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify OKF frontmatter
@@ -647,7 +647,7 @@ def test_proxmox_datacenter_architecture_html_content():
     html_file = "docs/proxmox-datacenter-architecture.html"
     assert os.path.exists(html_file), f"File {html_file} must exist."
 
-    with open(html_file, "r", encoding="utf-8") as f:
+    with open(html_file, encoding="utf-8") as f:
         content = f.read()
 
     # Verify unified template center column marker and anchors
@@ -670,7 +670,7 @@ def test_proxmox_datacenter_architecture_html_content():
 
 def _read(path):
     assert os.path.exists(path), f"File {path} must exist."
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
@@ -685,7 +685,7 @@ def test_k8s_ceph_design_frontmatter_mentions_rke2_k3s():
 
     assert "RKE2 & K3s" in frontmatter or "RKE2 &amp; K3s" in frontmatter
     assert "topics:" in frontmatter
-    topics_line = next((l for l in frontmatter.splitlines() if l.strip().startswith("topics:")), "")
+    topics_line = next((line_item for line_item in frontmatter.splitlines() if line_item.strip().startswith("topics:")), "")
     assert "rke2" in topics_line
     assert "k3s" in topics_line
     assert "kubernetes" in topics_line
@@ -1121,7 +1121,7 @@ def test_docs_sync_pipeline_guide_markdown_frontmatter():
     assert 'title: "Documentation Sync Pipeline & GitHub Actions Setup Guide"' in frontmatter
     assert "resource: \"file:///docs/docs-sync-pipeline-guide.md\"" in frontmatter
 
-    topics_line = next((l for l in frontmatter.splitlines() if l.strip().startswith("topics:")), "")
+    topics_line = next((line_item for line_item in frontmatter.splitlines() if line_item.strip().startswith("topics:")), "")
     for topic in ["github-actions", "mintlify", "docs-sync", "secrets", "automation", "songketmail"]:
         assert topic in topics_line, f"Missing topic '{topic}' in frontmatter topics line"
 
