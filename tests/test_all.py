@@ -18,7 +18,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 51 Markdown (.md) files in the repository."""
+    """
+    Collects the repository's Markdown files while excluding generated and metadata directories.
+    
+    Returns:
+    	list[str]: Sorted unique paths to the 51 Markdown files.
+    """
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
@@ -32,7 +37,12 @@ def get_all_markdown_files():
 
 
 def get_all_html_files():
-    """Retrieves all 31 HTML (.html) files in the docs/ directory."""
+    """
+    Collects all HTML files in the repository.
+    
+    Returns:
+    	list[str]: Sorted unique paths to the 31 discovered HTML files.
+    """
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -60,7 +70,15 @@ def get_all_template_files():
 
 def get_all_internal_links():
     """
-    Retrieves and slices/pads relative internal links from files to ensure exactly 254 checks.
+    Collect and normalize repository-internal links for documentation validation.
+    
+    The result contains unique links from supported root and documentation files,
+    excluding external and special links. The collection is truncated or padded with
+    synthetic entries to contain exactly 254 items.
+    
+    Returns:
+    	list[tuple[str, str, str]]: Tuples containing the source file, original link,
+    	and normalized target path.
     """
     docs_dir = "docs"
     html_href_pattern = re.compile(r'href=["\']([^"\']+)["\']')
@@ -669,6 +687,15 @@ def test_proxmox_datacenter_architecture_html_content():
 # Network Fabric section of docs/k8s-ceph-design.md / docs/k8s-ceph-design.html.
 
 def _read(path):
+    """
+    Read and return the contents of an existing file.
+    
+    Parameters:
+    	path (str): Path to the file to read.
+    
+    Returns:
+    	str: The file contents.
+    """
     assert os.path.exists(path), f"File {path} must exist."
     with open(path, encoding="utf-8") as f:
         return f.read()

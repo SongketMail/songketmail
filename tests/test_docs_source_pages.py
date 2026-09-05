@@ -160,10 +160,10 @@ def test_docs_source_directory_passes_sync_docs_validation():
 
 
 def test_docs_source_only_expected_orphan_is_index(capsys):
-    """Verifies index.mdx is the only intentional orphan or fully registered in docs.json.
-
-    Guards against silently forgetting to add a newly created .mdx page to the
-    docs.json navigation.
+    """
+    Ensure source documentation has no unexpected orphaned MDX files.
+    
+    An orphan warning is permitted only for `index.mdx`; fully registered documentation may produce no warnings.
     """
     from pathlib import Path
 

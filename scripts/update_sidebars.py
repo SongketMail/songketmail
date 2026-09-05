@@ -29,15 +29,11 @@ pattern = re.compile(
 
 
 def update_html_sidebars():
-    """Scans the HTML documentation directory and adds the ASIMP report link in the sidebar menu.
-
-    Iterates through the HTML files under `docs/` (excluding the report itself)
-    and checks if the ASIMP Hardening Report is already linked. If not, it
-    injects the ASIMP navigation anchor directly underneath the Jules planning document link
-    using regular expression matching.
-
-    Raises:
-        OSError: If reading or writing to any target HTML file fails due to filesystem permissions.
+    """
+    Add the ASIMP Hardening Report link to eligible HTML documentation sidebars.
+    
+    Processes HTML files in `docs/`, excluding the report itself, and inserts the
+    link after the Jules planning link when it is not already present.
     """
     for filename in os.listdir(html_dir):
         if filename.endswith(".html") and filename != "asimp-hardening-report.html":

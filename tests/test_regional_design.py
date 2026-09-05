@@ -95,10 +95,8 @@ def test_regional_design_pbs_technical_content():
 
 
 def test_regional_design_html_unification_integrity():
-    """Verifies that the unified template script compiled the html file correctly.
-
-    Checks that the central content area exists and includes the synchronized
-    Section 6 header anchors and the sidebar navigation elements.
+    """
+    Verify that the unified regional design HTML preserves the central content area and required Section 6 navigation anchors.
     """
     assert os.path.exists(REG_HTML_PATH), f"Unified HTML file {REG_HTML_PATH} does not exist"
 
@@ -123,7 +121,9 @@ def test_regional_design_html_unification_integrity():
 
 
 def test_ansible_playbooks_syntax_and_structure():
-    """Verifies that all root-level and nested Ansible playbooks have valid YAML format and structural keys."""
+    """
+    Checks available Ansible playbooks for basic YAML mapping and list structure.
+    """
     playbook_files = ["site.yml", "asimp_hardening_playbook.yml", "wsl_feedback_playbook.yml"]
     for pb in playbook_files:
         if not os.path.exists(pb):
