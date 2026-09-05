@@ -32,7 +32,15 @@ def get_all_markdown_files():
 
 
 def get_all_html_files():
-    """Retrieves all 30 HTML (.html) files in the docs/ directory."""
+    """
+    Collects all unique HTML files in the repository.
+    
+    Returns:
+    	list[str]: Sorted paths to the 30 discovered HTML files.
+    
+    Raises:
+    	AssertionError: If the repository contains a number of HTML files other than 30.
+    """
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
