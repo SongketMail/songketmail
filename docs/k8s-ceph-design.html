@@ -510,20 +510,107 @@ sudo systemctl enable --now k3s-agent.service
 <hr class="my-8 border-slate-200 dark:border-slate-800" />
 <h3 id="85-verification-operational-handover-checklist" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.5 Verification & Operational Handover Checklist</h3>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">RKE2 Cluster Node Status Verification:</strong></p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide
+</code></pre>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> 14 nodes listed in <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">Ready</code> status with containerd runtime.</p>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">K3s Cluster Node Status Verification:</strong></p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo k3s kubectl get nodes -o wide</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo k3s kubectl get nodes -o wide
+</code></pre>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> 5 nodes listed in <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">Ready</code> status.</p>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">3. <strong class="font-semibold text-slate-900 dark:text-white">Ceph Storage CSI Integration Verification:</strong></p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```bash</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass</p>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">```</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass
+</code></pre>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Expected Output:</em> <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">ceph-rbd</code> and <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">cephfs</code> provisioners available and set as persistent volume backends.</p>
+<hr class="my-8 border-slate-200 dark:border-slate-800" />
+<h3 id="86-persistent-volume-pv-storage-server-setup-for-rke2" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-8 mb-3">8.6 Persistent Volume (PV) Storage Server Setup for RKE2</h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">To set up and configure server infrastructure for RKE2 Persistent Volume (PV) storage, SongketMail supports three enterprise PV architectures:</p>
+<h4 id="a-dedicated-nfs-storage-server-provisioning-readwritemany--rwx" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">A. Dedicated NFS Storage Server Provisioning (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">ReadWriteMany</code> / RWX)</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">For shared storage workloads requiring concurrent multi-node read/write capabilities across RKE2 pods:</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">NFS Storage Server Provisioning (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">10.200.10.50</code>):</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># Install NFS kernel server package
+sudo apt-get update &amp;&amp; sudo apt-get install -y nfs-kernel-server
+
+# Create and secure export directory
+sudo mkdir -p /srv/nfs/rke2-pv
+sudo chown -R nobody:nogroup /srv/nfs/rke2-pv
+sudo chmod 777 /srv/nfs/rke2-pv
+
+# Configure export permissions for RKE2 node network subnet
+echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+
+# Export share and start NFS server service
+sudo exportfs -rav
+sudo systemctl enable --now nfs-kernel-server
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">RKE2 Node Client Prerequisites:</strong></p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Ensure all RKE2 agent and control-plane nodes have <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">nfs-common</code> installed:</p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>sudo apt-get install -y nfs-common
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">3. <strong class="font-semibold text-slate-900 dark:text-white">Dynamic Volume Provisioning via <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">nfs-subdir-external-provisioner</code>:</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+  --set nfs.server=10.200.10.50 \
+  --set nfs.path=/srv/nfs/rke2-pv \
+  --set storageClass.name=nfs-client \
+  --namespace kube-system
+</code></pre>
+<h4 id="b-external-ceph-csi-storage-provisioning-rbd--cephfs" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">B. External Ceph CSI Storage Provisioning (RBD &amp; CephFS)</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Configuring distributed Ceph block and filesystem storage as dynamic RKE2 StorageClasses:</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">Ceph RBD StorageClass Manifest (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">ceph-rbd-sc.yaml</code>):</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ceph-rbd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rbd.csi.ceph.com
+parameters:
+  clusterID: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
+  pool: rke2-app-pool
+  imageFormat: "2"
+  imageFeatures: layering
+  csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+mountOptions:
+  - discard
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">Persistent Volume Claim Example (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-pvc-ceph.yaml</code>):</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: songketmail-data-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-rbd
+  resources:
+    requests:
+      storage: 50Gi
+</code></pre>
+<h4 id="c-static-pv-binding--local-path-provisioner" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">C. Static PV Binding &amp; Local Path Provisioner</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">For static NFS PV binding or node-local NVMe storage:</p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">Static Persistent Volume Manifest (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-static-pv.yaml</code>):</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-nfs-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nconnect=8
+  nfs:
+    server: 10.200.10.50
+    path: /srv/nfs/rke2-pv
+</code></pre>
 <hr class="my-8 border-slate-200 dark:border-slate-800" />
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-20</em></p>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0</em></p>
@@ -605,6 +692,11 @@ sudo systemctl enable --now k3s-agent.service
                     <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
                         <a href="#85-verification-operational-handover-checklist" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
                             8.5 Verification & Operational Handover Checklist
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#86-persistent-volume-pv-storage-server-setup-for-rke2" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            8.6 Persistent Volume (PV) Storage Server Setup for RKE2
                         </a>
                     </li>
                 </ul>
