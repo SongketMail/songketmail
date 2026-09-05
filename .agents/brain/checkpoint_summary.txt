@@ -1,0 +1,5 @@
+[MENTAL ANCHOR]
+Project: SongketMail Enterprise Kubernetes & Ceph Architecture
+Status: Completed RKE2 PV Storage Server Setup documentation (NFS dynamic/static & Ceph CSI RBD).
+Branch: jules-rke2-pv-storage-setup
+Next Steps: Restore branch or reactivate PR when needed. All test suites passing (500/500).
