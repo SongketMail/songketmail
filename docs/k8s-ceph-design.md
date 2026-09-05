@@ -422,5 +422,141 @@ sudo systemctl enable --now k3s-agent.service
    *Expected Output:* `ceph-rbd` and `cephfs` provisioners available and set as persistent volume backends.
 
 ---
+
+### 8.6 Persistent Volume (PV) Storage Server Setup for RKE2
+
+To set up and configure server infrastructure for RKE2 Persistent Volume (PV) storage, SongketMail supports three enterprise PV architectures:
+
+#### A. Dedicated NFS Storage Server Provisioning (`ReadWriteMany` / RWX)
+For shared storage workloads requiring concurrent multi-node read/write capabilities across RKE2 pods:
+
+1. **NFS Storage Server Provisioning (`10.200.10.50`):**
+   ```bash
+   # Install NFS kernel server package
+   sudo apt-get update && sudo apt-get install -y nfs-kernel-server
+
+   # Create and secure export directories with minimal permissions
+   # Dynamic provisioner root: owned by nobody:nogroup with 755
+   sudo mkdir -p /srv/nfs/rke2-pv
+   sudo chown -R nobody:nogroup /srv/nfs/rke2-pv
+   sudo chmod 755 /srv/nfs/rke2-pv
+
+   # Static PV export path: configured for pod UID/GID 2001:2001 (SongketMail application user/fsGroup)
+   sudo mkdir -p /srv/nfs/rke2-static-pv
+   sudo chown -R 2001:2001 /srv/nfs/rke2-static-pv
+   sudo chmod 775 /srv/nfs/rke2-static-pv
+
+   # Configure secure export permissions (root_squash enabled for host safety)
+   echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+   echo "/srv/nfs/rke2-static-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+
+   # Export share and start NFS server service
+   sudo exportfs -rav
+   sudo systemctl enable --now nfs-kernel-server
+   ```
+
+2. **RKE2 Node Client Prerequisites:**
+   Ensure all RKE2 agent and control-plane nodes have `nfs-common` installed:
+   ```bash
+   sudo apt-get install -y nfs-common
+   ```
+
+3. **Dynamic Volume Provisioning via `nfs-subdir-external-provisioner`:**
+   ```bash
+   helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+   helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+     --set nfs.server=10.200.10.50 \
+     --set nfs.path=/srv/nfs/rke2-pv \
+     --set storageClass.name=nfs-client \
+     --set storageClass.allowVolumeExpansion=false \
+     --namespace kube-system
+   ```
+
+#### B. External Ceph CSI Storage Provisioning (RBD)
+Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (`rbd.csi.ceph.com`):
+
+1. **Ceph RBD StorageClass Manifest (`ceph-rbd-sc.yaml`):**
+   ```yaml
+   apiVersion: storage.k8s.io/v1
+   kind: StorageClass
+   metadata:
+     name: ceph-rbd
+     annotations:
+       storageclass.kubernetes.io/is-default-class: "true"
+   provisioner: rbd.csi.ceph.com
+   parameters:
+     # Ceph cluster ID and RBD pool names (configured via ceph-csi-config ConfigMap and csi-rbd-secret)
+     clusterID: "<CEPH_CLUSTER_ID_PLACEHOLDER>"
+     pool: "<CEPH_RBD_POOL_PLACEHOLDER>"
+     imageFormat: "2"
+     imageFeatures: layering
+     csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret
+     csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+     csi.storage.k8s.io/node-stage-secret-name: csi-rbd-secret
+     csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+     csi.storage.k8s.io/controller-expand-secret-name: csi-rbd-secret
+     csi.storage.k8s.io/controller-expand-secret-namespace: kube-system
+   reclaimPolicy: Delete
+   allowVolumeExpansion: true
+   mountOptions:
+     - discard
+   ```
+
+2. **Persistent Volume Claim Example (`rke2-pvc-ceph.yaml`):**
+   ```yaml
+   apiVersion: v1
+   kind: PersistentVolumeClaim
+   metadata:
+     name: songketmail-data-pvc
+     namespace: default
+   spec:
+     accessModes:
+       - ReadWriteOnce
+     storageClassName: ceph-rbd
+     resources:
+       requests:
+         storage: 50Gi
+   ```
+
+#### C. Static PV Binding & Local Path Provisioner
+For static NFS PV binding or node-local NVMe storage:
+
+1. **Static Persistent Volume Manifest (`rke2-static-pv.yaml`):**
+   ```yaml
+   apiVersion: v1
+   kind: PersistentVolume
+   metadata:
+     name: static-nfs-pv
+   spec:
+     capacity:
+       storage: 100Gi
+     accessModes:
+       - ReadWriteMany
+     persistentVolumeReclaimPolicy: Retain
+     mountOptions:
+       - nconnect=8
+     nfs:
+       server: 10.200.10.50
+       path: /srv/nfs/rke2-static-pv
+   ```
+
+2. **Matching Static Persistent Volume Claim (`rke2-static-pvc.yaml`):**
+   ```yaml
+   apiVersion: v1
+   kind: PersistentVolumeClaim
+   metadata:
+     name: static-nfs-pvc
+     namespace: default
+   spec:
+     accessModes:
+       - ReadWriteMany
+     storageClassName: ""
+     volumeName: static-nfs-pv
+     resources:
+       requests:
+         storage: 100Gi
+   ```
+
+---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-20*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
