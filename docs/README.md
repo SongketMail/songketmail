@@ -51,6 +51,7 @@ This documentation book is structured into several progressive parts:
 * **[Part 8: AI-Assisted Development](ai-dev.md)**: Workflow practices with Google Gemini and Jules developer synergy.
 * **[Part 9: GitHub Pages Automation Setup](github-pages-setup.md)**: Walkthrough of setup procedures and automated Actions deployment workflows.
 * **[Part 27: Documentation Sync Pipeline Guide](docs-sync-pipeline-guide.md)**: Mintlify sync pipeline architecture, GitHub Actions secret configuration (`DOCS_REPO_TOKEN`), and troubleshooting guide.
+* **[Part 28: Persistent Volume (PV) Storage Setup for RKE2](rke2-pv-storage-setup.md)**: RKE2 Persistent Volume storage architecture, PVE-Ceph CSI integration, NFS storage server setup, and Local Path provisioner configuration.
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 47 Markdown (.md) files in the repository."""
+    """Retrieves all 48 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
@@ -27,12 +27,12 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 47, f"Expected 47 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 48, f"Expected 48 Markdown files, found {len(md_files)}"
     return md_files
 
 
 def get_all_html_files():
-    """Retrieves all 29 HTML (.html) files in the docs/ directory."""
+    """Retrieves all 30 HTML (.html) files in the docs/ directory."""
     html_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root:
@@ -41,7 +41,7 @@ def get_all_html_files():
             if f.endswith('.html'):
                 html_files.append(os.path.join(root, f))
     html_files = sorted(list(set(html_files)))
-    assert len(html_files) == 29, f"Expected 29 HTML files, found {len(html_files)}"
+    assert len(html_files) == 30, f"Expected 30 HTML files, found {len(html_files)}"
     return html_files
 
 
@@ -1332,3 +1332,64 @@ def test_unify_templates_build_unified_html_uses_docs_sync_topic_pills():
     assert "[ MINTLIFY: SYNC ]" in rendered
     assert "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide" in rendered
     assert "docs-sync-pipeline-guide.html" in rendered
+
+
+# --- Test Group 15: Part 28 RKE2 PV Storage Setup Content Verification ---
+
+def test_rke2_pv_storage_setup_markdown_content():
+    """Verifies that docs/rke2-pv-storage-setup.md exists and contains required sections."""
+    md_file = "docs/rke2-pv-storage-setup.md"
+    assert os.path.exists(md_file), f"File {md_file} must exist."
+
+    content = _read(md_file)
+
+    # OKF Frontmatter
+    assert content.startswith("---")
+    assert 'okf_version: "0.1"' in content or "okf_version: '0.1'" in content or "okf_version: 0.1" in content
+    assert "title: \"Persistent Volume (PV) Storage Server Setup & RKE2 Storage Architecture\"" in content or "Persistent Volume" in content
+
+    # Key Sections
+    assert "External Ceph CSI Storage Provisioning (RBD) & PVE-Ceph Integration" in content
+    assert "NFS Storage Server Provisioning" in content
+    assert "Static PV Binding & Local Path Provisioner" in content
+
+    # Multi-OS Family Dependencies
+    assert "Debian/Ubuntu Family" in content
+    assert "AlmaLinux/RockyLinux Family" in content
+    assert "ceph-common" in content
+    assert "modprobe rbd" in content
+    assert "nfs-common" in content or "nfs-utils" in content
+
+    # Manifest & Helm Code Block Snippets
+    assert "ceph-csi-values.yaml" in content
+    assert "nfs-values.yaml" in content
+    assert "local-path-config.yaml" in content
+
+    # DSOM Footer
+    assert "Harisfazillah Jamel" in content
+    assert "LinuxMalaysia" in content
+    assert "DSOM" in content
+
+
+def test_rke2_pv_storage_setup_html_content():
+    """Verifies that docs/rke2-pv-storage-setup.html exists and has layout anchors and TOC."""
+    html_file = "docs/rke2-pv-storage-setup.html"
+    assert os.path.exists(html_file), f"File {html_file} must exist."
+
+    content = _read(html_file)
+
+    # Standard layout
+    assert "<!DOCTYPE html>" in content
+    assert "<!-- Column 2: Center Main Content Area" in content
+
+    # Key ID anchors
+    assert 'id="rke2-persistent-volume-pv-storage-architecture"' in content
+    assert 'id="1-external-ceph-csi-storage-provisioning-rbd-pve-ceph-integration"' in content
+    assert 'id="2-nfs-storage-server-provisioning"' in content
+    assert 'id="3-static-pv-binding-local-path-provisioner"' in content
+    assert 'id="storage-decision-matrix-architectural-comparison"' in content
+
+    # Footer badges
+    assert "[ TOPIC: 28 ]" in content
+    assert "[ ORCH: RKE2_PV ]" in content
+    assert "[ STORAGE: CEPH_NFS_LOCAL ]" in content

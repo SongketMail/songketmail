@@ -48,6 +48,7 @@ SIDEBAR_ITEMS = [
     { "href": "proxmox-datacenter-architecture.html", "icon": "🖥️", "label": "24. Proxmox VE Datacentre", "section": "research" },
     { "href": "freebsd-bhyve-solutions.html", "icon": "🐝", "label": "26. FreeBSD & Bhyve Architecture", "section": "research" },
     { "href": "docs-sync-pipeline-guide.html", "icon": "📚", "label": "27. Docs Sync Pipeline", "section": "research" },
+    { "href": "rke2-pv-storage-setup.html", "icon": "💾", "label": "28. RKE2 PV Storage Setup", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -82,6 +83,7 @@ TOPIC_MAP = {
     "proxmox-datacenter-architecture.html": ("[ TOPIC: 24 ]", "[ ORCH: PROXMOX_VE ]", "[ SDS: CEPH_HCI ]"),
     "freebsd-bhyve-solutions.html": ("[ TOPIC: 26 ]", "[ HYPERVISOR: BHYVE ]", "[ OS: FREEBSD_ZFS ]"),
     "docs-sync-pipeline-guide.html": ("[ TOPIC: 27 ]", "[ CI_CD: GH_ACTIONS ]", "[ MINTLIFY: SYNC ]"),
+    "rke2-pv-storage-setup.html": ("[ TOPIC: 28 ]", "[ ORCH: RKE2_PV ]", "[ STORAGE: CEPH_NFS_LOCAL ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -114,6 +116,7 @@ SUBTITLE_MAP = {
     "proxmox-datacenter-architecture.html": "Deep Research // Topic 24: Proxmox VE Enterprise Datacentre Architecture",
     "freebsd-bhyve-solutions.html": "Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture",
     "docs-sync-pipeline-guide.html": "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide",
+    "rke2-pv-storage-setup.html": "Deep Research // Topic 28: Persistent Volume (PV) Storage Server Setup for RKE2",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
