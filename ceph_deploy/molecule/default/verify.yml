@@ -14,3 +14,15 @@
         that:
           - ceph_playbook_stat.stat.exists
         fail_msg: "Ceph deployment playbook.yml does not exist."
+
+    - name: Read Ceph deployment playbook content
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/../../playbook.yml"
+      register: ceph_playbook_content
+      delegate_to: localhost
+
+    - name: Assert Ceph deployment playbook contains ceph_prep role
+      ansible.builtin.assert:
+        that:
+          - "'ceph_prep' in (ceph_playbook_content.content | b64decode)"
+        fail_msg: "Ceph deployment playbook.yml does not contain ceph_prep role."

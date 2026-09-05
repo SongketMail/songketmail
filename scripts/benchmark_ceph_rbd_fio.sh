@@ -30,6 +30,15 @@ IMAGE_NAME="fio_test_image"
 IMAGE_SIZE_MB=4096
 RUNTIME=10
 DRY_RUN=0
+CREATED_IMAGE=0
+
+cleanup_rbd() {
+    if [[ "${CREATED_IMAGE}" -eq 1 ]]; then
+        rbd rm "${POOL_NAME}/${IMAGE_NAME}" 2>/dev/null || true
+        CREATED_IMAGE=0
+    fi
+}
+trap cleanup_rbd EXIT
 
 show_help() {
     cat << EOF
@@ -112,25 +121,37 @@ check_nfs_parameter "vm.dirty_bytes" "629145600"
 check_nfs_parameter "vm.dirty_background_bytes" "314572800"
 
 echo ""
-echo "  Checking NFS Mount Options (noatime, rsize=1048576, wsize=1048576, nconnect=4)..."
+echo "  Checking NFS Mount Options (rsize=1048576, wsize=1048576, nconnect=4)..."
 if mount | grep -q "nfs"; then
     mount | grep "nfs" | while read -r line; do
         echo "  Current NFS Mount: ${line}"
-        if echo "${line}" | grep -q "noatime" && echo "${line}" | grep -q "rsize=1048576" && echo "${line}" | grep -q "wsize=1048576"; then
+        if echo "${line}" | grep -q "rsize=1048576" && echo "${line}" | grep -q "wsize=1048576"; then
             echo "  ✅ [PASS] Optimal NFS dynamic mount parameters detected."
         else
-            echo "  ⚠️ [WARN] Mount options do not match recommended tuning: 'noatime,rsize=1048576,wsize=1048576,nconnect=4'."
+            echo "  ⚠️ [WARN] Mount options do not match recommended tuning: 'rsize=1048576,wsize=1048576,nconnect=4'."
         fi
     done
 else
-    echo "  ℹ️ [INFO] No active NFS mounts detected on this host. (Recommended fstab entry: 'rw,fsc,sync,noatime,vers=4.2,rsize=1048576,wsize=1048576,hard,proto=tcp,nconnect=4,timeo=600,retrans=2,sec=sys,noresvport,_netdev')"
+    echo "  ℹ️ [INFO] No active NFS mounts detected on this host. (Recommended fstab entry: 'rw,fsc,sync,vers=4.2,rsize=1048576,wsize=1048576,hard,proto=tcp,nconnect=4,timeo=600,retrans=2,sec=sys,noresvport,_netdev')"
+fi
+
+# Check tools when not in dry-run mode
+if [[ "${DRY_RUN}" -eq 0 ]]; then
+    if ! command -v fio &>/dev/null; then
+        echo "❌ Error: 'fio' command not found. Install fio or run with --dry-run." >&2
+        exit 1
+    fi
+    if ! command -v rbd &>/dev/null; then
+        echo "❌ Error: 'rbd' command not found. Install ceph-common or run with --dry-run." >&2
+        exit 1
+    fi
 fi
 
 # 2. Ceph RBD Burst IOPS Benchmark (4K Random Read/Write)
 echo ""
 echo "[2/3] Running Ceph RBD 4K Burst IOPS Benchmark..."
 
-if [[ "${DRY_RUN}" -eq 1 ]] || ! command -v fio &>/dev/null || ! command -v rbd &>/dev/null; then
+if [[ "${DRY_RUN}" -eq 1 ]]; then
     echo "  ℹ️ [DRY-RUN / SIMULATION] Simulating Ceph RBD 4K Burst IOPS benchmark against Proxmox VE NVMe pool..."
     echo "  - Test: 4K Random Read (iodepth=64, numjobs=4, direct=1)"
     echo "    IOPS: 184,520 | Bandwidth: 720.7 MB/s | Latency (avg): 0.34 ms"
@@ -140,7 +161,11 @@ if [[ "${DRY_RUN}" -eq 1 ]] || ! command -v fio &>/dev/null || ! command -v rbd 
     echo "    IOPS: 156,110 | Bandwidth: 610.1 MB/s | Latency (avg): 0.41 ms"
 else
     echo "  Creating temporary RBD image '${POOL_NAME}/${IMAGE_NAME}' (${IMAGE_SIZE_MB}MB)..."
-    rbd create --size "${IMAGE_SIZE_MB}" "${POOL_NAME}/${IMAGE_NAME}" --pool "${POOL_NAME}" 2>/dev/null || true
+    if ! rbd create --size "${IMAGE_SIZE_MB}" "${POOL_NAME}/${IMAGE_NAME}" --pool "${POOL_NAME}"; then
+        echo "❌ Error: Failed to create RBD image '${POOL_NAME}/${IMAGE_NAME}'." >&2
+        exit 1
+    fi
+    CREATED_IMAGE=1
 
     echo "  Executing 4K Random Read Burst test..."
     fio --name=rbd_4k_randread \
@@ -171,21 +196,59 @@ else
         --runtime="${RUNTIME}" \
         --time_based \
         --group_reporting
-
-    echo "  Cleaning up temporary RBD image..."
-    rbd rm "${POOL_NAME}/${IMAGE_NAME}" 2>/dev/null || true
 fi
 
 # 3. Sequential 1M Throughput Profiling
 echo ""
 echo "[3/3] Running Ceph RBD 1M Sequential Throughput Benchmark..."
 
-if [[ "${DRY_RUN}" -eq 1 ]] || ! command -v fio &>/dev/null || ! command -v rbd &>/dev/null; then
+if [[ "${DRY_RUN}" -eq 1 ]]; then
     echo "  ℹ️ [DRY-RUN / SIMULATION] Simulating Ceph RBD 1M Sequential Throughput benchmark..."
     echo "  - Test: 1M Sequential Read (iodepth=32, numjobs=2, direct=1)"
     echo "    IOPS: 3,450 | Bandwidth: 3,450 MB/s (3.45 GB/s) | Latency (avg): 9.27 ms"
     echo "  - Test: 1M Sequential Write (iodepth=32, numjobs=2, direct=1)"
     echo "    IOPS: 2,180 | Bandwidth: 2,180 MB/s (2.18 GB/s) | Latency (avg): 14.68 ms"
+else
+    if [[ "${CREATED_IMAGE}" -eq 0 ]]; then
+        echo "  Creating temporary RBD image '${POOL_NAME}/${IMAGE_NAME}' (${IMAGE_SIZE_MB}MB)..."
+        if ! rbd create --size "${IMAGE_SIZE_MB}" "${POOL_NAME}/${IMAGE_NAME}" --pool "${POOL_NAME}"; then
+            echo "❌ Error: Failed to create RBD image '${POOL_NAME}/${IMAGE_NAME}'." >&2
+            exit 1
+        fi
+        CREATED_IMAGE=1
+    fi
+
+    echo "  Executing 1M Sequential Read Throughput test..."
+    fio --name=rbd_1m_seqread \
+        --ioengine=rbd \
+        --clientname=admin \
+        --pool="${POOL_NAME}" \
+        --rbdname="${IMAGE_NAME}" \
+        --rw=read \
+        --bs=1m \
+        --iodepth=32 \
+        --numjobs=2 \
+        --direct=1 \
+        --runtime="${RUNTIME}" \
+        --time_based \
+        --group_reporting
+
+    echo "  Executing 1M Sequential Write Throughput test..."
+    fio --name=rbd_1m_seqwrite \
+        --ioengine=rbd \
+        --clientname=admin \
+        --pool="${POOL_NAME}" \
+        --rbdname="${IMAGE_NAME}" \
+        --rw=write \
+        --bs=1m \
+        --iodepth=32 \
+        --numjobs=2 \
+        --direct=1 \
+        --runtime="${RUNTIME}" \
+        --time_based \
+        --group_reporting
+
+    cleanup_rbd
 fi
 
 echo ""

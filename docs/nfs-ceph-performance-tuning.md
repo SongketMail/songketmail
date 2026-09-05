@@ -16,7 +16,7 @@ This guide provides an enterprise-grade performance tuning specification for NFS
 ## ⚡ Executive Summary & Architecture Overview
 
 High-throughput email servers, container orchestrators, and database workloads demand low latency and high concurrent IOPS. Optimizing Linux storage stacks requires a multi-layered approach:
-1. **NFS v4.2 Protocol Tuning**: Utilizing modern kernel capabilities such as `nconnect` TCP stream multiplexing, `noatime` inode access optimization, 1MB block transfers (`rsize=1048576,wsize=1048576`), and elevated Sun RPC slot capacity (`sunrpc.tcp_slot_table_entries=128`).
+1. **NFS v4.2 Protocol Tuning**: Utilizing modern kernel capabilities such as `nconnect` TCP stream multiplexing, 1MB block transfers (`rsize=1048576,wsize=1048576`), and elevated Sun RPC slot capacity (`sunrpc.tcp_slot_table_entries=128`).
 2. **Ceph RBD NVMe Pool Optimization**: Leveraging direct `librbd` or `ioengine=libaio` with `fio` benchmarking to measure 4K burst IOPS and 1M sequential throughput across Proxmox VE storage clusters.
 3. **Client-Side FS-Cache Integration**: Utilizing `cachefilesd` under modern Linux Kernel 5.17+ re-architected caching layers to eliminate network round-trips for read-heavy operations.
 
@@ -112,17 +112,17 @@ dmesg | grep cachefiles
 
 ## 🛠️ 3. Tuned NFS v4.2 Mount Configuration (`/etc/fstab`)
 
-To maximize I/O throughput and eliminate metadata access write amplification, mount NFS exports using tuned parameters:
+To maximize I/O throughput and manage metadata consistency, mount NFS exports using tuned parameters:
 
 ```text
-nfsserver:/export/data /mnt/songketmail nfs4 rw,fsc,sync,noatime,vers=4.2,rsize=1048576,wsize=1048576,hard,proto=tcp,nconnect=4,timeo=600,retrans=2,sec=sys,local_lock=none,noresvport,_netdev 0 0
+nfsserver:/export/data /mnt/songketmail nfs4 rw,fsc,sync,vers=4.2,rsize=1048576,wsize=1048576,hard,proto=tcp,nconnect=4,timeo=600,retrans=2,sec=sys,local_lock=none,noresvport,_netdev 0 0
 ```
 
 ### Parameter Breakdown
 
-| Option | Function | Performance Benefit |
+| Option | Function | Performance & Durability Trade-off |
 |---|---|---|
-| `noatime` | Disables access time updates on inode reads | **Eliminates write amplification on read operations**, crucial for high-IOPS NVMe pools compared to `relatime`. |
+| `sync` | Forces synchronous write operations | **Durability Guarantee**: Guarantees that write operations are committed to non-volatile storage before returning to the client. *Trade-off*: Higher write latency per I/O compared to `async` (which buffers writes in client RAM at the risk of data loss during sudden power loss). |
 | `rsize=1048576` | Sets read chunk size to 1MB | Maximizes block transfer payloads per RPC round-trip. |
 | `wsize=1048576` | Sets write chunk size to 1MB | Maximizes sequential write throughput over 10G/25G networks. |
 | `nconnect=4` | Establishes 4 parallel TCP streams per mount | Distributes RPC processing across multiple CPU cores, eliminating single-core bottlenecks. |
