@@ -435,13 +435,14 @@ For shared storage workloads requiring concurrent multi-node read/write capabili
    # Install NFS kernel server package
    sudo apt-get update && sudo apt-get install -y nfs-kernel-server
 
-   # Create and secure export directory
-   sudo mkdir -p /srv/nfs/rke2-pv
-   sudo chown -R nobody:nogroup /srv/nfs/rke2-pv
-   sudo chmod 777 /srv/nfs/rke2-pv
+   # Create and secure export directories with minimal permissions
+   sudo mkdir -p /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
+   sudo chown -R nobody:nogroup /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
+   sudo chmod 755 /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
 
-   # Configure export permissions for RKE2 node network subnet
-   echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+   # Configure secure export permissions (root_squash enabled for host safety)
+   echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+   echo "/srv/nfs/rke2-static-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
 
    # Export share and start NFS server service
    sudo exportfs -rav
@@ -461,11 +462,12 @@ For shared storage workloads requiring concurrent multi-node read/write capabili
      --set nfs.server=10.200.10.50 \
      --set nfs.path=/srv/nfs/rke2-pv \
      --set storageClass.name=nfs-client \
+     --set storageClass.allowVolumeExpansion=false \
      --namespace kube-system
    ```
 
-#### B. External Ceph CSI Storage Provisioning (RBD & CephFS)
-Configuring distributed Ceph block and filesystem storage as dynamic RKE2 StorageClasses:
+#### B. External Ceph CSI Storage Provisioning (RBD)
+Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (`rbd.csi.ceph.com`):
 
 1. **Ceph RBD StorageClass Manifest (`ceph-rbd-sc.yaml`):**
    ```yaml
@@ -477,14 +479,17 @@ Configuring distributed Ceph block and filesystem storage as dynamic RKE2 Storag
        storageclass.kubernetes.io/is-default-class: "true"
    provisioner: rbd.csi.ceph.com
    parameters:
-     clusterID: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
-     pool: rke2-app-pool
+     # Ceph cluster ID and RBD pool names (configured via ceph-csi-config ConfigMap and csi-rbd-secret)
+     clusterID: "<CEPH_CLUSTER_ID_PLACEHOLDER>"
+     pool: "<CEPH_RBD_POOL_PLACEHOLDER>"
      imageFormat: "2"
      imageFeatures: layering
      csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret
      csi.storage.k8s.io/provisioner-secret-namespace: kube-system
      csi.storage.k8s.io/node-stage-secret-name: csi-rbd-secret
      csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+     csi.storage.k8s.io/controller-expand-secret-name: csi-rbd-secret
+     csi.storage.k8s.io/controller-expand-secret-namespace: kube-system
    reclaimPolicy: Delete
    allowVolumeExpansion: true
    mountOptions:
@@ -526,7 +531,24 @@ For static NFS PV binding or node-local NVMe storage:
        - nconnect=8
      nfs:
        server: 10.200.10.50
-       path: /srv/nfs/rke2-pv
+       path: /srv/nfs/rke2-static-pv
+   ```
+
+2. **Matching Static Persistent Volume Claim (`rke2-static-pvc.yaml`):**
+   ```yaml
+   apiVersion: v1
+   kind: PersistentVolumeClaim
+   metadata:
+     name: static-nfs-pvc
+     namespace: default
+   spec:
+     accessModes:
+       - ReadWriteMany
+     storageClassName: ""
+     volumeName: static-nfs-pv
+     resources:
+       requests:
+         storage: 100Gi
    ```
 
 ---

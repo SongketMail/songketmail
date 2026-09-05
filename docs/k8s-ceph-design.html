@@ -530,13 +530,14 @@ sudo systemctl enable --now k3s-agent.service
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code># Install NFS kernel server package
 sudo apt-get update &amp;&amp; sudo apt-get install -y nfs-kernel-server
 
-# Create and secure export directory
-sudo mkdir -p /srv/nfs/rke2-pv
-sudo chown -R nobody:nogroup /srv/nfs/rke2-pv
-sudo chmod 777 /srv/nfs/rke2-pv
+# Create and secure export directories with minimal permissions
+sudo mkdir -p /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
+sudo chown -R nobody:nogroup /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
+sudo chmod 755 /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
 
-# Configure export permissions for RKE2 node network subnet
-echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+# Configure secure export permissions (root_squash enabled for host safety)
+echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+echo "/srv/nfs/rke2-static-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
 
 # Export share and start NFS server service
 sudo exportfs -rav
@@ -552,10 +553,11 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
   --set nfs.server=10.200.10.50 \
   --set nfs.path=/srv/nfs/rke2-pv \
   --set storageClass.name=nfs-client \
+  --set storageClass.allowVolumeExpansion=false \
   --namespace kube-system
 </code></pre>
-<h4 id="b-external-ceph-csi-storage-provisioning-rbd--cephfs" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">B. External Ceph CSI Storage Provisioning (RBD &amp; CephFS)</h4>
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Configuring distributed Ceph block and filesystem storage as dynamic RKE2 StorageClasses:</p>
+<h4 id="b-external-ceph-csi-storage-provisioning-rbd" class="text-lg font-bold text-slate-900 dark:text-white tracking-tight mt-6 mb-2">B. External Ceph CSI Storage Provisioning (RBD)</h4>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rbd.csi.ceph.com</code>):</p>
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">1. <strong class="font-semibold text-slate-900 dark:text-white">Ceph RBD StorageClass Manifest (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">ceph-rbd-sc.yaml</code>):</strong></p>
 <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -565,14 +567,17 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: rbd.csi.ceph.com
 parameters:
-  clusterID: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
-  pool: rke2-app-pool
+  # Ceph cluster ID and RBD pool names (configured via ceph-csi-config ConfigMap and csi-rbd-secret)
+  clusterID: "&lt;CEPH_CLUSTER_ID_PLACEHOLDER&gt;"
+  pool: "&lt;CEPH_RBD_POOL_PLACEHOLDER&gt;"
   imageFormat: "2"
   imageFeatures: layering
   csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret
   csi.storage.k8s.io/provisioner-secret-namespace: kube-system
   csi.storage.k8s.io/node-stage-secret-name: csi-rbd-secret
   csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-expand-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: kube-system
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 mountOptions:
@@ -609,7 +614,22 @@ spec:
     - nconnect=8
   nfs:
     server: 10.200.10.50
-    path: /srv/nfs/rke2-pv
+    path: /srv/nfs/rke2-static-pv
+</code></pre>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3">2. <strong class="font-semibold text-slate-900 dark:text-white">Matching Static Persistent Volume Claim (<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono border border-slate-200 dark:border-slate-700">rke2-static-pvc.yaml</code>):</strong></p>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto my-4 border border-slate-800"><code>apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-nfs-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: static-nfs-pv
+  resources:
+    requests:
+      storage: 100Gi
 </code></pre>
 <hr class="my-8 border-slate-200 dark:border-slate-800" />
 <p class="text-slate-600 dark:text-slate-300 leading-relaxed my-3"><em class="italic">Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-08-20</em></p>
