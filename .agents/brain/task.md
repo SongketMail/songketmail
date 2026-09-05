@@ -16,7 +16,7 @@ topics: [dsom, task, brain, milestones]
 - [x] Synchronize layout across documentation pages using `python3 scripts/unify_templates.py`.
 - [x] Update `docs/SUMMARY.md` and `docs/README.md`.
 - [x] Update test assertions in `tests/test_all.py` and verify all tests pass.
-- [x] Conduct Playwright visual verification (`/home/jules/verification/rke2_pv_setup.png`).
+- [x] Conduct Playwright visual verification (`local-only artifact: /home/jules/verification/rke2_pv_setup.png`).
 - [x] Perform DSOM End of Day (EOD) Palace Brain Sync.
 
 ---

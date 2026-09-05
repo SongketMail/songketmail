@@ -25,8 +25,8 @@ topics: [dsom, walkthrough, brain, eod]
    - Added cross-reference pointers in `docs/k8s-ceph-design.md` and `docs/k8s-ceph-design.html`.
 4. **Validation & Automated Testing:**
    - Updated test suite `tests/test_all.py` assertions and added Group 15 tests.
-   - Executed pytest across sub-test suites: 532/532 unit tests passing cleanly.
-   - Executed Playwright frontend verification script and captured layout screenshot `/home/jules/verification/rke2_pv_setup.png`.
+   - Executed pytest across sub-test suites: 534/534 unit tests passing cleanly.
+   - Executed Playwright frontend verification script and captured layout screenshot (`local-only artifact: /home/jules/verification/rke2_pv_setup.png`).
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-09-05*
