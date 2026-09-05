@@ -436,9 +436,15 @@ For shared storage workloads requiring concurrent multi-node read/write capabili
    sudo apt-get update && sudo apt-get install -y nfs-kernel-server
 
    # Create and secure export directories with minimal permissions
-   sudo mkdir -p /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
-   sudo chown -R nobody:nogroup /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
-   sudo chmod 755 /srv/nfs/rke2-pv /srv/nfs/rke2-static-pv
+   # Dynamic provisioner root: owned by nobody:nogroup with 755
+   sudo mkdir -p /srv/nfs/rke2-pv
+   sudo chown -R nobody:nogroup /srv/nfs/rke2-pv
+   sudo chmod 755 /srv/nfs/rke2-pv
+
+   # Static PV export path: configured for pod UID/GID 2001:2001 (SongketMail application user/fsGroup)
+   sudo mkdir -p /srv/nfs/rke2-static-pv
+   sudo chown -R 2001:2001 /srv/nfs/rke2-static-pv
+   sudo chmod 775 /srv/nfs/rke2-static-pv
 
    # Configure secure export permissions (root_squash enabled for host safety)
    echo "/srv/nfs/rke2-pv 10.200.10.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
