@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+    theme: localStorage.getItem('theme') || 'auto',
+    setTheme(val) {
+        this.theme = val;
+        localStorage.setItem('theme', val);
+    },
+    isDark() {
+        if (this.theme === 'dark') return true;
+        if (this.theme === 'light') return false;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+}" :class="{ 'dark': isDark() }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Volume (PV) Storage Server Setup & RKE2 Storage Architecture — SongketMail :: LAB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            green: '#10b981',
+                            orange: '#f59e0b',
+                            blue: '#2563eb',
+                            red: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+            <!-- Brand Logo Area -->
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">SongketMail</span>
+                    <span class="text-2xl font-bold text-violet-600">::</span>
+                    <span class="text-2xl font-bold text-slate-900 dark:text-white">LAB</span>
+                </div>
+                <div class="text-xs tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase font-semibold">
+                    Deep Research // Topic 28: Persistent Volume (PV) Storage Server Setup for RKE2
+                </div>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex items-center space-x-3 mt-4 md:mt-0 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2 uppercase">Mode:</span>
+
+                <!-- Light Mode Button -->
+                <button @click="setTheme('light')"
+                        :class="theme === 'light' ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>☀️</span>
+                    <span>LIGHT</span>
+                </button>
+
+                <!-- Dark Mode Button -->
+                <button @click="setTheme('dark')"
+                        :class="theme === 'dark' ? 'bg-slate-700 text-white border-slate-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>🌙</span>
+                    <span>DARK</span>
+                </button>
+
+                <!-- Auto Mode Button -->
+                <button @click="setTheme('auto')"
+                        :class="theme === 'auto' ? 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                        class="px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 border border-transparent transition">
+                    <span>💻</span>
+                    <span>AUTO</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Column 1: Left Navigation Sidebar (span 3) -->
+        <aside class="lg:col-span-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏠</span>
+                        <span>Home</span>
+                    </a>
+
+                    <!-- Deep Research Series Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Deep Research Series
+                    </div>
+                    <a href="podman-rootless.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐳</span>
+                        <span>1. Podman Rootless</span>
+                    </a>
+                    <a href="ansible-fqcn.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>2. Ansible Best Practices</span>
+                    </a>
+                    <a href="postfix-dovecot.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>✉️</span>
+                        <span>3. Postfix & Dovecot</span>
+                    </a>
+                    <a href="s3-storage.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🪣</span>
+                        <span>4. S3 Object Storage</span>
+                    </a>
+                    <a href="webmail-clients.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>5. Webmail Integration</span>
+                    </a>
+                    <a href="bunkerweb-proxy.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>6. BunkerWeb Proxy</span>
+                    </a>
+                    <a href="architectural-blueprint.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🏗️</span>
+                        <span>7. SKM Blueprint</span>
+                    </a>
+                    <a href="creating-a-github-pages-site-with-jekyll.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>9a. Jekyll Site Creation</span>
+                    </a>
+                    <a href="github-pages-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>9b. GH Pages Automation</span>
+                    </a>
+                    <a href="references.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>10. References & Resources</span>
+                    </a>
+                    <a href="dockpod-integration.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📊</span>
+                        <span>11. DockPod Integration</span>
+                    </a>
+                    <a href="jules-planning.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📋</span>
+                        <span>12. Jules Planning Document</span>
+                    </a>
+                    <a href="asimp-hardening-report.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🛡️</span>
+                        <span>13. ASIMP Hardening Report</span>
+                    </a>
+                    <a href="SOP-KNOWLEDGE-FIRST-DISCOVERY.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🔍</span>
+                        <span>14. Discovery Protocol</span>
+                    </a>
+                    <a href="wsl-development-feedback.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>💻</span>
+                        <span>15. WSL Feedback Loop</span>
+                    </a>
+                    <a href="ANSIBLE-ADOPTION-REVIEW.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚙️</span>
+                        <span>16. Ansible Adoption Review</span>
+                    </a>
+                    <a href="mail-web-app-verification.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📧</span>
+                        <span>17. Mail Web Ingress Verification</span>
+                    </a>
+                    <a href="ansible-playbook-map.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>18. Ansible Playbook Map</span>
+                    </a>
+                    <a href="proxmox-ceph-hci.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>20. Proxmox & Ceph HCI</span>
+                    </a>
+                    <a href="ceph-ubuntu-deployment.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📦</span>
+                        <span>21. Ceph Native Deployment</span>
+                    </a>
+                    <a href="regional-design-proxmox-ceph.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🌐</span>
+                        <span>22. Geolocated Regional DC</span>
+                    </a>
+                    <a href="k8s-ceph-design.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>☸️</span>
+                        <span>23. Enterprise K8s & Ceph</span>
+                    </a>
+                    <a href="proxmox-datacenter-architecture.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🖥️</span>
+                        <span>24. Proxmox VE Datacentre</span>
+                    </a>
+                    <a href="freebsd-bhyve-solutions.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🐝</span>
+                        <span>26. FreeBSD & Bhyve Architecture</span>
+                    </a>
+                    <a href="docs-sync-pipeline-guide.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>📚</span>
+                        <span>27. Docs Sync Pipeline</span>
+                    </a>
+                    <a href="rke2-pv-storage-setup.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 font-bold text-sm transition">
+                        <span>💾</span>
+                        <span>28. RKE2 PV Storage Setup</span>
+                    </a>
+
+                    <!-- Laboratory Modules Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Laboratory Modules
+                    </div>
+                    <a href="ai-dev.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>🤖</span>
+                        <span>AI Development</span>
+                    </a>
+
+                    <!-- Legal & Terms Section -->
+                    <div class="pt-4 pb-1 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 border-t border-slate-200 dark:border-slate-700 mt-4 mb-2">
+                        Legal & Terms
+                    </div>
+                    <a href="legal-notice.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition font-medium">
+                        <span>⚖️</span>
+                        <span>Legal Notice & Disclaimer</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Column 2: Center Main Content Area (span 6) -->
+        <section class="lg:col-span-6 space-y-8">
+<h2 id="rke2-persistent-volume-pv-storage-architecture">🗺️ RKE2 Persistent Volume (PV) Storage Architecture</h2>
+        <p>With the operational requirement to establish highly available (HA), resilient, and horizontally scalable Day 2 storage operations for RKE2 fabrics, selecting the correct Persistent Volume (PV) provisioner is critical. By evaluating NFS, Ceph CSI, and Local Path provisioning against multi-node resiliency constraints, this document defines the deployment topologies across both Debian/Ubuntu and AlmaLinux/RockyLinux ecosystems.</p>
+
+        <p>The following architectural diagram illustrates the Proxmox VE hypervisor cluster hosting virtualized RKE2 master and worker nodes, backed by shared Ceph SDS and NFS persistent storage fabrics:</p>
+
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code>+----------------------------------------------------------------------------------------------------+
+|                               PROXMOX VE HYPER-CONVERGED CLUSTER                                   |
+|                                                                                                    |
+|  +---------------------------+   +---------------------------+   +---------------------------+  |
+|  |       PROXMOX NODE 1      |   |       PROXMOX NODE 2      |   |       PROXMOX NODE 3      |  |
+|  | +-----------------------+ |   | +-----------------------+ |   | +-----------------------+ |  |
+|  | |     k8s Master VM     | |   | |     k8s Master VM     | |   | |     k8s Master VM     | |  |
+|  | +-----------------------+ |   | +-----------------------+ |   | +-----------------------+ |  |
+|  | |     k8s Worker VM     | |   | |     k8s Worker VM     | |   | |     k8s Worker VM     | |  |
+|  | | [pod] [pod] [pod] [pod]| |   | | [pod] [pod] [pod] [pod]| |   | | [pod] [pod] [pod] [pod]| |  |
+|  | +-----------┬-----------+ |   | +-----------┬-----------+ |   | +-----------┬-----------+ |  |
+|  +-------------│-------------+   +-------------│-------------+   +-------------│-------------+  |
++----------------│-------------------------------│-------------------------------│-------------------+
+                 │                               │                               │
+                 └───────────────────────────────┼───────────────────────────────┘
+                                                 │
+                                                 ▼
++----------------------------------------------------------------------------------------------------+
+|                                 DISTRIBUTED STORAGE LAYER (CEPH / NFS)                             |
+|  +----------------------------------------------------------------------------------------------+  |
+|  | RADOS Block Device (RBD) Pools  |  CephFS Shared File System  |  NFS Storage Server Shares    |  |
+|  +----------------------------------------------------------------------------------------------+  |
++----------------------------------------------------------------------------------------------------+</code></pre>
+
+        <h2 id="1-external-ceph-csi-storage-provisioning-rbd-pve-ceph-integration">💾 1. External Ceph CSI Storage Provisioning (RBD) & PVE-Ceph Integration</h2>
+        <p>By leveraging a Proxmox Virtual Environment (PVE) Hyper-Converged Infrastructure (HCI) with integrated Ceph, the storage layer is decoupled from the compute nodes whilst maintaining block-level performance and multi-node redundancy. The Ceph Container Storage Interface (CSI) provides dynamic provisioning of RADOS Block Devices (RBD) and CephFS volumes directly to RKE2 pods.</p>
+
+        <h3 id="os-family-dependencies-configuration">OS Family Dependencies & Configuration</h3>
+        <p>For external Ceph connectivity, the RKE2 worker nodes require native Ceph client utilities to mount RBD and CephFS targets.</p>
+
+        <h4>Debian/Ubuntu Family (Debian 12, Ubuntu 24.04 / 26.04 LTS)</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># Install Ceph common utilities
+sudo apt-get update && sudo apt-get install -y ceph-common
+
+# Ensure kernel RBD module is loaded automatically on boot
+sudo modprobe rbd
+echo "rbd" | sudo tee /etc/modules-load.d/rbd.conf</code></pre>
+
+        <h4>AlmaLinux/RockyLinux Family (AlmaLinux 9.6, Rocky Linux 9)</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># Enable CentOS Storage SIG repository for Ceph packages
+sudo dnf install -y centos-release-ceph-reef epel-release
+sudo dnf install -y ceph-common
+
+# Ensure kernel RBD module is loaded automatically on boot
+sudo modprobe rbd
+echo "rbd" | sudo tee /etc/modules-load.d/rbd.conf</code></pre>
+
+        <h3 id="pve-ceph-integration-via-helm">PVE-Ceph Integration via Helm</h3>
+        <p>By configuring the <code>ceph-csi</code> Helm chart within RKE2, dynamic volume provisioning is achieved against the Proxmox Ceph cluster.</p>
+
+        <h4>Helm Chart Values Configuration (ceph-csi-values.yaml)</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># ceph-csi-values.yaml
+csiConfig:
+  - clusterID: "pve-ceph-cluster"
+    monitors:
+      - "10.0.10.11:6789"
+      - "10.0.10.12:6789"
+      - "10.0.10.13:6789"
+storageClass:
+  create: true
+  name: ceph-rbd
+  clusterID: "pve-ceph-cluster"
+  pool: "k8s-pool"
+  imageFeatures: layering
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true</code></pre>
+
+        <h4>Kubernetes StorageClass & PVC Manifests</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># ceph-rbd-sc.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ceph-rbd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rbd.csi.ceph.com
+parameters:
+  clusterID: "pve-ceph-cluster"
+  pool: "k8s-pool"
+  imageFormat: "2"
+  imageFeatures: layering
+  csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-expand-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: kube-system
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+mountOptions:
+  - discard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: songketmail-db-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-rbd
+  resources:
+    requests:
+      storage: 100Gi</code></pre>
+
+        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+            <li><strong>Use Case:</strong> Highly available databases (PostgreSQL/Patroni), vector databases (pg_vector), and stateful microservices requiring sub-millisecond IOPS and absolute reduction of MTTD/MTTR.</li>
+            <li><strong>Verdict:</strong> The primary choice for Day 2 operations requiring sovereign, distributed HA block storage without vendor lock-in.</li>
+        </ul>
+
+        <h2 id="2-nfs-storage-server-provisioning">📁 2. NFS Storage Server Provisioning</h2>
+        <p>Through the deployment of the NFS subdir external provisioner, standard NFS exports are dynamically carved into Kubernetes PVs. While lacking the block-level performance and self-healing HA characteristics of Ceph, NFS provides a simplistic approach for shared, ReadWriteMany (RWX) storage arrays.</p>
+
+        <h3 id="os-family-dependencies-configuration-1">OS Family Dependencies & Configuration</h3>
+
+        <h4>Server-Side Export Configuration (10.0.20.50)</h4>
+
+        <div class="space-y-4">
+            <h5 class="font-bold text-sm text-slate-900 dark:text-white">Debian/Ubuntu Family</h5>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code>sudo apt-get update && sudo apt-get install -y nfs-kernel-server
+
+# Prepare dynamic provisioner and static export paths
+sudo mkdir -p /mnt/k8s_storage /mnt/k8s_static_pv
+sudo chown -R nobody:nogroup /mnt/k8s_storage
+sudo chmod 755 /mnt/k8s_storage
+
+# Configure SongketMail application user permissions (UID:GID 2001:2001)
+sudo chown -R 2001:2001 /mnt/k8s_static_pv
+sudo chmod 775 /mnt/k8s_static_pv
+
+# Export paths in /etc/exports
+echo "/mnt/k8s_storage 10.0.20.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+echo "/mnt/k8s_static_pv 10.0.20.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+
+sudo exportfs -rav
+sudo systemctl enable --now nfs-kernel-server</code></pre>
+
+            <h5 class="font-bold text-sm text-slate-900 dark:text-white">AlmaLinux/RockyLinux Family</h5>
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code>sudo dnf install -y nfs-utils
+
+# Firewalld configurations (when host acts as NFS server)
+sudo firewall-cmd --permanent --add-service=nfs
+sudo firewall-cmd --permanent --add-service=mountd
+sudo firewall-cmd --permanent --add-service=rpc-bind
+sudo firewall-cmd --reload
+
+# Prepare directories and export permissions
+sudo mkdir -p /mnt/k8s_storage /mnt/k8s_static_pv
+sudo chown -R nobody:nobody /mnt/k8s_storage
+sudo chmod 755 /mnt/k8s_storage
+
+sudo chown -R 2001:2001 /mnt/k8s_static_pv
+sudo chmod 775 /mnt/k8s_static_pv
+
+echo "/mnt/k8s_storage 10.0.20.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+echo "/mnt/k8s_static_pv 10.0.20.0/24(rw,sync,no_subtree_check,root_squash)" | sudo tee -a /etc/exports
+
+sudo exportfs -rav
+sudo systemctl enable --now nfs-server</code></pre>
+        </div>
+
+        <h3 id="rke2-worker-client-prerequisites">RKE2 Worker Client Prerequisites</h3>
+        <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+            <li><strong>Debian/Ubuntu Family:</strong> <code>sudo apt-get install -y nfs-common</code></li>
+            <li><strong>AlmaLinux/RockyLinux Family:</strong> <code>sudo dnf install -y nfs-utils</code></li>
+        </ul>
+
+        <h3 id="rke2-nfs-provisioner-configuration">RKE2 NFS Provisioner Configuration</h3>
+        <p>Using the <code>nfs-subdir-external-provisioner</code> Helm chart:</p>
+
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># nfs-values.yaml
+nfs:
+  server: 10.0.20.50
+  path: /mnt/k8s_storage
+storageClass:
+  name: nfs-client
+  defaultClass: false
+  archiveOnDelete: false</code></pre>
+
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code>helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+  -f nfs-values.yaml \
+  --namespace kube-system</code></pre>
+
+        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+            <li><strong>Use Case:</strong> Shared configuration files, web server static assets, and legacy application shared directories requiring RWX access modes across pods.</li>
+            <li><strong>Verdict:</strong> Suitable for low-IOPS, non-critical data sharing. Not recommended for database workloads due to locking and latency overheads.</li>
+        </ul>
+
+        <h2 id="3-static-pv-binding-local-path-provisioner">⚡ 3. Static PV Binding & Local Path Provisioner</h2>
+        <p>By utilising the underlying disk infrastructure of physical compute nodes, the Local Path Provisioner provides the highest raw IOPS possible. RKE2 ships with Rancher's Local Path Provisioner by default. However, this binds a pod to a specific node; if that node fails, the pod cannot be rescheduled to a different node with its data intact unless application-level replication (e.g., Patroni, Galera) is in place.</p>
+
+        <h3 id="configuration-os-agnostic">Configuration (OS Agnostic)</h3>
+        <p>The provisioner leverages host directories (typically <code>/var/lib/rancher/rke2/storage</code>). No specific OS package installations are required beyond standard disk formatting (XFS/ext4) and mounting.</p>
+
+        <h4>ConfigMap Override (local-path-config.yaml)</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># local-path-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-path-config
+  namespace: kube-system
+data:
+  config.json: |-
+    {
+      "nodePathMap":[
+      {
+        "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+        "paths":["/opt/local-path-provisioner"]
+      }
+      ]
+    }</code></pre>
+
+        <h4>Static Persistent Volume & Claim Manifests (rke2-static-pv.yaml)</h4>
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto font-mono"><code># rke2-static-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-nfs-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nconnect=8
+  nfs:
+    server: 10.0.20.50
+    path: /mnt/k8s_static_pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-nfs-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: static-nfs-pv
+  resources:
+    requests:
+      storage: 100Gi</code></pre>
+
+        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+            <li><strong>Use Case:</strong> Highly specific workloads that handle their own replication at the application layer (e.g., Elasticsearch clusters, Kafka brokers, Patroni-managed PostgreSQL) where bare-metal NVMe performance is mandatory.</li>
+            <li><strong>Verdict:</strong> Deploy strictly when the application architecture is designed for "shared-nothing" resilience. Unsuitable for standard single-instance stateful deployments due to single-point-of-failure (SPOF) risks at the node level.</li>
+        </ul>
+
+        <h2 id="storage-decision-matrix-architectural-comparison">⚖️ Storage Decision Matrix & Architectural Comparison</h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700">
+                <thead>
+                    <tr class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">Provisioner Type</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">Access Mode</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">Resiliency & HA</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">Target Workloads</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">OS Dependencies</th>
+                        <th class="p-3 border border-slate-200 dark:border-slate-700">Performance Profile</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-700 dark:text-slate-300">
+                    <tr>
+                        <td class="p-3 font-bold border border-slate-200 dark:border-slate-700">Ceph CSI (RBD)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ReadWriteOnce</code> (RWO)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Multi-node OSD replication, dynamic failover</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">PostgreSQL / Patroni, Vector DB, Stateful Apps</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ceph-common</code>, <code>rbd</code> module</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">High IOPS, Low Latency, Distributed HA</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold border border-slate-200 dark:border-slate-700">Ceph CSI (CephFS)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ReadWriteMany</code> (RWX)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Multi-MDS HA filesystem, distributed replication</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Shared media streams, attachments</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ceph-common</code></td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Medium-High IOPS, Shared File System</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold border border-slate-200 dark:border-slate-700">NFS External</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ReadWriteMany</code> (RWX)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Single NFS server (SPOF unless NAS/SAN appliance)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Shared config files, static assets</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>nfs-common</code> / <code>nfs-utils</code></td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Low-Medium IOPS, File Locking Bottleneck</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold border border-slate-200 dark:border-slate-700">Local Path</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700"><code>ReadWriteOnce</code> (RWO)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Bound to single host disk (No node HA)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Kafka, Elasticsearch, Shared-Nothing DB</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">None (standard filesystem mount)</td>
+                        <td class="p-3 border border-slate-200 dark:border-slate-700">Maximum Raw NVMe IOPS, Sub-millisecond</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </section>
+
+        <!-- Column 3: Right Sidebar (span 3) -->
+        <aside class="lg:col-span-3 space-y-6">
+
+            <!-- Table of Contents Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sticky top-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Table of contents</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="pl-0">
+                        <a href="#rke2-persistent-volume-pv-storage-architecture" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            🗺️ RKE2 Persistent Volume (PV) Storage Architecture
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#1-external-ceph-csi-storage-provisioning-rbd-pve-ceph-integration" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            💾 1. External Ceph CSI Storage Provisioning (RBD) & PVE-Ceph Integration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#os-family-dependencies-configuration" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            OS Family Dependencies & Configuration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#pve-ceph-integration-via-helm" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            PVE-Ceph Integration via Helm
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#2-nfs-storage-server-provisioning" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            📁 2. NFS Storage Server Provisioning
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#os-family-dependencies-configuration-1" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            OS Family Dependencies & Configuration
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#rke2-worker-client-prerequisites" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            RKE2 Worker Client Prerequisites
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#rke2-nfs-provisioner-configuration" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            RKE2 NFS Provisioner Configuration
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#3-static-pv-binding-local-path-provisioner" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚡ 3. Static PV Binding & Local Path Provisioner
+                        </a>
+                    </li>
+                    <li class="pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <a href="#configuration-os-agnostic" class="text-slate-550 dark:text-slate-450 hover:text-violet-600 dark:hover:text-violet-400 transition text-xs block font-medium">
+                            Configuration (OS Agnostic)
+                        </a>
+                    </li>
+                    <li class="pl-0">
+                        <a href="#storage-decision-matrix-architectural-comparison" class="text-slate-650 dark:text-slate-350 hover:text-violet-600 dark:hover:text-violet-400 transition font-semibold block">
+                            ⚖️ Storage Decision Matrix & Architectural Comparison
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="max-w-7xl mx-auto px-4 py-8 mt-12 border-t border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <div class="text-xs text-slate-400 dark:text-slate-500 flex flex-wrap justify-center gap-3">
+            <span>SongketMail Infrastructure: <a href="https://www.linuxmalaysia.com/" class="hover:text-violet-500 underline">linuxmalaysia.com</a></span>
+            <span>•</span>
+            <span>Copyright © 2005 - 2026 Harisfazillah Jamel</span>
+            <span>•</span>
+            <span><a href="legal-notice.html" class="hover:text-violet-500 underline font-semibold">Legal Notice & Disclaimer</a></span>
+        </div>
+        <div class="text-[10px] tracking-wide text-slate-400 dark:text-slate-600 uppercase font-semibold flex flex-wrap justify-center gap-2">
+<span>[ TOPIC: 28 ]</span>
+            <span>|</span>
+            <span>[ ORCH: RKE2_PV ]</span>
+            <span>|</span>
+            <span>[ STORAGE: CEPH_NFS_LOCAL ]</span>
+        </div>
+    </footer>
+
+</body>
+</html>

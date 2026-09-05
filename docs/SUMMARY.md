@@ -39,6 +39,7 @@ topics: [summary, index, navigation]
 * [Part 25: Email Security from the Wire to the Mailbox, JMAP Protocol & ACME Management](email-security-design.md)
 * [Part 26: FreeBSD Options & Bhyve Hypervisor Architecture](freebsd-bhyve-solutions.md)
 * [Part 27: Documentation Sync Pipeline & GitHub Actions Setup Guide](docs-sync-pipeline-guide.md)
+* [Part 28: Persistent Volume (PV) Storage Server Setup for RKE2](rke2-pv-storage-setup.md)
 
 ---
 *Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-25*
