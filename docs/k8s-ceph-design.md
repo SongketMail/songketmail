@@ -425,6 +425,8 @@ sudo systemctl enable --now k3s-agent.service
 
 ### 8.6 Persistent Volume (PV) Storage Server Setup for RKE2
 
+*For detailed multi-OS deployment guides, Helm values, and StorageClass specifications across Debian, Ubuntu, AlmaLinux, and Rocky Linux, refer to [Part 28: Persistent Volume (PV) Storage Server Setup for RKE2](rke2-pv-storage-setup.md).*
+
 To set up and configure server infrastructure for RKE2 Persistent Volume (PV) storage, SongketMail supports three enterprise PV architectures:
 
 #### A. Dedicated NFS Storage Server Provisioning (`ReadWriteMany` / RWX)

@@ -1,5 +1,6 @@
 [MENTAL ANCHOR]
 Project: SongketMail Enterprise Kubernetes & Ceph Architecture
-Status: Completed RKE2 PV Storage Server Setup documentation (NFS dynamic/static & Ceph CSI RBD).
-Branch: jules-rke2-pv-storage-setup
-Next Steps: Restore branch or reactivate PR when needed. All test suites passing (500/500).
+Status: Completed Part 28 RKE2 PV Storage Server Setup documentation (Ceph CSI RBD, NFS, Local Path) across Debian/Ubuntu and AlmaLinux/RockyLinux.
+Brain State: DSOM EOD Palace Brain Sync executed. Task tracker, walkthrough log, checkpoint summary, and active context manifest updated.
+Branch: feat/rke2-pv-storage-setup
+Verification: All 532 unit tests passing cleanly. Playwright visual screenshot verified.
