@@ -47,15 +47,14 @@ def check_port(port):
 
 
 def parse_template_ports(template_path):
-    """Extracts Published Ports from the Quadlet proxy.container template file.
-
-    Parses the systemd Quadlet template layout to identify mapped external host ports.
-
+    """
+    Extract host ports from Quadlet `PublishPort` directives.
+    
     Args:
-        template_path (str): The filesystem path to the proxy.container template.
-
+        template_path (str): Path to the Quadlet template file.
+    
     Returns:
-        list: A sorted list of unique port integers found.
+        list: Sorted unique host port numbers, or an empty list if the file cannot be read.
     """
     ports = []
     if os.path.exists(template_path):
@@ -72,13 +71,13 @@ def parse_template_ports(template_path):
 
 
 def parse_template_env_vars(template_path):
-    """Extracts configured virtual hosts and reverse proxies from the proxy template.
-
+    """Extract environment variable assignments from a proxy template.
+    
     Args:
-        template_path (str): The filesystem path to the proxy template.
-
+        template_path (str): Path to the proxy template.
+    
     Returns:
-        dict: A dictionary containing key-value environment pairs.
+        dict: Environment variable names mapped to their configured values.
     """
     env_vars = {}
     if os.path.exists(template_path):

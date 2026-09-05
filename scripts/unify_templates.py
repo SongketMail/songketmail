@@ -126,15 +126,15 @@ SUBTITLE_MAP = {
 
 
 def parse_frontmatter(md_path):
-    """Parses OKF compliant YAML frontmatter from a Markdown file.
-
-    Extracts keys and values bounded by triple dashes (---) from the file head.
-
+    """
+    Extracts simple metadata from YAML-like frontmatter in a Markdown file.
+    
     Args:
-        md_path (str): The file path of the Markdown file.
-
+        md_path (str): Path to the Markdown file.
+    
     Returns:
-        dict: A dictionary of parsed YAML key-value pairs, or empty dict if not found.
+        dict: Parsed key-value metadata, or an empty dictionary if the file or
+            frontmatter is absent.
     """
     if not os.path.exists(md_path):
         return {}
@@ -526,14 +526,10 @@ def clean_content(content):
 
 
 def main():
-    """Main execution block to scan all .html pages and rebuild them cleanly.
-
-    Scans the docs/ directory, parses existing file content layouts, extracts
-    meaningful center main panels, updates titles and navigation parameters,
-    and overwrites unified templates cleanly.
-
-    Raises:
-        OSError: If files scanning or writing encounters resource issues.
+    """
+    Rebuild all HTML documentation pages in the `docs/` directory using the shared layout.
+    
+    Existing page content is extracted, cleaned, assigned heading anchors and a table of contents, then written back to its original file. Pages with unrecognized structures are skipped.
     """
     docs_dir = "docs"
     html_files = [f for f in os.listdir(docs_dir) if f.endswith(".html")]

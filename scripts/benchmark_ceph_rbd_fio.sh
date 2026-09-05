@@ -31,6 +31,7 @@ IMAGE_SIZE_MB=4096
 RUNTIME=10
 DRY_RUN=0
 
+# show_help displays command-line usage, available options, and their default values.
 show_help() {
     cat << EOF
 Usage: $0 [options]
@@ -93,6 +94,7 @@ echo "======================================================================"
 echo ""
 echo "[1/3] Auditing NFS v4.2 Dynamic Mount Parameters & Kernel Tuning..."
 
+# check_nfs_parameter reports whether a sysctl parameter matches its expected value.
 check_nfs_parameter() {
     local param="$1"
     local expected="$2"

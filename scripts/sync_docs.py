@@ -61,7 +61,20 @@ def resolve_page_path(source_dir: Path, page: str) -> bool:
 
 
 def validate_source_docs(source_dir: Path, min_files: int = 5):
-    """Validates source documentation directory, docs.json, MDX file count, navigation targets, and reports orphans."""
+    """
+    Validate the source documentation directory and its navigation configuration.
+    
+    Parameters:
+        source_dir (Path): Directory containing the source documentation.
+        min_files (int): Minimum number of MDX files required.
+    
+    Returns:
+        list[Path]: All files found in the source directory.
+    
+    Raises:
+        ValueError: If the directory, configuration file, required MDX files, or
+            navigation targets are invalid.
+    """
     if not source_dir.exists() or not source_dir.is_dir():
         raise ValueError(f"Source directory '{source_dir}' does not exist or is not a directory.")
 

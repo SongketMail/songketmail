@@ -43,7 +43,9 @@ def doc_server():
 
 
 def test_theme_toggling_playwright():
-    """Verifies theme toggle buttons (Light, Dark, Auto) update html element classes."""
+    """
+    Verify that the documentation page applies and removes dark mode through its theme controls.
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": 1280, "height": 800})
@@ -74,7 +76,14 @@ def test_theme_toggling_playwright():
     ],
 )
 def test_toc_smooth_scrolling_across_viewports(viewport_name, width, height):
-    """Verifies Table of Contents anchor links trigger navigation and smooth scrolling across viewports."""
+    """
+    Verify that a Table of Contents link navigates to its target heading across viewport sizes.
+    
+    Parameters:
+        viewport_name: Name of the viewport configuration used by the test.
+        width: Viewport width in pixels.
+        height: Viewport height in pixels.
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": width, "height": height})
@@ -95,7 +104,12 @@ def test_toc_smooth_scrolling_across_viewports(viewport_name, width, height):
 
 
 def generate_verification_screenshot():
-    """Generates a visual verification screenshot for the frontend verification tool."""
+    """
+    Capture a dark-mode screenshot of the documentation page for visual verification.
+    
+    Returns:
+        str: The path to the generated screenshot.
+    """
     os.makedirs("/home/jules/verification", exist_ok=True)
     screenshot_path = "/home/jules/verification/verification.png"
 
