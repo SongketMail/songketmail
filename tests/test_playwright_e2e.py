@@ -26,6 +26,7 @@ ALL_HTML_PAGES = sorted([f for f in os.listdir(DOCS_DIR) if f.endswith(".html")]
 
 class QuietHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
+        """Initialize a request handler that serves files from the documentation directory."""
         super().__init__(*args, directory=DOCS_DIR, **kwargs)
 
     def log_message(self, format, *args):
@@ -55,7 +56,7 @@ def test_html_page_count():
 
 
 def test_theme_toggling_playwright():
-    """Verifies theme toggle buttons (Light, Dark, Auto) update html element classes."""
+    """Verify that the documentation page's theme controls update the HTML element's theme class."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": 1280, "height": 800})
@@ -86,7 +87,14 @@ def test_theme_toggling_playwright():
     ],
 )
 def test_toc_smooth_scrolling_across_viewports(viewport_name, width, height):
-    """Verifies Table of Contents anchor links trigger navigation and smooth scrolling across viewports."""
+    """
+    Verify that a table-of-contents link navigates to its target heading across viewport sizes.
+    
+    Parameters:
+        viewport_name: Name of the viewport configuration used by the test.
+        width: Viewport width in pixels.
+        height: Viewport height in pixels.
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": width, "height": height})
@@ -141,7 +149,12 @@ def test_visual_regression_snapshot_matching_all_docs_pages(html_file):
 
 
 def generate_verification_screenshot():
-    """Generates a visual verification screenshot for the frontend verification tool."""
+    """
+    Generate a dark-mode verification screenshot of the performance tuning page.
+    
+    Returns:
+        str: The path to the generated screenshot.
+    """
     os.makedirs("/home/jules/verification", exist_ok=True)
     screenshot_path = "/home/jules/verification/verification.png"
 
