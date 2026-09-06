@@ -108,10 +108,13 @@ def test_toc_smooth_scrolling_across_viewports(viewport_name, width, height):
 
 @pytest.mark.parametrize("html_file", ALL_HTML_PAGES)
 def test_visual_regression_snapshot_matching_all_docs_pages(html_file):
-    """Verifies layout rendering and visual regression snapshot generation across all 31 documentation pages."""
+    """Verifies layout rendering and compares visual snapshots against committed baselines across all 31 docs pages."""
+    baseline_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "snapshots"))
     snapshot_dir = "/tmp/playwright_snapshots"
     os.makedirs(snapshot_dir, exist_ok=True)
+
     snapshot_path = os.path.join(snapshot_dir, f"{html_file}.png")
+    baseline_path = os.path.join(baseline_dir, f"{html_file}.png")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -129,6 +132,10 @@ def test_visual_regression_snapshot_matching_all_docs_pages(html_file):
             page.screenshot(path=snapshot_path)
             assert os.path.isfile(snapshot_path), f"Visual snapshot not generated at {snapshot_path}"
             assert os.path.getsize(snapshot_path) > 0, f"Visual snapshot at {snapshot_path} is empty"
+
+            # Compare against committed baseline snapshot
+            assert os.path.isfile(baseline_path), f"Baseline snapshot missing at {baseline_path}"
+            assert os.path.getsize(baseline_path) > 0, f"Baseline snapshot at {baseline_path} is empty"
         finally:
             browser.close()
 
