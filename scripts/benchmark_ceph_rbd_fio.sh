@@ -60,18 +60,34 @@ EOF
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --pool)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "Error: Missing value for --pool" >&2
+                exit 1
+            fi
             POOL_NAME="$2"
             shift 2
             ;;
         --image)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "Error: Missing value for --image" >&2
+                exit 1
+            fi
             IMAGE_NAME="$2"
             shift 2
             ;;
         --size)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "Error: Missing value for --size" >&2
+                exit 1
+            fi
             IMAGE_SIZE_MB="$2"
             shift 2
             ;;
         --runtime)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "Error: Missing value for --runtime" >&2
+                exit 1
+            fi
             RUNTIME="$2"
             shift 2
             ;;
@@ -84,7 +100,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            echo "Unknown argument: $1"
+            echo "Unknown argument: $1" >&2
             show_help
             exit 1
             ;;
