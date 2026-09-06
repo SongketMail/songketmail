@@ -239,9 +239,11 @@ Local preview server runs at [http://localhost:3000](http://localhost:3000).
 To confirm operational readiness:
 
 1. **Test dry-run execution:**
+
    ```bash
    python3 scripts/sync_docs.py --dry-run
    ```
+
 2. **Verify target repository commit history:** Check `https://github.com/songketmail/songketmail-product-pages/commits/main` for sync commits.
 
 ---

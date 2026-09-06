@@ -25,9 +25,11 @@ Instead of legacy docker-compose or ad-hoc run scripts, this baseline utilizes *
 
 ### 2. Node-Isolated Storage & Sovereignty
 To maximize host I/O throughput and maintain clear storage structures, volume mounts point to node-isolated paths under:
-```
+
+```text
 /opt/songketmail/{{ service_name }}/{{ inventory_hostname }}/data
 ```
+
 For example, the SMTP/IMAP data for `node1.songketmail.internal` maps exactly to `/opt/songketmail/emailserver/node1.songketmail.internal/data`.
 
 > ⚠️ **The Rootless UID Mapping Problem**:
@@ -35,9 +37,11 @@ For example, the SMTP/IMAP data for `node1.songketmail.internal` maps exactly to
 >
 > 💡 **The Solution — Storage Sovereignty via `keep-id`**:
 > We enforce a **mandatory `keep-id` mapping** at the **Pod level**.
+>
 > ```ini
 > UserNS=keep-id:uid=2001,gid=2001
 > ```
+>
 > This ensures that the host UID/GID (`2001:2001`) of the `songketmail` owner matches exactly the containerized process's internal UID/GID. Storage Sovereignty is preserved: the Master Architect owns and interacts with the physical mount directories directly and securely without `sudo` privileges.
 
 ### 3. Fabric Isolation
@@ -102,6 +106,7 @@ To ensure maximum host integrity and protect against vulnerabilities, our setup 
 
 ### 1. Configuration Check
 Review global parameters in `group_vars/all.yml` to ensure correct subnetting and volume locations:
+
 ```yaml
 cluster_prefix: "skm_fabric"
 songketmail_uid: 2001
@@ -110,6 +115,7 @@ storage_base_path: "/opt/songketmail"
 
 ### 2. Update Inventory
 Add your remote hosts to `inventory/hosts.ini`:
+
 ```ini
 [email_servers]
 node1.songketmail.internal ansible_host=10.0.1.11
@@ -118,6 +124,7 @@ node2.songketmail.internal ansible_host=10.0.1.12
 
 ### 3. Run the Playbook
 Run the baseline orchestration play to prepare, harden, and deploy services:
+
 ```bash
 ansible-playbook -i inventory/hosts.ini site.yml
 ```

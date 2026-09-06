@@ -44,36 +44,47 @@ Perform host-level kernel and system-level configuration required for rootless c
 
 1.  **Install Required Base Packages**:
     Ensure the latest stable versions of Python, Ansible, Podman, and the `podman-docker` compatibility layer are installed on the host:
+
     ```bash
     apt-get update && apt-get install -y python3 python3-pip ansible podman podman-docker
     ```
+
 2.  **Enable Unprivileged Low-Port Binding**:
     Standard Linux kernels restrict unprivileged users from binding to ports below `1024`. Since BunkerWeb runs rootless and must bind to public ports `25`, `80`, `443`, `587`, and `993`, we must tune the sysctl settings:
+
     ```bash
     sysctl -w net.ipv4.ip_unprivileged_port_start=25
     ```
+
     To persist this across reboots, define it in `/etc/sysctl.d/99-songketmail.conf`:
+
     ```ini
     net.ipv4.ip_unprivileged_port_start=25
     ```
+
 3.  **Kernel Networking & Memory Optimizations**:
     Load and persist the bridge networking module for container inter-communication, enable packet forwarding, and increase virtual memory map limits to support database performance:
+
     ```bash
     modprobe br_netfilter
     echo "br_netfilter" > /etc/modules-load.d/br_netfilter.conf
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w vm.max_map_count=262144
     ```
+
 4.  **Provision Unprivileged User and Subordinate UIDs**:
     Create the designated service owner account `songketmail` (UID/GID `2001:2001`) and configure namespace subuids and subgids to map container operations natively:
+
     ```bash
     groupadd -g 2001 songketmail
     useradd -u 2001 -g 2001 -m -s /bin/bash songketmail
     echo "songketmail:100000:65536" >> /etc/subuid
     echo "songketmail:100000:65536" >> /etc/subgid
     ```
+
 5.  **Enable User Session Lingering**:
     By default, user systemd daemons terminate upon session logout. To ensure email services run continuously on system startup and persist background executions, activate systemd linger:
+
     ```bash
     loginctl enable-linger songketmail
     ```
@@ -83,11 +94,13 @@ To maintain absolute data integrity and backup capability, establish host-level 
 
 1.  **Initialize Storage Base Path**:
     Construct the root storage path at `/var/srv/songketmail` with strict permissions (`0700`) restricting access exclusively to the `songketmail` owner:
+
     ```bash
     mkdir -p /var/srv/songketmail
     chmod 0700 /var/srv/songketmail
     chown 2001:2001 /var/srv/songketmail
     ```
+
 2.  **Provision the 14 Specific Subdirectories**:
     Create the individual directories to isolate configurations, databases, and message caches for the decoupled service mesh:
     - `bunkerweb/data` - Proxy dynamic storage
@@ -112,13 +125,16 @@ Leverage the Ansible playbook (`site.yml`) with strict FQCN mapping to automate 
 
 1.  **Configure Host Inventory (`inventory/hosts.ini`)**:
     Specify the minimal Linux server as the target node:
+
     ```ini
     [email_servers]
     mail_node ansible_host=192.168.1.100 ansible_user=root
     ```
+
 2.  **Define Global Variables (`group_vars/all.yml`)**:
     Review and pin image tags and execution parameters:
     {% raw %}
+
     ```yaml
     cluster_prefix: "songketmail"
     songketmail_user: "songketmail"
@@ -128,9 +144,11 @@ Leverage the Ansible playbook (`site.yml`) with strict FQCN mapping to automate 
     roundcube_image_tag: "1.6.8-apache"
     bunkerweb_image_tag: "1.6.13"
     ```
+
     {% endraw %}
 3.  **Execute the Deployment**:
     Run the unified site playbook. This implements the **Symmetric Privilege Strategy**: executing host-level hardening as `root`, and switching context directly to `become_user: songketmail` to template, write, and run user-session Quadlet unit files:
+
     ```bash
     ansible-playbook -i inventory/hosts.ini site.yml
     ```
@@ -140,9 +158,11 @@ Ensure the Quadlets are correctly interpreted by the systemd user manager.
 
 1.  **Verify Quadlet Unit Placements**:
     Confirm files are located under:
+
     ```bash
     /home/songketmail/.config/containers/systemd/
     ```
+
     The directory must contain:
     - `songketmail_net.network` (Network configuration bridge)
     - `songketmail_pod.pod` (Consolidated Pod container group with `UserNS=keep-id`)
@@ -155,11 +175,14 @@ Ensure the Quadlets are correctly interpreted by the systemd user manager.
     - `songketmail_rspamd.container` (Rspamd spam filters)
 2.  **Reload User systemd Manager**:
     Run a user-session daemon-reload to parse the Quadlet configurations and generate native systemd service files:
+
     ```bash
     systemctl --user daemon-reload
     ```
+
 3.  **Start and Enable Services**:
     Initialize the Pod group and the individual container engines:
+
     ```bash
     systemctl --user enable --now songketmail_pod-pod.service
     systemctl --user enable --now songketmail_proxy.service
@@ -171,15 +194,19 @@ Confirm the email server is fully up, secure, and ready to transmit and receive 
 
 1.  **Check Services Status**:
     Inspect the service statuses under the unprivileged user scope:
+
     ```bash
     systemctl --user status songketmail_pod-pod.service
     systemctl --user status songketmail_web.service
     ```
+
 2.  **Verify Public Ports Binding**:
     Ensure BunkerWeb is successfully listening on host ports:
+
     ```bash
     ss -tulnp | grep -E "25|80|443|587|993"
     ```
+
 3.  **Validate Webmail UI Access**:
     Access the Roundcube client through your web browser at `https://mail.songketmail.internal/`.
     The connection is terminated securely via BunkerWeb, utilizing client IP preservation and standard WAF filters to shield the mail backend from external threats.
@@ -194,11 +221,14 @@ The objective of this phase is to deploy **DockPod** as a lightweight, zero-depe
 Enable the rootless Podman API socket, allowing DockPod to interact with the container engine without root permissions.
 
 1.  **Activate user-level Podman Socket**:
+
     ```bash
     systemctl --user enable --now podman.socket
     ```
+
 2.  **Verify Socket Ownership**:
     Ensure the socket is initialized and accessible under the `songketmail` user session:
+
     ```bash
     ls -la /run/user/2001/podman/podman.sock
     ```
@@ -207,13 +237,16 @@ Enable the rootless Podman API socket, allowing DockPod to interact with the con
 Deploy the compiled Go binary and manage its lifecycle natively via systemd.
 
 1.  **Download the Binary**:
+
     ```bash
     mkdir -p ~/.local/bin
     curl -fsSL -o ~/.local/bin/dockpod https://dockpod.io/releases/latest/dockpod
     chmod +x ~/.local/bin/dockpod
     ```
+
 2.  **Create User systemd Unit File**:
     Write the service file to `~/.config/systemd/user/dockpod.service`:
+
     ```ini
     [Unit]
     Description=DockPod Container Control Plane
@@ -228,7 +261,9 @@ Deploy the compiled Go binary and manage its lifecycle natively via systemd.
     [Install]
     WantedBy=default.target
     ```
+
 3.  **Start the Service**:
+
     ```bash
     systemctl --user daemon-reload
     systemctl --user enable --now dockpod.service
@@ -239,6 +274,7 @@ Configure secure HTTPS endpoints for the DockPod dashboard and MCP streaming ser
 
 1.  **Configure Proxy Route**:
     Update the BunkerWeb reverse proxy configuration or specify environment variables to handle routing to DockPod:
+
     ```nginx
     # DockPod Panel Proxy Configuration
     server {
@@ -278,7 +314,9 @@ Configure secure HTTPS endpoints for the DockPod dashboard and MCP streaming ser
         }
     }
     ```
+
 2.  **Restart BunkerWeb Container**:
+
     ```bash
     systemctl --user restart songketmail-proxy
     ```
@@ -298,6 +336,7 @@ Connect your AI Client to DockPod and verify deep diagnostic reporting.
 
 1.  **Configure Client Settings**:
     Add the MCP remote definition to the client configuration file (e.g., `claude_desktop_config.json`):
+
     ```json
     {
       "mcpServers": {
@@ -313,6 +352,7 @@ Connect your AI Client to DockPod and verify deep diagnostic reporting.
       }
     }
     ```
+
 2.  **Verify Connection with LLM Tools**:
     Ask the AI agent to list containers or verify Postfix mail loops to prove end-to-end telemetry and monitoring are fully established.
 

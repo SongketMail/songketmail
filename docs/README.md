@@ -26,9 +26,11 @@ Instead of legacy docker-compose or ad-hoc run scripts, this baseline utilizes *
 ### 2. Node-Isolated Storage & Sovereignty
 To maximize host I/O throughput and maintain clear storage structures, volume mounts point to node-isolated paths under:
 {% raw %}
+
 ```
 /opt/songketmail/{{ service_name }}/{{ inventory_hostname }}/data
 ```
+
 {% endraw %}
 For example, the SMTP/IMAP data for `node1.songketmail.internal` maps exactly to `/opt/songketmail/emailserver/node1.songketmail.internal/data`.
 

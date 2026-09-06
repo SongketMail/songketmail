@@ -61,9 +61,11 @@ SongketMail's architectural integrity relies on the **"Persistence Trinity"**:
 
 ### Direct Socket Binding:
 Because DockPod is lightweight, it can run as an unprivileged systemd user-level service under the `songket` user session (UID 2001). By pointing DockPod's socket path directly to the rootless Podman API socket:
+
 ```bash
 /run/user/2001/podman/podman.sock
 ```
+
 DockPod gains complete visibility over the `songketmail_pod` services without requiring root privileges or violating storage sovereignty.
 
 ---
@@ -73,6 +75,7 @@ DockPod gains complete visibility over the `songketmail_pod` services without re
 By default, rootless Podman does not enable its API listening socket on startup. To make the socket accessible to DockPod, the systemd user service `podman.socket` must be explicitly enabled and lingered for the `songket` user.
 
 ### Activation Commands:
+
 ```bash
 # Log in or switch to the songket user context
 export XDG_RUNTIME_DIR="/run/user/2001"
@@ -83,12 +86,14 @@ systemctl --user enable --now podman.socket
 ```
 
 ### Verification:
+
 ```bash
 ls -la /run/user/2001/podman/podman.sock
 # Output: srw-rw----. 1 songket songket 0 Jul 4 12:00 /run/user/2001/podman/podman.sock
 ```
 
 Once verified, DockPod is configured to attach to this socket by defining the socket environment variable:
+
 ```bash
 DOCKPOD_SOCKET="/run/user/2001/podman/podman.sock"
 ```
@@ -140,6 +145,7 @@ If Traefik must remain enabled to support specific backend containers managed in
 #### Option C: Nested Proxying (BunkerWeb as Edge, Traefik as Backend)
 Configure BunkerWeb as the primary public-facing edge proxy, which terminates TLS and performs WAF inspection, then forwards requests to Traefik.
 * For this to work without losing client IPs, BunkerWeb must forward standard headers (`X-Real-IP`, `X-Forwarded-For`), and Traefik must be configured to trust BunkerWeb's internal IP address range:
+
   ```yaml
   # Traefik entryPoints configuration
   entryPoints:
@@ -172,6 +178,7 @@ Exposing a container management panel introduces a high-value attack vector. To 
    All MCP requests require a secure Bearer token prefixed with `dp_mcp_`. These keys must be rotated regularly and stored using unprivileged file permissions (`0600`) on the host filesystem.
 3. **Systemd Sandboxing**:
    Run the DockPod service under a sandboxed systemd service file limiting write permissions to its own database folder:
+
    ```ini
    ProtectSystem=strict
    ReadWritePaths=/var/lib/dockpod

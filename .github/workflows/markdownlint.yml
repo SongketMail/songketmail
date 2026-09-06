@@ -1,0 +1,30 @@
+name: MarkdownLint & Code Block Spacing Compliance
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  markdownlint:
+    name: MarkdownLint Check (MD031 Enforcer)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+
+      - name: Run MarkdownLint CLI
+        run: |
+          npx markdownlint-cli@0.44.0 --config .markdownlint.json "**/*.md" --ignore node_modules

@@ -77,6 +77,7 @@ This directory is scanned automatically by the rootless systemd manager. Placing
 Below is an explicit, production-grade Ansible task list utilizing proper FQCN syntax to template and deploy Quadlet configurations under the rootless environment. Notice how the environment variables `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` are passed explicitly to the user-level systemd service manager.
 
 {% raw %}
+
 ```yaml
 # Deploys standard and custom Quadlets into the rootless systemd path
 - name: Create Quadlet configuration directory
@@ -118,6 +119,7 @@ Below is an explicit, production-grade Ansible task list utilizing proper FQCN s
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ songket_uid | default(2001) }}/bus"
   when: quadlets_deployed.changed
 ```
+
 {% endraw %}
 
 ---

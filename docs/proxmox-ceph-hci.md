@@ -142,10 +142,12 @@ To safeguard the cluster from split-brain scenarios and corosync timeout failure
 ### 1. Placement Group (PG) Autoscaling
 Placement Groups are logical fragments used to group objects within a pool to distribute writes evenly across OSDs.
 - Enable the **PG Autoscaler** to dynamically adjust the PG count based on dataset growth:
+
   ```bash
   ceph mgr module enable pg_autoscaler
   ceph osd pool set <pool-name> pg_autoscale_mode on
   ```
+
 - Setting `target_size` or `target_size_ratio` on pools gives the autoscaler early hints, preventing massive, performance-degrading reshuffles later.
 
 ### 2. Erasure Coding (EC) & FastEC Optimization
@@ -154,9 +156,11 @@ To bypass the traditional latency penalty of EC on virtual machine workloads, en
 - Ensure the cluster is at least at the **Tentacle** release.
 - Verify the default EC profile uses a compatible technique (e.g., `reed_sol_van`).
 - Enable partial writes and partial reads optimization:
+
   ```bash
   ceph osd pool set <pool-name>-data allow_ec_optimizations 1
   ```
+
   *Note: `allow_ec_optimizations` is a one-way switch. Once enabled, it cannot be cleared without draining and recreating the pool.*
 
 ---
@@ -220,6 +224,7 @@ While Proxmox VE manages Ceph natively through the GUI or `pveceph`, deploying a
 
 ### 1. Bootstrapping the Ubuntu 26.04 Storage Node
 Install dependencies and bootstrap the cluster using a dedicated IP interface:
+
 ```bash
 # Update packages and install Docker/Podman container runtime
 sudo apt update && sudo apt install -y docker.io python3
@@ -229,10 +234,12 @@ curl --silent --remote-name https://download.ceph.com/rpm/el9/scap-security-guid
 chmod +x cephadm
 sudo ./cephadm bootstrap --mon-ip <UBUNTU_NODE_IP>
 ```
+
 This commands creates an initial Monitor, a Manager, distributes the cluster keys, and spins up a web dashboard on port `8443`.
 
 ### 2. Provisioning OSDs on Ubuntu
 Once the cluster is running, identify raw, unpartitioned disks on the host and assign them as OSD storage devices:
+
 ```bash
 # List available storage devices
 sudo ceph orch device ls
@@ -258,15 +265,20 @@ To scale storage limitlessly or split storage costs, a Proxmox VE hyper-converge
 ```
 
 1. **Extract Client Keyring**: On the Ubuntu 26.04 Ceph cluster, retrieve the admin keyring:
+
    ```bash
    sudo ceph auth get-or-create client.admin
    ```
+
 2. **Transfer Keyring to PVE**: Copy the keyring file to the secure Proxmox clustered filesystem (`pmxcfs`), naming it to match your intended storage ID:
+
    ```bash
    mkdir -p /etc/pve/priv/ceph
    scp user@<ubuntu-ip>:/etc/ceph/ceph.client.admin.keyring /etc/pve/priv/ceph/<storage-id>.keyring
    ```
+
 3. **Configure Storage backend in PVE**: Add the external RADOS Block Device (RBD) config to `/etc/pve/storage.cfg`:
+
    ```ini
    rbd: external-ubuntu-ceph
        monhost 10.10.10.20:6789;10.10.10.21:6789;10.10.10.22:6789
@@ -279,11 +291,14 @@ To scale storage limitlessly or split storage costs, a Proxmox VE hyper-converge
 ### Case B: Ubuntu 26.04 Client Mounting PVE CephFS
 
 1. **Export PVE Configuration**: Copy PVE's `/etc/pve/ceph.conf` and the client key to Ubuntu:
+
    ```bash
    scp root@<pve-ip>:/etc/pve/ceph.conf /etc/ceph/ceph.conf
    scp root@<pve-ip>:/etc/pve/priv/ceph/cephfs.keyring /etc/ceph/ceph.keyring
    ```
+
 2. **Mount CephFS via fstab**: Add the mount option to `/etc/fstab` on Ubuntu 26.04 for high-performance, persistent file shares:
+
    ```text
    10.10.10.1:6789,10.10.10.2:6789,10.10.10.3:6789:/ /mnt/cephfs ceph name=admin,secretfile=/etc/ceph/ceph.keyring,_netdev,x-systemd.mount-timeout=15s 0 0
    ```
