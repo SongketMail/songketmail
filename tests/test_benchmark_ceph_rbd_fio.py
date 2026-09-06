@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """
 tests/test_benchmark_ceph_rbd_fio.py - Unit test suite for scripts/benchmark_ceph_rbd_fio.sh.
-Verifies CLI option parsing, missing argument validation ("Error: Missing value for --pool"),
+Verifies CLI option parsing, missing argument validation, supported network fabrics,
 and dry-run simulation mode.
 """
 
 import os
 import subprocess
 
+import pytest
+
 SCRIPT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "scripts", "benchmark_ceph_rbd_fio.sh"))
+
+
+def _run_script(*arguments):
+    """Run the benchmark through Bash so CLI tests are independent of file-mode metadata."""
+    return subprocess.run(["bash", SCRIPT_PATH, *arguments], capture_output=True, text=True)
 
 
 def test_benchmark_script_exists_and_executable():
@@ -51,6 +58,63 @@ def test_benchmark_script_fabric_option():
     result = subprocess.run([SCRIPT_PATH, "--dry-run", "--fabric", "100G"], capture_output=True, text=True)
     assert result.returncode == 0
     assert "Network Fabric    : 100G RoCEv2/iWARP" in result.stdout
+
+
+def test_benchmark_script_defaults_to_25g_fabric():
+    """Verify dry-run output reports the documented 25G default when no fabric is supplied."""
+    result = _run_script("--dry-run")
+
+    assert result.returncode == 0
+    assert "Network Fabric    : 25G RoCEv2/iWARP" in result.stdout
+
+
+@pytest.mark.parametrize("fabric", ["25G", "100G"])
+def test_benchmark_script_accepts_each_supported_fabric(fabric):
+    """Verify both documented network fabrics are accepted and reported exactly."""
+    result = _run_script("--fabric", fabric, "--dry-run")
+
+    assert result.returncode == 0
+    assert f"Network Fabric    : {fabric} RoCEv2/iWARP" in result.stdout
+
+
+def test_benchmark_script_accepts_network_fabric_alias():
+    """Verify the long-form alias selects the same fabric setting as --fabric."""
+    result = _run_script("--network-fabric", "100G", "--dry-run")
+
+    assert result.returncode == 0
+    assert "Network Fabric    : 100G RoCEv2/iWARP" in result.stdout
+
+
+@pytest.mark.parametrize("option", ["--fabric", "--network-fabric"])
+def test_benchmark_script_rejects_fabric_option_followed_by_another_flag(option):
+    """Verify another option is not accidentally consumed as the fabric value."""
+    result = _run_script(option, "--dry-run")
+
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert result.stderr.strip() == "Error: Missing value for --fabric"
+
+
+@pytest.mark.parametrize("fabric", ["10G", "40G", "25g", "100g", "", "25G "])
+def test_benchmark_script_rejects_unsupported_fabric_values(fabric):
+    """Verify unsupported, malformed, and case-mismatched fabric values fail closed."""
+    result = _run_script("--fabric", fabric, "--dry-run")
+
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert result.stderr.strip() == (
+        f"Error: Invalid value for --fabric: expected '25G' or '100G', got '{fabric}'"
+    )
+
+
+def test_benchmark_script_help_documents_fabric_contract_without_running_audits():
+    """Verify help advertises the supported fabric values without running host audits."""
+    result = _run_script("--help")
+
+    assert result.returncode == 0
+    assert "--fabric <speed>" in result.stdout
+    assert "Network fabric speed: 25G or 100G (Default: 25G)" in result.stdout
+    assert "Auditing NFS" not in result.stdout
 
 
 def test_benchmark_script_dry_run_execution():
