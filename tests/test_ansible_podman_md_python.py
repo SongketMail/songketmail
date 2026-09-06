@@ -78,7 +78,8 @@ def test_ansible_playbooks_yaml_validity():
 
 def test_ansible_playbooks_fqcn_compliance():
     """
-    Ensures that Ansible playbooks and role tasks use fully qualified collection names instead of legacy short module names.
+    Ensures that Ansible playbooks and role tasks use Fully Qualified Collection Names (FQCN)
+    and avoid deprecated or legacy non-FQCN short module names (e.g. 'copy', 'template').
     """
     yaml_files = get_yaml_files()
 

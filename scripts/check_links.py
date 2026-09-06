@@ -49,11 +49,16 @@ def is_external_or_special(link):
 
 
 def check_all_links():
-    """
-    Scan the `docs/` directory and report whether local links resolve to existing paths.
-    
+    """Scans the docs/ folder and verifies all local references resolve successfully.
+
+    Recursively walks through target folders, parses all anchor lines, computes relative
+    resolutions, and flags any non-existent reference targets.
+
     Returns:
-        bool: `True` if all checked local links resolve successfully, `False` otherwise.
+        bool: True if zero broken relative links are detected; False otherwise.
+
+    Raises:
+        OSError: If opening files for scanning encounters filesystem issues.
     """
     broken_links = []
     total_checked = 0

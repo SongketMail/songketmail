@@ -34,13 +34,15 @@ CREATED_IMAGE=0
 
 cleanup_rbd() {
     if [[ "${CREATED_IMAGE}" -eq 1 ]]; then
-        rbd rm "${POOL_NAME}/${IMAGE_NAME}" 2>/dev/null || true
-        CREATED_IMAGE=0
+        if rbd rm "${POOL_NAME}/${IMAGE_NAME}"; then
+            CREATED_IMAGE=0
+        else
+            echo "⚠️ Warning: Failed to remove temporary RBD image '${POOL_NAME}/${IMAGE_NAME}'." >&2
+        fi
     fi
 }
 trap cleanup_rbd EXIT
 
-# show_help displays command-line usage, available options, and their default values.
 show_help() {
     cat << EOF
 Usage: $0 [options]
@@ -103,7 +105,6 @@ echo "======================================================================"
 echo ""
 echo "[1/3] Auditing NFS v4.2 Dynamic Mount Parameters & Kernel Tuning..."
 
-# check_nfs_parameter reports whether a sysctl parameter matches its expected value.
 check_nfs_parameter() {
     local param="$1"
     local expected="$2"
@@ -127,7 +128,7 @@ echo "  Checking NFS Mount Options (rsize=1048576, wsize=1048576, nconnect=4)...
 if mount | grep -q "nfs"; then
     mount | grep "nfs" | while read -r line; do
         echo "  Current NFS Mount: ${line}"
-        if echo "${line}" | grep -q "rsize=1048576" && echo "${line}" | grep -q "wsize=1048576"; then
+        if echo "${line}" | grep -q "rsize=1048576" && echo "${line}" | grep -q "wsize=1048576" && echo "${line}" | grep -q "nconnect=4"; then
             echo "  ✅ [PASS] Optimal NFS dynamic mount parameters detected."
         else
             echo "  ⚠️ [WARN] Mount options do not match recommended tuning: 'rsize=1048576,wsize=1048576,nconnect=4'."
