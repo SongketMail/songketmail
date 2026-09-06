@@ -16,13 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js Environment
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c08020d06ec3e029631bb7af # v4.1.0
         with:
           node-version: "20"
 
       - name: Run MarkdownLint CLI
         run: |
-          npx markdownlint-cli --config .markdownlint.json "**/*.md" --ignore node_modules
+          npx markdownlint-cli@0.44.0 --config .markdownlint.json "**/*.md" --ignore node_modules

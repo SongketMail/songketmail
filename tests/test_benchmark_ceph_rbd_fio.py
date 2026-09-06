@@ -39,6 +39,13 @@ def test_benchmark_script_missing_fabric_value():
     assert "Error: Missing value for --fabric" in result.stderr
 
 
+def test_benchmark_script_invalid_fabric_value():
+    """Verifies that specifying an invalid --fabric value emits an error and exits with non-zero."""
+    result = subprocess.run([SCRIPT_PATH, "--fabric", "10G"], capture_output=True, text=True)
+    assert result.returncode == 1
+    assert "Error: Invalid value for --fabric" in result.stderr
+
+
 def test_benchmark_script_fabric_option():
     """Verifies that running with --fabric 100G sets fabric speed in stdout."""
     result = subprocess.run([SCRIPT_PATH, "--dry-run", "--fabric", "100G"], capture_output=True, text=True)

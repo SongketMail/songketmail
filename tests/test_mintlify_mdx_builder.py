@@ -10,9 +10,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 try:
     from tools import build_mintlify_mdx
-except ImportError:
-    import pytest
-    pytest.skip("tools module not present in repository", allow_module_level=True)
+except ModuleNotFoundError as e:
+    if e.name == "tools":
+        import pytest
+        pytest.skip("tools module not present in repository", allow_module_level=True)
+    raise
 
 
 def test_parse_frontmatter():

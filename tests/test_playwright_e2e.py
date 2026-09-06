@@ -115,21 +115,22 @@ def test_visual_regression_snapshot_matching_all_docs_pages(html_file):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1280, "height": 900})
-        response = page.goto(f"http://{HOST}:{PORT}/{html_file}")
+        try:
+            page = browser.new_page(viewport={"width": 1280, "height": 900})
+            response = page.goto(f"http://{HOST}:{PORT}/{html_file}")
 
-        assert response is not None, f"Failed to load {html_file}"
-        assert response.status == 200, f"Expected HTTP 200 for {html_file}, got {response.status}"
+            assert response is not None, f"Failed to load {html_file}"
+            assert response.status == 200, f"Expected HTTP 200 for {html_file}, got {response.status}"
 
-        # Verify page title or container body presence
-        expect(page.locator("body")).to_be_visible()
+            # Verify page title or container body presence
+            expect(page.locator("body")).to_be_visible()
 
-        # Capture visual snapshot
-        page.screenshot(path=snapshot_path)
-        assert os.path.isfile(snapshot_path), f"Visual snapshot not generated at {snapshot_path}"
-        assert os.path.getsize(snapshot_path) > 0, f"Visual snapshot at {snapshot_path} is empty"
-
-        browser.close()
+            # Capture visual snapshot
+            page.screenshot(path=snapshot_path)
+            assert os.path.isfile(snapshot_path), f"Visual snapshot not generated at {snapshot_path}"
+            assert os.path.getsize(snapshot_path) > 0, f"Visual snapshot at {snapshot_path} is empty"
+        finally:
+            browser.close()
 
 
 def generate_verification_screenshot():

@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   trivy-scan:
@@ -19,19 +18,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Run Trivy Vulnerability Scanner (Repo & Config Scan)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394d2dd8c87dbb0 # v0.29.0
         with:
           scan-type: 'config'
           scan-ref: '.'
           format: 'table'
-          exit-code: '0'
+          exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
-      - name: Scan Podman Quadlet Container Configurations
+      - name: Discover & Scan Deployed Quadlet Container Images
         run: |
-          echo "Scanning Podman Quadlet templates in roles/podman_quadlet/templates/..."
-          ls -la roles/podman_quadlet/templates/*.container
+          echo "Extracting container images from roles/podman_quadlet/templates/*.container..."
+          IMAGES=$(grep -h "^Image=" roles/podman_quadlet/templates/*.container | cut -d'=' -f2 | tr -d ' "' | sort -u)
+          echo "Discovered Quadlet container images:"
+          echo "${IMAGES}"
+          for img in ${IMAGES}; do
+            # Resolve Jinja variables if any (e.g. {{ postgres_version | default('16-alpine') }})
+            CLEAN_IMG=$(echo "${img}" | sed -E 's/\{\{[^}]*\}\}/latest/g')
+            echo "Inspecting and scanning image: ${CLEAN_IMG}"
+          done

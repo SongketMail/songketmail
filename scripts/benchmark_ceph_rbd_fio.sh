@@ -99,6 +99,10 @@ while [[ $# -gt 0 ]]; do
                 echo "Error: Missing value for --fabric" >&2
                 exit 1
             fi
+            if [[ "$2" != "25G" && "$2" != "100G" ]]; then
+                echo "Error: Invalid value for --fabric: expected '25G' or '100G', got '$2'" >&2
+                exit 1
+            fi
             FABRIC_SPEED="$2"
             shift 2
             ;;
