@@ -39,7 +39,16 @@ jobs:
           echo "Discovered Quadlet container images:"
           echo "${IMAGES}"
           for img in ${IMAGES}; do
-            # Resolve Jinja variables if any (e.g. {{ postgres_version | default('16-alpine') }})
-            CLEAN_IMG=$(echo "${img}" | sed -E 's/\{\{[^}]*\}\}/latest/g')
-            echo "Inspecting and scanning image: ${CLEAN_IMG}"
+            # Resolve Jinja variables using group_vars/all.yml defaults
+            CLEAN_IMG=$(echo "${img}" | sed \
+              -e 's/{{ dovecot_image_tag }}/2.3.21.1/g' \
+              -e 's/{{ postfix_image_tag }}/3.9.0/g' \
+              -e 's/{{ bunkerweb_image_tag }}/1.6.13/g' \
+              -e 's/{{ rspamd_image_tag }}/3.9.1/g' \
+              -e 's/{{ rustfs_image_tag }}/1.0.0/g' \
+              -e 's/{{ smallstep_image_tag }}/0.26.1/g' \
+              -e 's/{{ roundcube_image_tag }}/1.6.8-apache/g' \
+              -e 's/\{\{[^}]*\}\}/latest/g')
+            echo "Scanning Quadlet container image: ${CLEAN_IMG}"
+            npx --yes trivy image --severity CRITICAL,HIGH --exit-code 0 "${CLEAN_IMG}" || true
           done

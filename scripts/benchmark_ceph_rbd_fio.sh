@@ -45,7 +45,6 @@ cleanup_rbd() {
 }
 trap cleanup_rbd EXIT
 
-# show_help prints the script usage information and available command-line options.
 show_help() {
     cat << EOF
 Usage: $0 [options]
