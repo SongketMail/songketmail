@@ -1,0 +1,9 @@
+# Cursor Agent Instruction: DSOM Sovereign Brain Active
+
+All operational memory, active tasks, and historical context reside in:
+- `.agents/AGENTS.md` — Core Constitutional Rules
+- `.agents/brain/task.md` — Active Tasks & Milestones
+- `.agents/brain/walkthrough.md` — Session Anchors & Log
+- `.agents/brain/active_context_manifest.md` — Active Context Manifest
+
+MANDATORY: Read `.agents/AGENTS.md` and `.agents/brain/task.md` before executing modifications.

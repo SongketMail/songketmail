@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # --- Helper functions to retrieve test parameters dynamically with exact counts ---
 
 def get_all_markdown_files():
-    """Retrieves all 51 Markdown (.md) files in the repository."""
+    """Retrieves all 53 Markdown (.md) files in the repository."""
     md_files = []
     for root, dirs, files in os.walk('.'):
         if '.git' in root or '.pytest_cache' in root or '__pycache__' in root or 'docs-source' in root:
@@ -27,7 +27,7 @@ def get_all_markdown_files():
             if f.endswith('.md'):
                 md_files.append(os.path.join(root, f))
     md_files = sorted(list(set(md_files)))
-    assert len(md_files) == 51, f"Expected 51 Markdown files, found {len(md_files)}"
+    assert len(md_files) == 53, f"Expected 53 Markdown files, found {len(md_files)}"
     return md_files
 
 
