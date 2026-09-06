@@ -19,6 +19,7 @@
 #     --image <image_name>  RBD test image name (Default: fio_test_image)
 #     --size <size_mb>      RBD test image size in MB (Default: 4096)
 #     --runtime <seconds>   fio benchmark runtime per test in seconds (Default: 10)
+#     --fabric <speed>      Network fabric speed: 25G or 100G (Default: 25G)
 #     --dry-run             Simulate execution and print fio benchmarks/NFS audits
 #     --help                Show this help message and exit
 # ==============================================================================
@@ -29,6 +30,7 @@ POOL_NAME="nvme-pool"
 IMAGE_NAME="fio_test_image"
 IMAGE_SIZE_MB=4096
 RUNTIME=10
+FABRIC_SPEED="25G"
 DRY_RUN=0
 CREATED_IMAGE=0
 
@@ -52,6 +54,7 @@ Options:
   --image <image_name>  RBD test image name (Default: fio_test_image)
   --size <size_mb>      RBD test image size in MB (Default: 4096)
   --runtime <seconds>   fio benchmark runtime per test in seconds (Default: 10)
+  --fabric <speed>      Network fabric speed: 25G or 100G (Default: 25G)
   --dry-run             Simulate benchmark execution and print reports
   --help                Show this help message and exit
 EOF
@@ -91,6 +94,14 @@ while [[ $# -gt 0 ]]; do
             RUNTIME="$2"
             shift 2
             ;;
+        --fabric|--network-fabric)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "Error: Missing value for --fabric" >&2
+                exit 1
+            fi
+            FABRIC_SPEED="$2"
+            shift 2
+            ;;
         --dry-run)
             DRY_RUN=1
             shift
@@ -114,6 +125,7 @@ echo "Target Ceph Pool  : ${POOL_NAME}"
 echo "RBD Image Name    : ${IMAGE_NAME}"
 echo "Image Size        : ${IMAGE_SIZE_MB} MB"
 echo "FIO Runtime       : ${RUNTIME} seconds"
+echo "Network Fabric    : ${FABRIC_SPEED} RoCEv2/iWARP"
 echo "Dry Run Mode      : ${DRY_RUN}"
 echo "======================================================================"
 

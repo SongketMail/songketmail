@@ -32,6 +32,20 @@ def test_benchmark_script_missing_pool_value():
     assert "Error: Missing value for --pool" in result.stderr
 
 
+def test_benchmark_script_missing_fabric_value():
+    """Verifies that specifying --fabric without a value emits 'Error: Missing value for --fabric'."""
+    result = subprocess.run([SCRIPT_PATH, "--fabric"], capture_output=True, text=True)
+    assert result.returncode == 1
+    assert "Error: Missing value for --fabric" in result.stderr
+
+
+def test_benchmark_script_fabric_option():
+    """Verifies that running with --fabric 100G sets fabric speed in stdout."""
+    result = subprocess.run([SCRIPT_PATH, "--dry-run", "--fabric", "100G"], capture_output=True, text=True)
+    assert result.returncode == 0
+    assert "Network Fabric    : 100G RoCEv2/iWARP" in result.stdout
+
+
 def test_benchmark_script_dry_run_execution():
     """Verifies that running with --dry-run completes successfully and prints benchmark outputs."""
     result = subprocess.run([SCRIPT_PATH, "--dry-run"], capture_output=True, text=True)
