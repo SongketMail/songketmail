@@ -21,7 +21,7 @@ def _read_file(path: str) -> str:
     Returns:
         str: UTF-8 string contents of the file.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 

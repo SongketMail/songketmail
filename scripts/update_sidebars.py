@@ -42,7 +42,7 @@ def update_html_sidebars():
     for filename in os.listdir(html_dir):
         if filename.endswith(".html") and filename != "asimp-hardening-report.html":
             filepath = os.path.join(html_dir, filename)
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
 
             # Check if ASIMP link is already added to prevent duplicate insertion

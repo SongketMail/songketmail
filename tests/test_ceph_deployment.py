@@ -6,9 +6,9 @@ inventory, variables, and documentation files introduced in this session
 for independent Ceph native deployment on Ubuntu 26.04 and AlmaLinux 9.6.
 """
 
+import configparser
 import os
 import re
-import configparser
 
 # --- Test Constants ---
 CEPH_DEPLOY_DIR = "ceph_deploy"
@@ -51,7 +51,7 @@ def test_group_vars_all_yaml():
     """
     assert os.path.exists(VARS_PATH), f"Variables file {VARS_PATH} does not exist"
 
-    with open(VARS_PATH, "r", encoding="utf-8") as f:
+    with open(VARS_PATH, encoding="utf-8") as f:
         content = f.read()
 
     # Verify key variables presence
@@ -69,7 +69,7 @@ def test_capacity_sizing_math():
     Ensures that raw capacity, replication factor, and usable capacity
     parameters match the user requirements of 154TB raw and 51TB usable storage.
     """
-    with open(VARS_PATH, "r", encoding="utf-8") as f:
+    with open(VARS_PATH, encoding="utf-8") as f:
         content = f.read()
 
     # Extract capacity values
@@ -103,7 +103,7 @@ def test_ansible_playbook_yaml_integrity():
     """
     assert os.path.exists(PLAYBOOK_PATH), f"Playbook file {PLAYBOOK_PATH} does not exist"
 
-    with open(PLAYBOOK_PATH, "r", encoding="utf-8") as f:
+    with open(PLAYBOOK_PATH, encoding="utf-8") as f:
         content = f.read()
 
     # Check for mandatory roles in playbook execution
@@ -148,7 +148,7 @@ def test_ceph_ansible_fqcn_compliance():
         if "group_vars" in filepath or "defaults" in filepath:
             continue
 
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             task_indent = None
             module_indent = None
 
@@ -191,7 +191,7 @@ def test_new_documentation_okf_frontmatter():
     """
     assert os.path.exists(DOC_MD_PATH), f"Documentation file {DOC_MD_PATH} does not exist"
 
-    with open(DOC_MD_PATH, "r", encoding="utf-8") as f:
+    with open(DOC_MD_PATH, encoding="utf-8") as f:
         content = f.read().strip()
 
     assert content.startswith("---"), "Markdown file does not start with YAML frontmatter marker '---'"
@@ -230,7 +230,7 @@ def test_new_documentation_footer_standards():
     Verifies the presence of the author Harisfazillah Jamel, LinuxMalaysia, and DSOM
     AI Protocol standard signature in the page footer.
     """
-    with open(DOC_MD_PATH, "r", encoding="utf-8") as f:
+    with open(DOC_MD_PATH, encoding="utf-8") as f:
         content = f.read()
 
     assert "Harisfazillah Jamel" in content, "Missing author name 'Harisfazillah Jamel' in footer"
@@ -247,7 +247,7 @@ def test_ceph_prep_multi_os_tasks():
     prep_tasks_path = os.path.join(CEPH_DEPLOY_DIR, "roles", "ceph_prep", "tasks", "main.yml")
     assert os.path.exists(prep_tasks_path), f"File {prep_tasks_path} does not exist"
 
-    with open(prep_tasks_path, "r", encoding="utf-8") as f:
+    with open(prep_tasks_path, encoding="utf-8") as f:
         content = f.read()
 
     # Check that OS family conditionals exist
@@ -275,7 +275,7 @@ def test_ceph_prep_multi_os_handlers():
     prep_handlers_path = os.path.join(CEPH_DEPLOY_DIR, "roles", "ceph_prep", "handlers", "main.yml")
     assert os.path.exists(prep_handlers_path), f"File {prep_handlers_path} does not exist"
 
-    with open(prep_handlers_path, "r", encoding="utf-8") as f:
+    with open(prep_handlers_path, encoding="utf-8") as f:
         content = f.read()
 
     # Check FQCN and dynamic service mapping

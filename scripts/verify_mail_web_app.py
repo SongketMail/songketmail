@@ -13,12 +13,11 @@ Typical usage example:
 """
 
 import os
-import sys
-import json
 import re
 import socket
 import subprocess
-from datetime import datetime, timezone
+import sys
+from datetime import UTC, datetime
 
 
 def check_port(port):
@@ -61,7 +60,7 @@ def parse_template_ports(template_path):
     ports = []
     if os.path.exists(template_path):
         try:
-            with open(template_path, 'r', encoding='utf-8') as f:
+            with open(template_path, encoding='utf-8') as f:
                 content = f.read()
             # Match PublishPort=80:8080 or PublishPort=25:25
             matches = re.findall(r'^PublishPort=(\d+):', content, re.MULTILINE)
@@ -84,7 +83,7 @@ def parse_template_env_vars(template_path):
     env_vars = {}
     if os.path.exists(template_path):
         try:
-            with open(template_path, 'r', encoding='utf-8') as f:
+            with open(template_path, encoding='utf-8') as f:
                 for line in f:
                     if line.startswith("Environment="):
                         part = line.split("Environment=", 1)[1].strip()
@@ -141,7 +140,6 @@ def verify_all():
 
     # Quadlet configuration parsing
     proxy_tpl = "roles/podman_quadlet/templates/proxy.container"
-    web_tpl = "roles/podman_quadlet/templates/web.container"
 
     template_ports = parse_template_ports(proxy_tpl)
     env_vars = parse_template_env_vars(proxy_tpl)
@@ -151,7 +149,7 @@ def verify_all():
     is_limited = False
     all_vars_path = "group_vars/all.yml"
     if os.path.exists(all_vars_path):
-        with open(all_vars_path, "r", encoding="utf-8") as f:
+        with open(all_vars_path, encoding="utf-8") as f:
             if "is_limited_environment: true" in f.read():
                 is_limited = True
 
@@ -161,7 +159,7 @@ def verify_all():
 
     # Compile result data
     report_data = {
-        "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "timestamp": datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ'),
         "verification_mode": mode_str,
         "is_limited_environment": is_limited,
         "ports": port_results,

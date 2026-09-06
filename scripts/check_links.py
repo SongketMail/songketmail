@@ -71,7 +71,7 @@ def check_all_links():
         for file in files:
             if file.endswith((".html", ".md")):
                 filepath = os.path.join(root, file)
-                with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                with open(filepath, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
 
                 # Choose correct regex based on file extension
@@ -102,7 +102,7 @@ def check_all_links():
                             "resolved_path": target_path
                         })
 
-    print(f"--- Link Checker Report ---")
+    print("--- Link Checker Report ---")
     print(f"Total internal links checked: {total_checked}")
     if broken_links:
         print(f"❌ Found {len(broken_links)} broken link(s):")

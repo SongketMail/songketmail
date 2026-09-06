@@ -7,6 +7,7 @@ OKF v0.1, constitution footer, and link standards.
 """
 
 import os
+
 import pytest
 
 # --- Test Constants ---
@@ -21,7 +22,7 @@ def test_regional_design_markdown_okf_frontmatter():
     """
     assert os.path.exists(REG_MD_PATH), f"File {REG_MD_PATH} does not exist"
 
-    with open(REG_MD_PATH, "r", encoding="utf-8") as f:
+    with open(REG_MD_PATH, encoding="utf-8") as f:
         content = f.read().strip()
 
     assert content.startswith("---"), "Markdown file must start with YAML frontmatter markers (---)"
@@ -59,7 +60,7 @@ def test_regional_design_markdown_footer_compliance():
 
     Checks for the mandatory brand elements: Harisfazillah Jamel, LinuxMalaysia, and DSOM.
     """
-    with open(REG_MD_PATH, "r", encoding="utf-8") as f:
+    with open(REG_MD_PATH, encoding="utf-8") as f:
         content = f.read()
 
     assert "Harisfazillah Jamel" in content, "Missing author name 'Harisfazillah Jamel' in footer"
@@ -73,7 +74,7 @@ def test_regional_design_pbs_technical_content():
     Verifies the inclusion of: client-side encryption, dirty bitmaps, deduplication,
     Zstandard compression, WAN sync pull strategy, and Live-Restore.
     """
-    with open(REG_MD_PATH, "r", encoding="utf-8") as f:
+    with open(REG_MD_PATH, encoding="utf-8") as f:
         content = f.read()
 
     # Verify presence of Section 6 title and key sub-headings
@@ -101,7 +102,7 @@ def test_regional_design_html_unification_integrity():
     """
     assert os.path.exists(REG_HTML_PATH), f"Unified HTML file {REG_HTML_PATH} does not exist"
 
-    with open(REG_HTML_PATH, "r", encoding="utf-8") as f:
+    with open(REG_HTML_PATH, encoding="utf-8") as f:
         content = f.read()
 
     # Content Area confirmation
@@ -127,7 +128,7 @@ def test_ansible_playbooks_syntax_and_structure():
     for pb in playbook_files:
         if not os.path.exists(pb):
             continue
-        with open(pb, "r", encoding="utf-8") as f:
+        with open(pb, encoding="utf-8") as f:
             content = f.read()
         assert ":" in content, f"Playbook {pb} lacks key-value colon structure"
         assert "-" in content, f"Playbook {pb} lacks YAML list element marker (-)"
@@ -145,6 +146,6 @@ def test_podman_quadlet_templates_exist_and_compliant():
     for f in os.listdir(quadlet_dir):
         if f.endswith(".container"):
             filepath = os.path.join(quadlet_dir, f)
-            with open(filepath, "r", encoding="utf-8") as file_obj:
+            with open(filepath, encoding="utf-8") as file_obj:
                 content = file_obj.read()
             assert "[Container]" in content, f"Quadlet container file {f} lacks systemd [Container] section"

@@ -49,6 +49,7 @@ SIDEBAR_ITEMS = [
     { "href": "freebsd-bhyve-solutions.html", "icon": "🐝", "label": "26. FreeBSD & Bhyve Architecture", "section": "research" },
     { "href": "docs-sync-pipeline-guide.html", "icon": "📚", "label": "27. Docs Sync Pipeline", "section": "research" },
     { "href": "rke2-pv-storage-setup.html", "icon": "💾", "label": "28. RKE2 PV Storage Setup", "section": "research" },
+    { "href": "nfs-ceph-performance-tuning.html", "icon": "⚡", "label": "29. NFS & Ceph Performance", "section": "research" },
     { "header": "Laboratory Modules", "section": "lab" },
     { "href": "ai-dev.html", "icon": "🤖", "label": "AI Development", "section": "lab" },
     { "header": "Legal & Terms", "section": "legal" },
@@ -84,6 +85,7 @@ TOPIC_MAP = {
     "freebsd-bhyve-solutions.html": ("[ TOPIC: 26 ]", "[ HYPERVISOR: BHYVE ]", "[ OS: FREEBSD_ZFS ]"),
     "docs-sync-pipeline-guide.html": ("[ TOPIC: 27 ]", "[ CI_CD: GH_ACTIONS ]", "[ MINTLIFY: SYNC ]"),
     "rke2-pv-storage-setup.html": ("[ TOPIC: 28 ]", "[ ORCH: RKE2_PV ]", "[ STORAGE: CEPH_NFS_LOCAL ]"),
+    "nfs-ceph-performance-tuning.html": ("[ TOPIC: 29 ]", "[ TUNING: NFS_V42 ]", "[ CEPH: NVME_FIO ]"),
     "ai-dev.html": ("[ LAB: AI_DEV ]", "[ MODEL: COGNITIVE_TWIN ]", "[ ENGINE: JULES_GEMINI ]"),
     "legal-notice.html": ("[ REGULATION: DISCLAIMER ]", "[ PURPOSE: TRAINING ]", "[ RISK: ASSUMED ]")
 }
@@ -117,6 +119,7 @@ SUBTITLE_MAP = {
     "freebsd-bhyve-solutions.html": "Deep Research // Topic 26: FreeBSD Options & Bhyve Hypervisor Architecture",
     "docs-sync-pipeline-guide.html": "Deep Research // Topic 27: Documentation Sync Pipeline & GitHub Actions Setup Guide",
     "rke2-pv-storage-setup.html": "Deep Research // Topic 28: Persistent Volume (PV) Storage Server Setup for RKE2",
+    "nfs-ceph-performance-tuning.html": "Deep Research // Topic 29: NFS v4.2 & Ceph RBD Performance Tuning Guide",
     "ai-dev.html": "Deep Research // Laboratory Module: AI Development Loop",
     "legal-notice.html": "Legal Notice // Privacy Policy, Critical Assumptions & Disclaimer of Liability"
 }
@@ -135,7 +138,7 @@ def parse_frontmatter(md_path):
     """
     if not os.path.exists(md_path):
         return {}
-    with open(md_path, 'r', encoding='utf-8') as f:
+    with open(md_path, encoding='utf-8') as f:
         content = f.read()
     parts = content.split('---')
     if len(parts) < 3:
@@ -541,7 +544,7 @@ def main():
 
         print(f"Processing {filename}...")
 
-        with open(html_path, "r", encoding="utf-8") as f:
+        with open(html_path, encoding="utf-8") as f:
             html_content = f.read()
 
         fm = parse_frontmatter(md_path)

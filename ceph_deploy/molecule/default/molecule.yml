@@ -1,0 +1,16 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+platforms:
+  - name: ceph-node-01
+    image: docker.io/library/ubuntu:26.04
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      hosts: ../../hosts.ini
+verifier:
+  name: ansible
