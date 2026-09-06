@@ -13,7 +13,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -80,7 +79,7 @@ def validate_source_docs(source_dir: Path, min_files: int = 5):
         )
 
     try:
-        with open(docs_json_path, "r", encoding="utf-8") as f:
+        with open(docs_json_path, encoding="utf-8") as f:
             docs_data = json.load(f)
     except Exception as err:
         raise ValueError(f"Failed to parse '{docs_json_path}': {err}") from err

@@ -12,13 +12,13 @@ Typical usage example:
     $ python3 scripts/privilege_and_safety_test.py
 """
 
-import os
-import sys
 import json
+import os
 import re
 import socket
 import subprocess
-from datetime import datetime, timezone
+import sys
+from datetime import UTC, datetime
 
 
 def check_privileges():
@@ -105,7 +105,7 @@ def _check_ssh_safety(priv_info, issues, warnings, passed):
 
     if os.path.exists(auth_keys_path):
         try:
-            with open(auth_keys_path, "r") as f:
+            with open(auth_keys_path) as f:
                 content = f.read().strip()
                 # Ensure it's not empty and contains actual key lines
                 key_lines = [line for line in content.splitlines() if line and not line.startswith("#")]
@@ -222,7 +222,7 @@ def _check_port_availability(priv_info, issues, warnings, passed):
                 "vector": f"PORT_{port}_AVAILABLE",
                 "description": f"Port {port} ({service}) is free and ready for binding."
             })
-        except socket.error:
+        except OSError:
             # Port is already bound or cannot bind due to permission (< 1024 as non-root)
             if priv_info["privilege_level"] == "UNPRIVILEGED_SANDBOX" and port < 1024:
                 # Ordinary user cannot bind to <1024, which is expected, but port might be free.
@@ -438,7 +438,7 @@ def print_text_report(priv, safety):
     print("=" * 80)
     print("            🕵️‍♂️  SONGKETMAIL PRIVILEGE & REMEDIATION SAFETY ASSESSMENT REPORT")
     print("=" * 80)
-    print(f"Timestamp:       {datetime.now(timezone.utc).isoformat()}")
+    print(f"Timestamp:       {datetime.now(UTC).isoformat()}")
     print(f"Current User:    {priv['username']} (UID: {priv['uid']})")
     print(f"Privilege Mode:  {priv['privilege_level']} (asimp_privilege_level: {priv['asimp_privilege_level']})")
     print(f"Passwordless Sudo: {'YES' if priv['has_sudo'] else 'NO'}")
@@ -499,7 +499,7 @@ type: report
 title: "Privilege Detection and Remediation Safety Report"
 description: "Analysis of host privilege levels and potential safety hazards of running security hardening remediation."
 resource: "file:///docs/privilege-safety-report.md"
-timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}
+timestamp: {datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')}
 topics: [privilege, safety, reporting, auditing, compliance]
 ---
 
@@ -606,7 +606,7 @@ def generate_json_report(priv, safety):
     report_path = "data/privilege_and_safety_report.json"
 
     report_data = {
-        "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "timestamp": datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ'),
         "privileges": priv,
         "safety": safety
     }
