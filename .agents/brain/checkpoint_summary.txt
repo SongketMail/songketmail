@@ -1,6 +1,10 @@
-[MENTAL ANCHOR]
-Project: SongketMail Enterprise Kubernetes & Ceph Architecture
-Status: Completed Part 28 RKE2 PV Storage Server Setup documentation (Ceph CSI RBD, NFS, Local Path) across Debian/Ubuntu and AlmaLinux/RockyLinux.
-Brain State: DSOM EOD Palace Brain Sync executed. Task tracker, walkthrough log, checkpoint summary, and active context manifest updated.
-Branch: feat/rke2-pv-storage-setup
-Verification: All 532 unit tests passing cleanly. Playwright visual screenshot verified.
+[MENTAL ANCHOR - 2026-09-05 EOD PALACE SYNC]
+Project State: SongketMail Infrastructure & Performance Tuning
+Status: Complete, 100% Tests Passing (642/642 under pytest)
+
+Key Accomplishments Today:
+1. Part 29 Documentation (`docs/nfs-ceph-performance-tuning.md` and `.html`): Fact-checked NFS v4.2 tuning (sysctl parameters, RPC slots=128, nconnect=4, 1MB block size, sync/async trade-offs, Kernel 5.17+ fscache) and Ceph RBD fio benchmarking against NVMe pools on Proxmox VE nodes.
+2. Benchmark Utility (`scripts/benchmark_ceph_rbd_fio.sh`): Executable script for 4K random burst IOPS and 1M sequential throughput profiling with strict CLI option validation, dry-run simulation mode, and robust EXIT trap cleanup.
+3. Code Health (`pyproject.toml`, `.yamllint`): Configured ruff for Python linting and yamllint for YAML verification. All Python scripts/tests and YAML files pass with 0 errors.
+4. Molecule & E2E Testing (`ceph_deploy/molecule/default/`, `tests/test_playwright_e2e.py`, `tests/test_benchmark_ceph_rbd_fio.py`): Molecule scenario importing top-level playbook.yml and verifying role entries; Playwright E2E browser tests for dark mode toggling and TOC smooth scrolling across desktop/tablet/mobile viewports.
+5. All 31 HTML documentation templates unified via `scripts/unify_templates.py`; 1153 internal links verified with 0 broken links via `scripts/check_links.py`.
