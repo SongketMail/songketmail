@@ -20,6 +20,7 @@ By decoupling Postfix and Dovecot, LMTP operates over an isolated, cluster-prefi
 Postfix validates domains, mailboxes, and aliases by querying PostgreSQL using native SQL lookup tables (`virtual_mailbox_domains`, `virtual_mailbox_maps`, and `virtual_alias_maps` mapped to `virtual_aliases` table). This allows administrators to scale mailboxes horizontally without altering local host user groups.
 
 ### 1. Postfix PGSQL Configuration: `pgsql-virtual-mailbox-maps.cf`
+
 ```ini
 hosts = songketmail-db.songketmail-net
 user = mail_admin
@@ -29,6 +30,7 @@ query = SELECT maildir FROM users WHERE email='%s' AND active=true
 ```
 
 ### 2. Postfix Configuration Hooks: `main.cf`
+
 ```ini
 # Enable Virtual Domain Handlers
 virtual_mailbox_domains = pgsql:/etc/postfix/pgsql-virtual-domains-maps.cf
@@ -46,6 +48,7 @@ virtual_transport = lmtp:inet:songketmail-dovecot.songketmail-net:24
 Dovecot acts as the mail delivery terminal, validating IMAP connections directly against PostgreSQL hashes and listening on port `24` for inbound LMTP flows.
 
 ### 1. `dovecot-sql.conf.ext`
+
 ```ini
 driver = pgsql
 connect = host=songketmail-db.songketmail-net dbname=mailserver user=mail_admin password=super_secure_db_pass
@@ -55,6 +58,7 @@ user_query = SELECT '/var/vmail/indexes/'||maildir AS home, 2001 AS uid, 2001 AS
 ```
 
 ### 2. `dovecot.conf` (LMTP Service Listener)
+
 ```ini
 protocols = imap lmtp
 

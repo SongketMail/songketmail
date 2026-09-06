@@ -68,10 +68,13 @@ The compute layer consists of four greenfield Proxmox VE 9 nodes designed to exe
 ### 2.1 PVE Greenfield Install & Quorum
 1. **Host OS Provisioning**: Install Proxmox VE 9 on each of the 4 compute nodes. Keep local system volumes isolated from Ceph.
 2. **Corosync Configuration**: Initialize a redundant Corosync cluster link over dedicated low-latency physical switches:
+
    ```bash
    pvecm create pve-compute-cluster --link0 10.10.10.21
    ```
+
 3. **Cluster Joining**: Join the remaining three nodes to form a highly available, 4-node quorum cluster:
+
    ```bash
    pvecm add 10.10.10.21 --link0 10.10.10.22  # From pve-node2
    pvecm add 10.10.10.21 --link0 10.10.10.23  # From pve-node3
@@ -104,10 +107,13 @@ Integrating the independent Ceph cluster as an external storage backend for Prox
 
 ### 4.1 Keyring Extraction & Delegation
 1. On **ceph-node1** (the bootstrap node), extract the administrative access keyring:
+
    ```bash
    ceph auth get-or-create client.admin
    ```
+
 2. Distribute this keyring securely to all PVE compute hosts inside the secure Proxmox cluster directory `/etc/pve/priv/ceph/`:
+
    ```bash
    mkdir -p /etc/pve/priv/ceph/
    scp /etc/ceph/ceph-prod.client.admin.keyring root@10.10.10.21:/etc/pve/priv/ceph/external-ceph-prod.keyring
@@ -115,6 +121,7 @@ Integrating the independent Ceph cluster as an external storage backend for Prox
 
 ### 4.2 Storage Registration (`/etc/pve/storage.cfg`)
 Define the external RADOS Block Device (RBD) backend in the PVE clustered configuration:
+
 ```ini
 rbd: external-ceph-prod
     monhost 10.10.20.11;10.10.20.12;10.10.20.13
@@ -158,11 +165,14 @@ Verifying performance baselines helps confirm proper disk, fabric, and controlle
 
 ### 6.1 Cluster RADOS Benchmarking
 Run the synthetic object bench tool directly from containerized cephadm shell:
+
 ```bash
 cephadm shell -- rados bench -p pve-rbd-pool 30 write --no-cleanup
 ```
+
 - Capture throughput (MB/s), average write latency (ms), and sustained IOPS.
 - Clean up test benchmarks objects:
+
   ```bash
   cephadm shell -- rados -p pve-rbd-pool cleanup
   ```
@@ -177,15 +187,20 @@ This runbook guides administrators through routine storage node maintenance, rec
 When performing standard kernel upgrades or physical hardware repairs on a storage host, follow these precise maintenance commands:
 
 1. **Set Cluster OSD Maintenance Flags**: Inform the cluster that a node is temporarily going offline to prevent immediate data replication or backfilling overhead:
+
    ```bash
    ceph osd set noout
    ```
+
 2. **Gracefully stop OSD services on the node**: Shut down target daemons on the active maintenance node:
+
    ```bash
    systemctl stop ceph-osd@*
    ```
+
 3. **Execute Host Repair**: Perform OS/kernel patching, reboot the host, and ensure all networks reconnect correctly.
 4. **Restore Services and Clear Flags**: Re-enable standard data backfilling and healing:
+
    ```bash
    systemctl start ceph-osd@*
    ceph osd unset noout
@@ -193,10 +208,12 @@ When performing standard kernel upgrades or physical hardware repairs on a stora
 
 ### 7.2 Storage Quorum Healing Verification
 Check the real-time cluster health and recovery status during rebalancing operations:
+
 ```bash
 ceph status
 ceph -w
 ```
+
 Confirm health returns to `HEALTH_OK` once replication catchup completes.
 
 ---

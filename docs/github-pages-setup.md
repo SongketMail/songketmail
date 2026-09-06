@@ -70,9 +70,11 @@ Ensure that the `docs/` folder containing `index.html` is committed and pushed t
 Once the build and deployment run successfully (which usually takes 1–2 minutes):
 1. Navigate back to **Settings** -> **Pages**.
 2. At the top of the Pages settings, you will see a banner displaying your live URL, formatted as:
+
    ```
    https://<your-username>.github.io/<your-repository-name>/
    ```
+
 3. Click on the link to open your live interactive SongketMail Documentation dashboard!
 
 ---

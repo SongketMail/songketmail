@@ -65,6 +65,7 @@ sunrpc.tcp_slot_table_entries = 128
 ```
 
 To apply parameter updates dynamically without rebooting:
+
 ```bash
 sudo sysctl -p /etc/sysctl.d/99-nfs-performance.conf
 ```
@@ -72,6 +73,7 @@ sudo sysctl -p /etc/sysctl.d/99-nfs-performance.conf
 ### B. Persistent RPC Slot Table Configuration
 
 For kernel module stability across reboots, also persist the RPC slot table entries in `/etc/modprobe.d/sunrpc.conf`:
+
 ```ini
 options sunrpc tcp_slot_table_entries=128
 ```
@@ -84,12 +86,14 @@ FS-Cache allows NFS clients to cache read-frequently data locally on flash or NV
 
 ### Installation & Daemon Activation
 On RHEL, Enterprise Linux, AlmaLinux, or Rocky Linux:
+
 ```bash
 sudo dnf install -y cachefilesd
 sudo systemctl enable cachefilesd
 ```
 
 On Debian or Ubuntu:
+
 ```bash
 sudo apt update && sudo apt install -y cachefilesd
 sudo systemctl enable cachefilesd
@@ -97,11 +101,13 @@ sudo systemctl enable cachefilesd
 
 ### Configuration (`/etc/default/cachefilesd`)
 Ensure the service is explicitly enabled:
+
 ```ini
 RUN=yes
 ```
 
 Restart and verify kernel keyring registration:
+
 ```bash
 sudo systemctl restart cachefilesd
 sudo systemctl status cachefilesd
@@ -157,6 +163,7 @@ To validate Ceph RADOS Block Device (RBD) performance on Proxmox VE hypervisors 
 
 ### Executing the Benchmark Script
 Run the built-in benchmarking tool:
+
 ```bash
 # Dry-run / audit mode
 ./scripts/benchmark_ceph_rbd_fio.sh --dry-run
@@ -176,6 +183,7 @@ Run the built-in benchmarking tool:
 | **1M Sequential Write** | `1m` | `rbd` / `libaio` | 32 | 2 | `1` | Measure maximum write throughput in GB/s. |
 
 ### Sample FIO Direct Benchmark Command
+
 ```bash
 fio --name=ceph_rbd_4k_burst \
     --ioengine=rbd \

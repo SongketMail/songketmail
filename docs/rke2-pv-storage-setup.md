@@ -206,11 +206,13 @@ sudo systemctl enable --now nfs-server
 #### RKE2 Worker Client Prerequisites
 
 * **Debian/Ubuntu Family:**
+
 ```bash
 sudo apt-get update && sudo apt-get install -y nfs-common
 ```
 
 * **AlmaLinux/RockyLinux Family:**
+
 ```bash
 sudo dnf install -y nfs-utils
 ```

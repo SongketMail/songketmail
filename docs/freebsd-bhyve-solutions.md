@@ -185,15 +185,20 @@ SongketMail can be deployed on FreeBSD host environments using two primary topol
 To verify bhyve hypervisor health and VM performance on FreeBSD:
 
 1. **Hypervisor Module Check:**
+
    ```bash
    kldstat -n vmm
    ```
+
 2. **Active VM Status Check:**
+
    ```bash
    vm list
    bhyvectl --get-all --vm=songketmail-node01
    ```
+
 3. **ZFS Storage Performance Verification:**
+
    ```bash
    zpool status
    zfs list -t snapshot

@@ -33,6 +33,7 @@ This document provides a comprehensive review of the **DSOM Ansible Configuratio
 *   **Analysis**: Enabling pipelining dramatically reduces SSH overhead by running multiple Ansible modules inside the same SSH session without transferring temporary python script files to the host disk.
 *   **SongketMail Context**: Highly relevant. Since SongketMail is designed to deploy a complex multi-container service mesh across distributed email server nodes (`node1.songketmail.internal`, `node2.songketmail.internal`), SSH latency reduction is extremely beneficial.
 *   **Adoption Action**: We can modify our `ansible.cfg` to explicitly enable pipelining:
+
     ```ini
     [ssh_connection]
     pipelining = True
@@ -48,16 +49,20 @@ This document provides a comprehensive review of the **DSOM Ansible Configuratio
 ### 3. Production Trinity (Storage, Isolation, Orchestration)
 *   **Analysis**: The guide proposes collocating components inside unified Pods, using systemd Quadlets, and maintaining node-isolated host storage paths.
 *   **SongketMail Context**: Perfectly adopted. The 7-service mesh (Proxy, Postfix, Dovecot, DB, S3 MinIO, Webmail, Rspamd) runs in a single rootless systemd Pod (`songketmail_pod`), managed cleanly via native systemd Quadlet files inside the user's home directory:
+
     ```
     ~/.config/containers/systemd/
     ```
+
     Persistent volumes are strictly mapped to node-isolated subdirectories under `/var/srv/songketmail`.
 
 ### 4. Runtime Secrets Injection Protocol
 *   **Analysis**: The guide recommends keeping the main host inventory file (`hosts.yml`) clean from static credentials, storing secret attributes (such as passwords, keys, and tokens) in a git-ignored vault (`vault/production_secrets.yml`), and injecting them dynamically at runtime using:
+
     ```bash
     ansible-playbook -i inventory/hosts.yml site.yml --extra-vars "@vault/production_secrets.yml"
     ```
+
 *   **SongketMail Context**: Excellent security practice. It separates cluster structure (public IP maps, connection modes) from private authentication credentials.
 *   **Adoption Action**: Our playbooks use template variables. We can adopt this runtime secrets injection directly to keep credentials out of version control and ensure high-security compliance in enterprise pipelines.
 

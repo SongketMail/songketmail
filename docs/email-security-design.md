@@ -74,6 +74,7 @@ MTA-STS enables domain owners to declare that inbound SMTP connections must enfo
 * **Private / Internal Environments:** Internal enterprise domains (`*.songketmail.internal`) utilize Smallstep Private CA issued certificates for `mta-sts.songketmail.internal`.
 * **DNS TXT Record:** `_mta-sts.songketmail.internal. IN TXT "v=STSv1; id=2026081901;"`
 * **Policy Endpoint:** Served over HTTPS at `https://mta-sts.songketmail.internal/.well-known/mta-sts.txt`:
+
   ```ini
   version: STSv1
   mode: enforce
