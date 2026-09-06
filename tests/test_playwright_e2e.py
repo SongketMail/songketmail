@@ -40,6 +40,7 @@ class ReusableTCPServer(socketserver.TCPServer):
 def doc_server():
     """Starts a local HTTP server serving docs/ in a background thread."""
     handler = QuietHTTPRequestHandler
+    with socketserver.TCPServer((HOST, PORT), handler) as httpd:
     with ReusableTCPServer((HOST, PORT), handler) as httpd:
         server_thread = threading.Thread(target=httpd.serve_forever)
         server_thread.daemon = True
@@ -146,6 +147,7 @@ def generate_verification_screenshot():
     screenshot_path = "/home/jules/verification/verification.png"
 
     handler = QuietHTTPRequestHandler
+    with socketserver.TCPServer((HOST, PORT), handler) as httpd:
     with ReusableTCPServer((HOST, PORT), handler) as httpd:
         server_thread = threading.Thread(target=httpd.serve_forever)
         server_thread.daemon = True
