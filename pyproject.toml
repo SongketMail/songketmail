@@ -1,3 +1,12 @@
+[project]
+name = "songketmail"
+version = "1.0.0"
+description = "Enterprise-grade rootless email server baseline orchestrated using Ansible and Podman 5+"
+dependencies = [
+    "pytest>=8.0.0",
+    "playwright>=1.40.0",
+]
+
 [tool.ruff]
 target-version = "py312"
 line-length = 160

@@ -233,6 +233,7 @@ To eliminate proprietary dependencies and avoid vendor lock-in, the entire orche
 Before installing RKE2 or K3s, all Linux nodes must execute the following kernel and sysctl tuning configuration:
 
 #### 1. Load Required Kernel Modules (`/etc/modules-load.d/k8s.conf`)
+
 ```bash
 sudo tee /etc/modules-load.d/k8s.conf <<EOF
 overlay
@@ -249,6 +250,7 @@ sudo modprobe br_netfilter
 ```
 
 #### 2. Configure System Control Parameters (`/etc/sysctl.d/99-kubernetes.conf`)
+
 ```bash
 sudo tee /etc/sysctl.d/99-kubernetes.conf <<EOF
 net.bridge.bridge-nf-call-iptables  = 1
@@ -260,6 +262,7 @@ EOF
 
 sudo sysctl --system
 ```
+
 *Note: Binding low-numbered ports (such as SMTP port 25) without root permissions is configured specifically on SMTP ingress worker nodes (`rke2-worker-app-*`) via `net.ipv4.ip_unprivileged_port_start = 25` or Linux `CAP_NET_BIND_SERVICE` capability settings, keeping other nodes restricted.*
 
 ---
@@ -268,9 +271,11 @@ sudo sysctl --system
 
 #### Secure Token Generation, CA Hash, & Security Notice
 Before deploying cluster nodes, generate cryptographically secure 256-bit secret tokens for cluster server and agent join operations using OpenSSL:
+
 ```bash
 openssl rand -hex 32
 ```
+
 For cluster node join operations, full join-token values should include the CA hash prefix (`K10<CA_HASH>::<SECRET_TOKEN>`) to pin server TLS certificates during node registration.
 
 Store tokens in an out-of-band secret manager (such as HashiCorp Vault or password manager) and never commit plaintext tokens to git repositories.
@@ -285,6 +290,7 @@ Note: RKE2 Supervisor port 9345 and Kubernetes API port 6443 must be exposed on 
 
 ##### Step 1: Configure Primary Control Plane Node (`rke2-cp-01`)
 Create `/etc/rancher/rke2/config.yaml`:
+
 ```yaml
 # /etc/rancher/rke2/config.yaml (Primary Server: rke2-cp-01)
 token: "<GENERATE_SECURE_RKE2_TOKEN>"
@@ -301,6 +307,7 @@ disable:
 ```
 
 Execute installation CLI commands on `rke2-cp-01`:
+
 ```bash
 curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.31" sh -
 sudo systemctl enable --now rke2-server.service
@@ -308,6 +315,7 @@ sudo systemctl enable --now rke2-server.service
 
 ##### Step 2: Configure Additional Control Plane Nodes (`rke2-cp-02` & `rke2-cp-03`)
 Create `/etc/rancher/rke2/config.yaml` on `rke2-cp-02` and `rke2-cp-03`:
+
 ```yaml
 # /etc/rancher/rke2/config.yaml (Secondary Servers: rke2-cp-02 / rke2-cp-03)
 server: "https://10.200.10.10:9345"
@@ -323,6 +331,7 @@ disable:
 ```
 
 Enable systemd service on `rke2-cp-02` and `rke2-cp-03`:
+
 ```bash
 curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL="v1.31" sh -
 sudo systemctl enable --now rke2-server.service
@@ -330,6 +339,7 @@ sudo systemctl enable --now rke2-server.service
 
 ##### Step 3: Configure Worker / Agent Nodes (`rke2-worker-ai-*`, `rke2-worker-app-*`, `rke2-worker-db-*`)
 Create `/etc/rancher/rke2/config.yaml` on agent nodes:
+
 ```yaml
 # /etc/rancher/rke2/config.yaml (Worker / Agent Nodes)
 server: "https://10.200.10.10:9345"
@@ -339,6 +349,7 @@ node-label:
 ```
 
 Enable systemd agent service on worker nodes:
+
 ```bash
 curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_CHANNEL="v1.31" sh -
 sudo systemctl enable --now rke2-agent.service
@@ -352,6 +363,7 @@ Note: K3s API server / supervisor port 6443 must be exposed across all managemen
 
 ##### Step 1: Configure Primary K3s Control Plane Node (`k3s-mgmt-01`)
 Create `/etc/rancher/k3s/config.yaml`:
+
 ```yaml
 # /etc/rancher/k3s/config.yaml (Primary Server: k3s-mgmt-01)
 cluster-init: true
@@ -366,6 +378,7 @@ disable:
 ```
 
 Execute installation CLI commands on `k3s-mgmt-01`:
+
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.31" sh -
 sudo systemctl enable --now k3s.service
@@ -373,6 +386,7 @@ sudo systemctl enable --now k3s.service
 
 ##### Step 2: Join Additional K3s Control Plane Nodes (`k3s-mgmt-02` & `k3s-mgmt-03`)
 Create `/etc/rancher/k3s/config.yaml` on `k3s-mgmt-02` and `k3s-mgmt-03`:
+
 ```yaml
 # /etc/rancher/k3s/config.yaml (Join HA Control Plane)
 server: "https://10.200.20.10:6443"
@@ -387,6 +401,7 @@ disable:
 ```
 
 Enable systemd service:
+
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL="v1.31" sh -
 sudo systemctl enable --now k3s.service
@@ -394,6 +409,7 @@ sudo systemctl enable --now k3s.service
 
 ##### Step 3: Join K3s Worker / Agent Nodes (`k3s-worker-01` & `k3s-worker-02`)
 Execute agent registration CLI command on `k3s-worker-01` and `k3s-worker-02`:
+
 ```bash
 curl -sfL https://get.k3s.io | K3S_URL="https://10.200.20.10:6443" K3S_TOKEN="<GENERATE_SECURE_K3S_AGENT_TOKEN>" sh -
 sudo systemctl enable --now k3s-agent.service
@@ -404,21 +420,27 @@ sudo systemctl enable --now k3s-agent.service
 ### 8.5 Verification & Operational Handover Checklist
 
 1. **RKE2 Cluster Node Status Verification:**
+
    ```bash
    sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes -o wide
    ```
+
    *Expected Output:* 14 nodes listed in `Ready` status with containerd runtime.
 
 2. **K3s Cluster Node Status Verification:**
+
    ```bash
    sudo k3s kubectl get nodes -o wide
    ```
+
    *Expected Output:* 5 nodes listed in `Ready` status.
 
 3. **Ceph Storage CSI Integration Verification:**
+
    ```bash
    sudo /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get storageclass
    ```
+
    *Expected Output:* `ceph-rbd` and `cephfs` provisioners available and set as persistent volume backends.
 
 ---
@@ -433,6 +455,7 @@ To set up and configure server infrastructure for RKE2 Persistent Volume (PV) st
 For shared storage workloads requiring concurrent multi-node read/write capabilities across RKE2 pods:
 
 1. **NFS Storage Server Provisioning (`10.200.10.50`):**
+
    ```bash
    # Install NFS kernel server package
    sudo apt-get update && sudo apt-get install -y nfs-kernel-server
@@ -459,11 +482,13 @@ For shared storage workloads requiring concurrent multi-node read/write capabili
 
 2. **RKE2 Node Client Prerequisites:**
    Ensure all RKE2 agent and control-plane nodes have `nfs-common` installed:
+
    ```bash
    sudo apt-get install -y nfs-common
    ```
 
 3. **Dynamic Volume Provisioning via `nfs-subdir-external-provisioner`:**
+
    ```bash
    helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
    helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
@@ -478,6 +503,7 @@ For shared storage workloads requiring concurrent multi-node read/write capabili
 Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (`rbd.csi.ceph.com`):
 
 1. **Ceph RBD StorageClass Manifest (`ceph-rbd-sc.yaml`):**
+
    ```yaml
    apiVersion: storage.k8s.io/v1
    kind: StorageClass
@@ -505,6 +531,7 @@ Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (`rbd.cs
    ```
 
 2. **Persistent Volume Claim Example (`rke2-pvc-ceph.yaml`):**
+
    ```yaml
    apiVersion: v1
    kind: PersistentVolumeClaim
@@ -524,6 +551,7 @@ Configuring distributed Ceph block storage as dynamic RKE2 StorageClass (`rbd.cs
 For static NFS PV binding or node-local NVMe storage:
 
 1. **Static Persistent Volume Manifest (`rke2-static-pv.yaml`):**
+
    ```yaml
    apiVersion: v1
    kind: PersistentVolume
@@ -543,6 +571,7 @@ For static NFS PV binding or node-local NVMe storage:
    ```
 
 2. **Matching Static Persistent Volume Claim (`rke2-static-pvc.yaml`):**
+
    ```yaml
    apiVersion: v1
    kind: PersistentVolumeClaim

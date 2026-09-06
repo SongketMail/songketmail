@@ -20,19 +20,26 @@ Jekyll is a blog-aware, static site generator written in Ruby that integrates na
 Before you can run Jekyll locally, you must ensure that your system has Ruby, Bundler, Git, and Jekyll installed.
 
 1. **Install Git**: Verify that you have Git installed:
+
    ```bash
    git --version
    ```
+
 2. **Install Ruby**: Jekyll requires Ruby (version 2.5.0 or higher is recommended).
    - On Ubuntu/Debian:
+
      ```bash
      sudo apt-get install ruby-full build-essential zlib1g-dev
      ```
+
    - On macOS (using Homebrew):
+
      ```bash
      brew install ruby
      ```
+
 3. **Install Bundler and Jekyll**: Bundler is a Ruby gem manager that helps keep dependency versions consistent.
+
    ```bash
    gem install jekyll bundler
    ```
@@ -45,15 +52,19 @@ You can initialize Jekyll in a completely new repository or inject it into an ex
 
 ### Case A: Creating a Site in a New Repository
 1. Initialize a new local directory and Git repository:
+
    ```bash
    mkdir my-jekyll-site
    cd my-jekyll-site
    git init
    ```
+
 2. Run the Jekyll creation command inside the root directory:
+
    ```bash
    jekyll new . --force
    ```
+
    *(The `--force` option is required if the directory contains initialized Git metadata).*
 
 ### Case B: Injecting Jekyll into an Existing Repository (e.g. SongketMail)
@@ -73,6 +84,7 @@ To align your site exactly with the GitHub Pages build server, you should utiliz
 
 ### 1. Update the `Gemfile`
 Overwrite or create a `Gemfile` in the directory root with the following contents:
+
 ```ruby
 source "https://rubygems.org"
 
@@ -81,6 +93,7 @@ gem "github-pages", group: :jekyll_plugins
 
 ### 2. Configure Jekyll Settings in `_config.yml`
 Create or update your `_config.yml` file to configure metadata, themes, and exclusion lists:
+
 ```yaml
 title: "SongketMail :: LAB"
 description: "Secure Email Server Fabric // Podman 5+ & Systemd Quadlet"
@@ -108,17 +121,22 @@ To run a local web server and preview your site before pushing it to GitHub, use
 
 1. **Install Dependencies Locally**:
    Run this once to install the exact gems specified in your `Gemfile`:
+
    ```bash
    bundle install
    ```
+
 2. **Launch Jekyll Serve**:
    Start the local development server:
+
    ```bash
    bundle exec jekyll serve
    ```
+
    - By default, your site will be served locally at `http://localhost:4000/`.
    - The server dynamically watches for changes and rebuilds the site automatically on save.
    - If you want to build the site statically without launching a server:
+
      ```bash
      bundle exec jekyll build
      ```
@@ -133,6 +151,7 @@ Because Jekyll uses the Liquid templating engine, any code blocks containing Jin
 You must wrap any Jinja2-style code blocks inside `{ % raw % }` and `{ % endraw % }` tags.
 
 For example, to prevent Jekyll from attempting to parse an Ansible variable:
+
 ```markdown
 {% raw %}
 - name: Set dynamic path

@@ -35,6 +35,7 @@ SongketMail enforces namespace mapping using **keep-id** with UID/GID 2001:2001 
 ## 📋 Declarative Quadlet Specifications
 
 ### 1. `skm_fabric_pod.pod`
+
 ```ini
 [Pod]
 PodName=skm_fabric_pod
@@ -47,6 +48,7 @@ PublishPort=993:993
 ```
 
 ### 2. `skm_fabric_net.network`
+
 ```ini
 [Network]
 NetworkName=skm_fabric_net
@@ -56,6 +58,7 @@ Internal=false
 ```
 
 ### 3. `emailserver.container`
+
 ```ini
 [Container]
 ContainerName=skm_fabric_emailserver

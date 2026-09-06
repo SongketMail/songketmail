@@ -92,6 +92,7 @@ This ensures maximum performance, zero port contention, and eliminates multi-lay
 If Traefik must remain active to wire other services (e.g., databases, CrowdSec), BunkerWeb is positioned as the edge proxy and forwards requests to Traefik on a non-conflicting loopback port (e.g., `127.0.0.1:8081`).
 
 To preserve client IPs in this nested configuration, BunkerWeb must explicitly forward HTTP header metadata:
+
 ```nginx
 # BunkerWeb configuration block for Traefik delegation
 proxy_set_header Host $host;
@@ -99,6 +100,7 @@ proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $scheme;
 ```
+
 Traefik must then be configured with `forwardedHeaders.trustedIPs` matching BunkerWeb's IP to trust these incoming headers.
 
 ---
