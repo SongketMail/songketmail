@@ -8,7 +8,7 @@ topics: [jules, history, antigravity, sessions, archive]
 
 # 📜 Google Jules Historical Sessions Archive
 
-This catalog archives all Google Jules collaborative coding sessions, activity logs, prompts, and git patches for **SongketMail**, providing full continuity for Google Antigravity and future agentic workflows.
+This catalog indexes Google Jules collaborative coding sessions for **SongketMail**, preserving session metadata, plan steps, and commit records to provide operational continuity for Google Antigravity and future agentic workflows.
 
 | PR # | Branch / Session ID | Date | Summary Title | Merge Commit |
 |:---|:---|:---|:---|:---|
