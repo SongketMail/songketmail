@@ -1,0 +1,408 @@
+[
+  {
+    "id": "mem-001",
+    "fact": "Risk level calculation in `scripts/privilege_and_safety_test.py` is implemented via `check_safety_calc_risk`, performing a single-pass traversal over detected issue severities using numeric rank mapping with early exit on 'CRITICAL_RISK', benchmarked by `scripts/benchmark_risk_calc.py`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-002",
+    "fact": "The repository uses a gh-pages branch configured with Jekyll (_config.yml, Gemfile, and .nojekyll) at both the root and docs/ levels to support GitHub Pages static site hosting.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-003",
+    "fact": "Repetitive, inline `curl` requests in `scripts/jules_gh_feedback.sh` were refactored into a reusable `github_api_request` function that standardizes header injection and request timeouts using Bash arrays to avoid argument splitting issues.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-004",
+    "fact": "The repository utilizes RustFS (`docker.io/rustfs/rustfs`) as its primary S3-compatible object storage backend, replacing MinIO. Configuration is declared in `group_vars/all.yml` (`rustfs_image_tag`, and directory structures mapping to `rustfs/data`), container Podman Quadlet configuration under `roles/podman_quadlet/templates/s3.container` using RUSTFS environment variables, and documented within `docs/s3-storage.md` and `docs/s3-storage.html` detailing justifications against MinIO (licensing, resource footprint, telemetry, and payload size optimization).",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-005",
+    "fact": "The repository maintains strict PEP-257 and Google-style docstring compliance across all Python scripts under `scripts/` and `tests/`, and enforces thorough documentation headers, dependency prerequisites, usage rules, and step-by-step comments inside all Bash utility scripts.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-006",
+    "fact": "The repository's ansible.cfg is configured with stdout_callback = ansible.builtin.default to ensure compatibility across modern Ansible Core versions and prevent community.general.yaml callback deprecation or removal crashes.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-007",
+    "fact": "The documentation book includes Part 23 (`docs/k8s-ceph-design.md` and `docs/k8s-ceph-design.html`) detailing an Enterprise Kubernetes & Distributed Ceph Architecture Specification for SongketMail, featuring an open-source dual-cluster topology with a main production RKE2 cluster (14 nodes) and a small supporting services K3s cluster (5 nodes), Persistent Volume (PV) storage setup for RKE2 (Ceph CSI RBD/CephFS, NFS server, Local Path provisioner), and `scripts/unify_templates.py`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-008",
+    "fact": "The repository contains a dedicated, 100% passing unit test suite in `tests/test_ansible_podman_md_python.py` verifying Ansible playbook YAML structure and FQCN compliance, Podman Quadlet templates syntax, sections and keep-id mapping, absence of hardcoded passwords in Quadlet container templates, Markdown documentation compliance with OKF v0.1 and footer standards, and mocking Python helper functions from `scripts/` (including sidebar injection operations and doc sync automation).",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-009",
+    "fact": "Database environment configuration (`postgres_user`, `postgres_password`, `postgres_db`) in `roles/podman_quadlet/templates/db.container` is parameterized via Ansible Jinja2 variables with default values declared in `group_vars/all.yml`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-010",
+    "fact": "Automated container vulnerability scanning and Quadlet configuration checks are integrated into GitHub Actions CI via `.github/workflows/security-scan.yml` using Trivy.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-011",
+    "fact": "The documentation book includes Part 18 ('docs/ansible-playbook-map.md' and '.html') mapping repository playbooks (site.yml, asimp_hardening_playbook.yml, wsl_feedback_playbook.yml, and playbooks/matrix_test.yml) to their managed roles, services, and related documentation to ensure all deployment, monitoring, and operational tasks are fully Ansible-driven.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-012",
+    "fact": "The project uses a root-level .gitignore file to ignore Jekyll build artifacts ('_site/', '.sass-cache/', '.jekyll-cache/', '.jekyll-metadata'), ruby bundler paths ('vendor/', '.bundle/'), the cloned 'asimp/' directory, and the 'tools/' directory to avoid workspace and repository file tracking pollution.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-013",
+    "fact": "The template unification script 'scripts/unify_templates.py' dynamically scans documentation page content for '<h2>' and '<h3>' tags, injects clean and deduplicated unique 'id' attributes as anchors, and generates a hierarchical, sticky Table of Contents (TOC) sidebar in the right-hand column (Column 3) for each compiled page.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-014",
+    "fact": "The repository contains a production-grade, modular Ansible playbook structure inside the `ceph_deploy/` directory to natively deploy an independent 3-node Ceph storage cluster supporting both Ubuntu 26.04 LTS and AlmaLinux 9.6 (Ceph Tentacle release) via `cephadm`. It utilizes FQCN compliance and modular roles: `ceph_prep` (with precise Chrony/chronyd synchronization dynamically configured across Debian/RedHat, standalone cephadm download, and dynamic official repository addition via `cephadm add-repo`), `ceph_bootstrap` (which performs initial active monitor/manager configuration, SSH public key extraction, and secure key distribution), `security_hardening` (providing backend public/cluster network port isolation), `pve_integration` (managing RBD keyring transfer and storage.cfg generation), and `validation_bench`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-015",
+    "fact": "An isolated multi-OS local test matrix is orchestrated on WSL2 via `playbooks/matrix_test.yml` using `containers.podman` and loop tasks under `playbooks/tasks/run_distro.yml` to target Ubuntu 24.04, Ubuntu 26.04 (Noble/Plucky next target), AlmaLinux 9, and Debian 12 containers.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-016",
+    "fact": "The documentation book includes Part 24 (`docs/proxmox-datacenter-architecture.md` and `docs/proxmox-datacenter-architecture.html`) detailing a Proxmox VE Enterprise Datacentre Architecture for SongketMail, including system topology ASCII diagram, 7 core architectural tiers (Ingress & External Integration Perimeter, Perimeter Security & Traffic Routing, Dual-Plane Network Fabric, Proxmox VE Hypervisor Compute Fabric, Ceph SDS, Datacentre Supporting Infrastructure, and DR Site Continuity), and integration with `scripts/unify_templates.py`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-017",
+    "fact": "The repository includes a comprehensive, 100% passing test suite defined across `tests/test_all.py`, `tests/test_playwright_e2e.py`, and modular test suites verifying 675 test cases under pytest. The suite tests OKF Markdown compliance, HTML structure, Quadlet templates, ingress ports, privilege/safety check mock verifications, doc sync validation safety guards, Playwright E2E viewports, visual regression snapshot matching across all 31 documentation pages, and local link resolution.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-018",
+    "fact": "Ceph RBD burst IOPS and NFS dynamic mount parameters can be audited and benchmarked using the executable utility script `scripts/benchmark_ceph_rbd_fio.sh`, which supports 25G/100G network fabric options (`--fabric`), dry-run execution, and generates standard report diagnostics.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-019",
+    "fact": "The documentation book includes Part 21 (`docs/ceph-ubuntu-deployment.md` and `docs/ceph-ubuntu-deployment.html`) detailing the architectural planning (such as network segmentation, IP addressing schemes, CRUSH maps, and capacity planning of 154TB raw / 51TB usable), greenfield Proxmox VE 9 cluster builds, external Ceph native deployment on both Ubuntu 26.04 LTS and AlmaLinux 9.6, network and security hardening, performance benchmarking, and high-availability operational runbooks.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-020",
+    "fact": "The template unification script 'scripts/unify_templates.py' relies on unique occurrences of the HTML comment `<!-- Column 2: Center Main Content Area (span 6) -->` to extract content. Duplicate occurrences of this marker in HTML files will break parsing and truncate layout generation. Additionally, both `.md` and `.html` source files must be updated manually in sync as the script does not compile Markdown to HTML.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-021",
+    "fact": "Host-level network port checks in the SongketMail fabric target the active BunkerWeb-bound ports (25, 80, 443, 587, and 993) to align with Step 1.5; port 143 (IMAP) is not exposed/bound on the host level by BunkerWeb and is omitted from host-level safety checks.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-022",
+    "fact": "The repository uses an automated template unification script 'scripts/unify_templates.py' to parse and rebuild custom HTML documentation pages in 'docs/' into a standardized, modern 'SongketMail :: LAB' 12-column layout. This layout features a synchronized left-sidebar navigation, a central content panel, a dynamic, page-specific Table of Contents (TOC) with hierarchical heading anchors on the right-sidebar, a unified global footer, and a fully functional light/dark/auto theme toggle.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-023",
+    "fact": "The deployment design adheres to the 'Persistence Trinity' strategy: cluster-prefixed network/pod fabric isolation, native user-level systemd Quadlet orchestration, and node-isolated host storage paths.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-024",
+    "fact": "The repository orchestrates Google Jules and Google Antigravity collaborative intelligence through modular Agent Skills inside `.agents/skills/` containing `SKILL.md` documents configured with combined OKF and Antigravity YAML frontmatter, registered dynamically in `AGENTS.md` and `.agents/AGENTS.md`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-025",
+    "fact": "Namespace mapping with keep-id (UID/GID 2001:2001) is mandatory at the Pod level to preserve storage sovereignty and align host and container permissions natively without sudo.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-026",
+    "fact": "When managing rootless systemd services through Ansible, the environment variables XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS must be explicitly defined for the target rootless user.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-027",
+    "fact": "The documentation book includes Part 26 (`docs/freebsd-bhyve-solutions.md` and `docs/freebsd-bhyve-solutions.html`) detailing FreeBSD deployment options, FreeBSD Jails containerization versus bhyve type-2 hypervisor virtualization (supporting FreeBSD, Linux, OpenBSD, NetBSD, and Windows guests on Intel, AMD, and ARM64 processors), OpenZFS storage fabric integration, virtual networking (`if_bridge`, TAP devices, virtio-net, VLANs), VM management with `vm-bhyve`, UEFI/EDK2 firmware, cloud-init, and SongketMail deployment topologies on FreeBSD.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-028",
+    "fact": "The documentation in Part 20 (`docs/proxmox-ceph-hci.md` and `.html`) includes a detailed 6-stage deployment and replication flow for Proxmox VE integrated with external Production & DR Ceph clusters. The architecture utilizes Proxmox VE 9, Ubuntu 26.04 LTS, the Ceph Tentacle release (containerized via cephadm), and RBD Mirroring for inter-cluster replication.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-029",
+    "fact": "Sovereign Storage Path Creation (UID 2001) is orchestrated under `roles/host_prepare/tasks/main.yml` in two consecutive steps: first, creating the base storage parent directory (`storage_base_path`) with strict permissions (`0700`) and custom ownership matching `songketmail_user` (or dynamically omitting ownership/using the logged-in user when running in unprivileged sandboxes with `is_limited_environment: true`), followed by creating the 14 isolated subdirectories defined in `songketmail_storage_dirs` with identical permission constraints.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-030",
+    "fact": "The documentation book includes Part 27 (`docs/docs-sync-pipeline-guide.md` and `docs/docs-sync-pipeline-guide.html`) detailing the Documentation Sync Pipeline & GitHub Actions Setup Guide, explaining Mintlify documentation sync architecture (`docs-source/` to `songketmail/songketmail-product-pages`), GitHub Actions `DOCS_REPO_TOKEN` secret configuration via GitHub REST API/NaCl or Web UI, PAT required scopes, and pipeline troubleshooting.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-031",
+    "fact": "A programmatic verification tool `scripts/verify_mail_web_app.py` is available to perform Step 1.5 Mail Web Application Ingress Verification. It checks host ports 25, 80, 443, 587, and 993, and gracefully falls back to auditing container Quadlet configuration templates in limited/sandbox environments, generating OKF v0.1-compliant Markdown and HTML reports in `docs/`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-032",
+    "fact": "To avoid CodeQL 'py/incomplete-url-substring-sanitization' false positives in test files, avoid checking plain URL domain substrings (such as 'https://jmap.io' or 'domain.com') directly using 'in' assertions, and instead assert on protocol concepts, RFC references, or non-domain strings.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-033",
+    "fact": "To resolve Ansible 'INJECT_FACTS_AS_VARS' deprecation warnings cleanly, always access gathered system facts via the 'ansible_facts' dictionary (e.g., 'ansible_facts[\"env\"][\"HOME\"]' and 'ansible_facts[\"user_id\"]') when defining custom variables in 'set_fact', while referencing custom variables (such as 'songketmail_user') directly by their plain names (e.g. '{{ songketmail_user }}') to maintain idiomatic code quality.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-034",
+    "fact": "The documentation book includes Part 16 ('docs/ANSIBLE-ADOPTION-REVIEW.md' and '.html') assessing the adoption of DSOM Ansible Configuration Guide patterns (Pipelining, YAML callback, Hybrid Privilege, Keep-ID mapping, and Runtime Secrets Injection) in SongketMail.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-035",
+    "fact": "Mintlify documentation source files are maintained in `docs-source/` (`.mdx` files and `docs.json`) and automatically synchronized to `songketmail/songketmail-product-pages` on push to main via `.github/workflows/sync-docs.yml` and `scripts/sync_docs.py` using a secure `GIT_ASKPASS` credential helper. The script implements safety guards in `validate_source_docs` that fail fast if `docs-source/` or `docs.json` is missing, if file count is below threshold (default 5), or if navigation links in `docs.json` do not resolve to actual disk files, and supports a `--dry-run` flag.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-036",
+    "fact": "An automated link-checking script `scripts/check_links.py` is available to recursively parse and verify that all internal links in both Markdown (`.md`) and HTML (`.html`) files under `docs/` resolve correctly without broken routes.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-037",
+    "fact": "The repository is configured to deploy the SongketMail email server fabric using Ansible and Podman 5+ via systemd Quadlets.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-038",
+    "fact": "Jekyll configuration in `_config.yml` excludes directory paths `playbooks/` and `scripts/` as well as root-level Ansible/YAML playbooks to prevent Jekyll's Liquid engine from compiling files with raw Jinja2 templates.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-039",
+    "fact": "The repository implements comprehensive SEO optimization and discovery by hosting duplicate `sitemap.txt`, `sitemap.xml`, and `robots.txt` files at both the repository root and the `docs/` directory. This aligns standard search engine indexers with both GitBook URLs and the custom GitHub Pages static site hosting configuration.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-040",
+    "fact": "The repository houses ten modular Google Antigravity Agent Skills in `.agents/skills/` (namely `songketmail-architecture`, `songketmail-deployment`, `dockpod-integration`, `jekyll-gh-pages`, `jules-agent-protocol`, `jules-sandbox-mode`, `ceph-deployment`, `wsl-development-feedback`, `s3-storage-integration`, and `template-unification`), each utilizing SKILL.md formatted with a combined Antigravity and OKF v0.1 frontmatter header, and concluding with the standard DSOM AI Protocol footer.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-041",
+    "fact": "Code health standards are enforced via `pyproject.toml` configuring `ruff` for Python script and test linting, `.yamllint` for YAML formatting, and `.markdownlint.json` / `.github/workflows/markdownlint.yml` enforcing Markdown linting and MD031 code block spacing rules across documentation files via `markdownlint-cli`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-042",
+    "fact": "Ansible Molecule test scenarios for `ceph_deploy` roles are configured under `ceph_deploy/molecule/default/` with `molecule.yml`, `converge.yml`, and `verify.yml` to validate role execution and deployment configuration.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-043",
+    "fact": "The development environment has Playwright installed and utilizes a verification script at `/home/jules/verification/verify_pages.py` to capture layout screenshots (such as `/home/jules/verification/review.png`) of HTML pages to visually verify frontend UI changes.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-044",
+    "fact": "The documentation book includes Part 29 (`docs/nfs-ceph-performance-tuning.md` and `docs/nfs-ceph-performance-tuning.html`) detailing the NFS v4.2 and Ceph RBD Performance Tuning Guide in UK English, featuring fact-checked sysctl kernel parameters (`sunrpc.tcp_slot_table_entries = 128`, `net.core.rmem_max`, `vm.dirty_bytes`), tuned dynamic mount parameters (`noatime`, `rsize=1048576`, `wsize=1048576`, `nconnect=4`), Linux Kernel 5.17+ fscache/cachefilesd architecture, and Ceph RBD fio burst IOPS benchmarking against NVMe pools on Proxmox VE nodes.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-045",
+    "fact": "Template parsing functions within `scripts/verify_mail_web_app.py` target specific `OSError` exceptions rather than using broad `except Exception:` clauses to prevent masking syntax, conversion, or type errors.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-046",
+    "fact": "The documentation book includes Part 20 ('docs/proxmox-ceph-hci.md' and '.html') detailing hyper-converged integration (HCI) of a 3-node Proxmox VE + Ceph cluster, cross-cluster storage consumption guidelines, native Ceph deployment on Ubuntu 26.04 LTS via cephadm, and a comprehensive Manpower & Operational Effort Analysis comparing Proxmox-managed and Ubuntu-managed (cephadm) decoupled deployments.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-047",
+    "fact": "The monolithic `check_safety` function in `scripts/privilege_and_safety_test.py` was refactored into distinct, single-responsibility helper functions (`_check_ssh_safety`, `_check_kernel_sysctl_safety`, `_check_port_availability`, `_check_storage_safety`, and `_check_podman_safety`) to improve maintainability and readability.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-048",
+    "fact": "Python cache directories (`__pycache__/`) and compiled bytecodes (`*.pyc`) are configured to be ignored by `.gitignore` to prevent tracking pollution in Python-based scripts.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-049",
+    "fact": "The documentation book includes Part 25 (`docs/email-security-design.md` and `docs/email-security-design.html`) detailing Email Security from the Wire to the Mailbox, covering DANE, MTA-STS, TLSRPT, ACMEv2 certificate automation via Smallstep Private CA (`smallstep.container` / `step-ca`), user OpenPGP and S/MIME mailbox encryption at rest, JSON Meta Application Protocol (JMAP / RFC 8620, RFC 8621), automated DKIM key rotation, Rust memory-safety, and security-by-default Ansible variable definitions in `group_vars/all.yml`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-050",
+    "fact": "The repository's ansible.cfg is configured with SSH pipelining enabled under the '[ssh_connection]' section to reduce connection handshakes and latency during deployment.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-051",
+    "fact": "The repository includes a Legal Notice page (`docs/legal-notice.md` and `docs/legal-notice.html` as Part 19 of the documentation summary) that defines privacy policies, critical planning/cost assumptions, training parameters, and liability disclaimers, with a link to this notice automatically injected into the unified footer of all generated HTML documentation pages.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-052",
+    "fact": "To allow executing deployment playbooks locally within unprivileged sandbox environments, the inventory file 'inventory/hosts.ini' includes 'localhost' defined with 'ansible_connection=local' under the '[email_servers]' host group.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-053",
+    "fact": "Ansible playbooks and tasks in this repository must use Fully Qualified Collection Names (FQCN), such as ansible.builtin.copy or ansible.posix.sysctl.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-054",
+    "fact": "The documentation book includes Part 22 (`docs/regional-design-proxmox-ceph.md` and `docs/regional-design-proxmox-ceph.html`) detailing a geolocated regional data center design for SongketMail, including a 3-region topology (Alpha, Beta, Gamma), a dual-tier Ceph strategy (Proxmox VE local HCI Ceph and independent AlmaLinux 9.6 Ceph), and a multi-region Proxmox Backup Server (PBS) integration utilizing chunk-level deduplication, QEMU dirty-bitmap incremental backups, client-side AES-256-GCM encryption, and pull-based WAN sync.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-055",
+    "fact": "The host preparation role (roles/host_prepare/tasks/main.yml) fully captures Phase 1 bootstrap requirements by configuring the sysctl parameter 'net.ipv4.ip_unprivileged_port_start=25' and ensuring required packages (python3, python3-pip, ansible, podman, and podman-docker) are installed under non-sandbox configurations.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-056",
+    "fact": "The repository contains a static documentation site in the docs/ directory, which is automated to deploy to GitHub Pages via the .github/workflows/deploy-pages.yml workflow.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-057",
+    "fact": "The documentation book includes Part 28 (`docs/rke2-pv-storage-setup.md` and `docs/rke2-pv-storage-setup.html`) detailing Persistent Volume (PV) Storage Server Setup for RKE2, covering external Ceph CSI storage provisioning (RBD), Proxmox VE-Ceph integration via Helm, NFS storage server setup with `nfs-subdir-external-provisioner`, Local Path provisioner configuration, OS dependencies across Debian/Ubuntu and AlmaLinux/RockyLinux, and integration with `scripts/unify_templates.py`.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  },
+  {
+    "id": "mem-058",
+    "fact": "Test discovery in `tests/test_all.py` dynamically filters out `.pytest_cache/` to ensure file metrics and markdown counting tests remain stable and do not include auto-generated pytest metadata files.",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "archived": false
+  }
+]

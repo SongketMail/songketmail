@@ -26,7 +26,7 @@ def test_markdownlint_workflow_exists():
 
 def test_security_workflow_permissions():
     """Verifies that security-scan.yml specifies contents: read and rejects write permissions."""
-    with open(SECURITY_WORKFLOW, "r", encoding="utf-8") as f:
+    with open(SECURITY_WORKFLOW, encoding="utf-8") as f:
         content = f.read()
 
     assert "contents: read" in content, "security-scan.yml missing 'contents: read'"
@@ -36,7 +36,7 @@ def test_security_workflow_permissions():
 
 def test_security_workflow_image_scan_loop():
     """Verifies that each normalized ${CLEAN_IMG} is passed to Trivy image scan in the Quadlet loop."""
-    with open(SECURITY_WORKFLOW, "r", encoding="utf-8") as f:
+    with open(SECURITY_WORKFLOW, encoding="utf-8") as f:
         content = f.read()
 
     assert "roles/podman_quadlet/templates/*.container" in content, "Missing Quadlet template path"
@@ -47,7 +47,7 @@ def test_security_workflow_image_scan_loop():
 
 def test_markdownlint_workflow_permissions():
     """Verifies that markdownlint.yml specifies contents: read and rejects write permissions."""
-    with open(MARKDOWNLINT_WORKFLOW, "r", encoding="utf-8") as f:
+    with open(MARKDOWNLINT_WORKFLOW, encoding="utf-8") as f:
         content = f.read()
 
     assert "contents: read" in content, "markdownlint.yml missing 'contents: read'"

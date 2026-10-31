@@ -1,0 +1,14 @@
+[
+  {
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "name": "sources/github_com_SongketMail_songketmail",
+    "displayName": "SongketMail/songketmail",
+    "githubRepo": {
+      "owner": "SongketMail",
+      "repo": "songketmail",
+      "defaultBranch": "main",
+      "htmlUrl": "https://github.com/SongketMail/songketmail"
+    },
+    "createdAt": "2026-07-01T00:00:00Z"
+  }
+]

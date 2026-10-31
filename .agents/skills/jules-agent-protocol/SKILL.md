@@ -43,7 +43,10 @@ To be a good AI citizen in this workspace, follow these strict rules:
 6.  **Unprivileged Sandbox and Google Jules Constraints (Rule 31)**:
     - AI agents operate in unprivileged environments where escalation/root access is completely unavailable.
     - All code changes or tasks MUST implement or support the `is_limited_environment` toggle (defined in `group_vars/all.yml`) to gracefully bypass restricted tasks (kernel tuning, system modifications, system package installations, service manager reloading) and target unprivileged user paths instead.
+7.  **Google Jules Historical Continuity & Google Antigravity Handover**:
+    - Complete Google Jules historical session logs, prompts, git patches, source linkages, and 58+ operational memories are preserved under `.agents/brain/jules_history/` (and indexed via `sessions_catalog.md`).
+    - Google Antigravity and succeeding agentic coding platforms must inspect `.agents/brain/jules_history/` to access historical context, decision rationale, and operational memory.
 
 ---
-*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-07-04*
+*Deep State of Mind (DSOM) For My AI Protocol | Harisfazillah Jamel (LinuxMalaysia) | 2026-10-31*
 *Standard: UK English | DBP-standard Bahasa Melayu Malaysia (Piawai) | GNU General Public License v3.0*
