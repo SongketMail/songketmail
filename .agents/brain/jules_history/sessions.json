@@ -1,0 +1,974 @@
+[
+  {
+    "id": "jules-4993105610050480120-bc13d0fb",
+    "pr": "95",
+    "title": "PR #95: Merge branch 'main' into jules-4993105610050480120-bc13d0fb",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sun Sep 6 20:25:19 2026 +0800",
+    "completedAt": "Sun Sep 6 20:25:19 2026 +0800",
+    "branch": "jules-4993105610050480120-bc13d0fb",
+    "mergeHash": "849e7aa2d2e1adf5c05f5524a82a69887ffb9db2",
+    "tipHash": "f51a55dcc83f843134fa0a8d91748be83f755ddf",
+    "description": "Merge branch 'main' into jules-4993105610050480120-bc13d0fb",
+    "commits": [
+      {
+        "commitId": "f51a55dcc83f843134fa0a8d91748be83f755ddf",
+        "title": "Merge branch 'main' into jules-4993105610050480120-bc13d0fb",
+        "commitMessage": "Merge branch 'main' into jules-4993105610050480120-bc13d0fb",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "942f84ba7bc1656f371d09811d67504196fd6cd4",
+        "title": "eod: final summary report and EOD session wrap-up",
+        "commitMessage": "eod: final summary report and EOD session wrap-up\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-4993105610050480120-bc13d0fb",
+    "pr": "87",
+    "title": "PR #87: eod: finalize DSOM palace brain sync and start prompt execution protocol",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sun Sep 6 12:34:31 2026 +0800",
+    "completedAt": "Sun Sep 6 12:34:31 2026 +0800",
+    "branch": "jules-4993105610050480120-bc13d0fb",
+    "mergeHash": "884c8fd3616caf81b026e1ef97354e7ff4f7df1b",
+    "tipHash": "3212232b8f4b28293c54234e1219daee7a70dceb",
+    "description": "eod: finalize DSOM palace brain sync and start prompt execution protocol\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "3212232b8f4b28293c54234e1219daee7a70dceb",
+        "title": "eod: finalize DSOM palace brain sync and start prompt execution protocol",
+        "commitMessage": "eod: finalize DSOM palace brain sync and start prompt execution protocol\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "5a1911767de87a03ff4613724b3f8799e1f0e5bd",
+        "title": "feat: Universal Platform Gateway Matrix and Downstream DSOM Compliance Mandate adoption",
+        "commitMessage": "feat: Universal Platform Gateway Matrix and Downstream DSOM Compliance Mandate adoption\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "888b26c673361f804c87e0aefdedf330ec5db90d",
+        "title": "eod: update DSOM palace brain state files for EOD sync",
+        "commitMessage": "eod: update DSOM palace brain state files for EOD sync\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "69d59a0ccf851dcfaee742697caf7c0d2dc04637",
+        "title": "fix: explicit --pool missing value error validation and test coverage",
+        "commitMessage": "fix: explicit --pool missing value error validation and test coverage\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "30f81c2b86fc696b2c14efa8e35766b5a319590a",
+        "title": "fix: Molecule verify role entry assertion, nconnect audit predicate, and RBD cleanup flow",
+        "commitMessage": "fix: Molecule verify role entry assertion, nconnect audit predicate, and RBD cleanup flow\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "1fb97a3c5aa9ac12a5fcdb1118b241602d7e82c1",
+        "title": "Merge pull request #89 from SongketMail/coderabbit/add-pull-request-tests/7f27d2de",
+        "commitMessage": "Merge pull request #89 from SongketMail/coderabbit/add-pull-request-tests/7f27d2de\n\nAdd behavioural tests for the Ceph RBD benchmark",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "dbe6093f306de49acc44845989191b6b2d3636aa",
+        "title": "Generate unit tests for PR #87",
+        "commitMessage": "Generate unit tests for PR #87",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "9413c47ff5444e6450eccb41e956679b63056e23",
+        "title": "Merge pull request #88 from SongketMail/coderabbitai/docstrings/4cb491c",
+        "commitMessage": "Merge pull request #88 from SongketMail/coderabbitai/docstrings/4cb491c\n\n\ud83d\udcdd Add docstrings to `jules-4993105610050480120-bc13d0fb`",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "c13bdb9a34cabd6ca2b48d8da351e4364e2123d3",
+        "title": "fix: PR feedback updates for Molecule, NFS mount options, and RBD fio benchmark lifecycle",
+        "commitMessage": "fix: PR feedback updates for Molecule, NFS mount options, and RBD fio benchmark lifecycle\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "dd43ee95715ab99a65fed8c90fb24e8072883de2",
+        "title": "\ud83d\udcdd Add docstrings to `jules-4993105610050480120-bc13d0fb`",
+        "commitMessage": "\ud83d\udcdd Add docstrings to `jules-4993105610050480120-bc13d0fb`\n\nDocstrings generation was requested by @linuxmalaysia.\n\n* https://github.com/SongketMail/songketmail/pull/87#issuecomment-5555340013\n\nThe following files were modified:\n\n* `scripts/benchmark_ceph_rbd_fio.sh`\n* `scripts/check_links.py`\n* `scripts/sync_docs.py`\n* `scripts/unify_templates.py`\n* `scripts/update_sidebars.py`\n* `scripts/verify_mail_web_app.py`\n* `tests/test_all.py`\n* `tests/test_ansible_podman_md_python.py`\n* `tests/test_docs_source_pages.py`\n* `tests/test_playwright_e2e.py`\n* `tests/test_regional_design.py`",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      },
+      {
+        "commitId": "4cb491cc68b3c9fb40ace4ddef2aa9d5abea04e1",
+        "title": "feat: NFS v4.2 & Ceph RBD tuning guide, ruff/yamllint, Molecule & Playwright E2E tests",
+        "commitMessage": "feat: NFS v4.2 & Ceph RBD tuning guide, ruff/yamllint, Molecule & Playwright E2E tests\n\nCo-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+        "gitBranchName": "jules-4993105610050480120-bc13d0fb"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-rke2-pv-storage-setup-11171486674595924951",
+    "pr": "82",
+    "title": "PR #82: eod: dsom palace sync and eod mental anchor update",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Sep 5 13:47:49 2026 +0800",
+    "completedAt": "Sat Sep 5 13:47:49 2026 +0800",
+    "branch": "jules-rke2-pv-storage-setup-11171486674595924951",
+    "mergeHash": "ce82ab9bc6506e91fb58f013ca047ef01d48b1ce",
+    "tipHash": "700eaff000f8703c86f1f903ee836ae9f675deb9",
+    "description": "eod: dsom palace sync and eod mental anchor update\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "700eaff000f8703c86f1f903ee836ae9f675deb9",
+        "title": "eod: dsom palace sync and eod mental anchor update",
+        "commitMessage": "eod: dsom palace sync and eod mental anchor update\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "66fc6b6c2bbca953227a0777edffa1c5a39619ae",
+        "title": "docs: configure static NFS PV export ownership for pod UID/GID 2001:2001",
+        "commitMessage": "docs: configure static NFS PV export ownership for pod UID/GID 2001:2001\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "e6c5d91e987967f0c787145895cae3e67a565957",
+        "title": "eod: state sync checkpoint and mental anchor updated",
+        "commitMessage": "eod: state sync checkpoint and mental anchor updated\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "a0f59eed9f21b2fa6a4e2cbacf9fe85a3939e6c4",
+        "title": "Merge pull request #83 from SongketMail/coderabbit/add-pull-request-tests/8f7421a0",
+        "commitMessage": "Merge pull request #83 from SongketMail/coderabbit/add-pull-request-tests/8f7421a0\n\nAdd regression tests for RKE2 persistent-volume documentation",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "42efabf1ecc4d8f99d5e81bea7cb2fa604891863",
+        "title": "Add tests for RKE2 persistent volume documentation",
+        "commitMessage": "Add tests for RKE2 persistent volume documentation",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "b652e512148efc759dfe65ecdeba901fc6613632",
+        "title": "docs: update RKE2 PV storage documentation per review feedback",
+        "commitMessage": "docs: update RKE2 PV storage documentation per review feedback\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      },
+      {
+        "commitId": "7317edba4c67cc08578a7d50752df33acd5e5da9",
+        "title": "docs: add RKE2 persistent volume PV storage server setup guide",
+        "commitMessage": "docs: add RKE2 persistent volume PV storage server setup guide\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-rke2-pv-storage-setup-11171486674595924951"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-9895116411447778929-2096b09e",
+    "pr": "56",
+    "title": "PR #56: feat(skills): implement feedback and add automated skill compliance tests",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Thu Aug 13 21:33:51 2026 +0800",
+    "completedAt": "Thu Aug 13 21:33:51 2026 +0800",
+    "branch": "jules-9895116411447778929-2096b09e",
+    "mergeHash": "f10dd1abe8db058c05ee2ed5899b379c148aaf78",
+    "tipHash": "2c055f8ae9f3c69b32877f19a071eb6d37b340b7",
+    "description": "feat(skills): implement feedback and add automated skill compliance tests\n\nAdds `test_agent_skills_compliance()` to `tests/test_ansible_podman_md_python.py` to verify metadata and footer standards of all 10 Agent Skills. All 377 test cases are verified passing under pytest.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "2c055f8ae9f3c69b32877f19a071eb6d37b340b7",
+        "title": "feat(skills): implement feedback and add automated skill compliance tests",
+        "commitMessage": "feat(skills): implement feedback and add automated skill compliance tests\n\nAdds `test_agent_skills_compliance()` to `tests/test_ansible_podman_md_python.py` to verify metadata and footer standards of all 10 Agent Skills. All 377 test cases are verified passing under pytest.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-9895116411447778929-2096b09e"
+      },
+      {
+        "commitId": "e939bbec063d5462cea6f303ba356c96c90ed6c9",
+        "title": "feat(skills): add comprehensive Google Antigravity-compatible Agent Skills",
+        "commitMessage": "feat(skills): add comprehensive Google Antigravity-compatible Agent Skills\n\nAdds four new, highly precise Google Antigravity-compatible Agent Skills inside `.agents/skills/` (ceph-deployment, s3-storage-integration, template-unification, and wsl-development-feedback) to encapsulate all Jules operational and domain-specific knowledge about the project.\n\nUpdates both `AGENTS.md` and `.agents/AGENTS.md` guidelines with the new consolidated agent skills register.\n\nUpdates `tests/test_all.py` assertions to expect exactly 41 Markdown files to reflect the skills expansion. All unit tests remain 100% green and verified.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-9895116411447778929-2096b09e"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-7060770974374053153-d515c90c",
+    "pr": "53",
+    "title": "PR #53: docs: implement PR feedback, add unit tests and Google-style docstrings",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Wed Aug 12 18:09:22 2026 +0800",
+    "completedAt": "Wed Aug 12 18:09:22 2026 +0800",
+    "branch": "jules-7060770974374053153-d515c90c",
+    "mergeHash": "79e31237c37a5ea4f39448f60e3ef88c30c39232",
+    "tipHash": "bf62b15597bcdbb04e5c53adbd4c2e14ae3e1f1b",
+    "description": "docs: implement PR feedback, add unit tests and Google-style docstrings\n\nAdds unit tests verifying the Proxmox VE + External Ceph deployment\nflow content in both Markdown and HTML, with Google-style docstrings.\nAll 361 tests pass successfully.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "bf62b15597bcdbb04e5c53adbd4c2e14ae3e1f1b",
+        "title": "docs: implement PR feedback, add unit tests and Google-style docstrings",
+        "commitMessage": "docs: implement PR feedback, add unit tests and Google-style docstrings\n\nAdds unit tests verifying the Proxmox VE + External Ceph deployment\nflow content in both Markdown and HTML, with Google-style docstrings.\nAll 361 tests pass successfully.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-7060770974374053153-d515c90c"
+      },
+      {
+        "commitId": "a386e45b7868c077e258365621ee07908dcb5524",
+        "title": "docs: add Proxmox and Ceph deployment & replication flow section",
+        "commitMessage": "docs: add Proxmox and Ceph deployment & replication flow section\n\nAdds a comprehensive, 6-stage deployment and operational flow section\nto Part 20 (Proxmox VE + Ceph HCI) documentation in both Markdown and\nHTML. Rebuilt unified templates to update heading anchors and the\ndynamic Table of Contents (TOC) sidebar. All unit and link checks pass.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-7060770974374053153-d515c90c"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-6739621278251212044-26d28710",
+    "pr": "52",
+    "title": "PR #52: docs: Add manpower effort analysis and corresponding automated unit tests",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Wed Aug 12 17:50:37 2026 +0800",
+    "completedAt": "Wed Aug 12 17:50:37 2026 +0800",
+    "branch": "jules-6739621278251212044-26d28710",
+    "mergeHash": "30e699444e145790e8d4fe8cd013dcffa10325dd",
+    "tipHash": "f68b579038fa67cd0878903d604c20873705d5de",
+    "description": "docs: Add manpower effort analysis and corresponding automated unit tests\n\n- Document 'Manpower & Operational Effort Analysis' in docs/proxmox-ceph-hci.md and docs/proxmox-ceph-hci.html.\n- Unify templates via unify_templates.py to establish anchors and TOC.\n- Add comprehensive automated test verification in tests/test_all.py for the new documentation section, verifying 100% test compliance.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "f68b579038fa67cd0878903d604c20873705d5de",
+        "title": "docs: Add manpower effort analysis and corresponding automated unit tests",
+        "commitMessage": "docs: Add manpower effort analysis and corresponding automated unit tests\n\n- Document 'Manpower & Operational Effort Analysis' in docs/proxmox-ceph-hci.md and docs/proxmox-ceph-hci.html.\n- Unify templates via unify_templates.py to establish anchors and TOC.\n- Add comprehensive automated test verification in tests/test_all.py for the new documentation section, verifying 100% test compliance.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-6739621278251212044-26d28710"
+      },
+      {
+        "commitId": "02eec488edf9e7f70016c7b4e418a38b665daf42",
+        "title": "docs: Add manpower and operational effort analysis to Proxmox/Ceph HCI documentation",
+        "commitMessage": "docs: Add manpower and operational effort analysis to Proxmox/Ceph HCI documentation\n\n- Compare Proxmox VE Compute + Proxmox-managed Ceph versus Proxmox VE Compute + Ubuntu Ceph (cephadm).\n- Elaborate on provisioning, upgrade paths, monitoring, training, and troubleshooting requirements.\n- Add an in-depth comparison matrix to summarize and weigh operational efforts.\n- Re-run unify_templates.py to regenerate correct anchors, styles, and right sidebar Table of Contents.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-6739621278251212044-26d28710"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-2769243931220696040-6c32ddea",
+    "pr": "50",
+    "title": "PR #50: Refactor imports to remove unused pytest import in test_ansible_podman_md_python.py",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Wed Aug 12 07:16:55 2026 +0800",
+    "completedAt": "Wed Aug 12 07:16:55 2026 +0800",
+    "branch": "jules-2769243931220696040-6c32ddea",
+    "mergeHash": "8d2dfb911f7357e7f77eb7b9272ee1c83c18acbe",
+    "tipHash": "f993ac21d7b4db4bb5fadc31fb67c8812e48cba2",
+    "description": "Refactor imports to remove unused pytest import in test_ansible_podman_md_python.py\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "f993ac21d7b4db4bb5fadc31fb67c8812e48cba2",
+        "title": "Refactor imports to remove unused pytest import in test_ansible_podman_md_python.py",
+        "commitMessage": "Refactor imports to remove unused pytest import in test_ansible_podman_md_python.py\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-2769243931220696040-6c32ddea"
+      },
+      {
+        "commitId": "41e64ff5da40fa9f864421c859d0429437fa255f",
+        "title": "Generate comprehensive docstrings and multi-domain unit tests",
+        "commitMessage": "Generate comprehensive docstrings and multi-domain unit tests\n\n- Added clear, Google-style docstrings to Python helper scripts (unify_templates.py, update_sidebars.py, check_links.py, verify_mail_web_app.py).\n- Created a robust unit testing suite (test_ansible_podman_md_python.py) verifying Ansible playbook FQCN compliance, Podman Quadlet mappings, OKF v0.1 Markdown metadata, and custom python utility functions.\n- Ensured 100% test success on both the original and new test suites.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-2769243931220696040-6c32ddea"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-13491247649264944738-8962eea2",
+    "pr": "44",
+    "title": "PR #44: \ud83e\uddf9 Remove unused subprocess import in tests/test_all.py and re-verify 339 tests passing",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Mon Aug 10 13:10:19 2026 +0800",
+    "completedAt": "Mon Aug 10 13:10:19 2026 +0800",
+    "branch": "jules-13491247649264944738-8962eea2",
+    "mergeHash": "12db80f27d31291ab9aa610f2736df9200a33c7b",
+    "tipHash": "c4ae33b9d581f469b26204ea8f95cb1f3e0fa371",
+    "description": "\ud83e\uddf9 Remove unused subprocess import in tests/test_all.py and re-verify 339 tests passing\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "c4ae33b9d581f469b26204ea8f95cb1f3e0fa371",
+        "title": "\ud83e\uddf9 Remove unused subprocess import in tests/test_all.py and re-verify 339 tests passing",
+        "commitMessage": "\ud83e\uddf9 Remove unused subprocess import in tests/test_all.py and re-verify 339 tests passing\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13491247649264944738-8962eea2"
+      },
+      {
+        "commitId": "629814b8037b2db1166d310a36b95dd86a73d5a6",
+        "title": "Add comprehensive 339-case test suite for SongketMail",
+        "commitMessage": "Add comprehensive 339-case test suite for SongketMail\n\nThis commit introduces a complete and isolated test suite in `tests/test_all.py` designed to run exactly 339 test cases using `pytest`. The test suite covers OKF metadata compliance, HTML document structure, Quadlet template integrity, ingress port bindings, privilege & safety checks under mocked environments, and relative link resolution.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13491247649264944738-8962eea2"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-17971812958633803262-82775df5",
+    "pr": "43",
+    "title": "PR #43: refactor: improve exception handling in scripts/verify_mail_web_app.py",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sun Aug 9 14:03:35 2026 +0800",
+    "completedAt": "Sun Aug 9 14:03:35 2026 +0800",
+    "branch": "jules-17971812958633803262-82775df5",
+    "mergeHash": "7829b0154a48ed1d20bee7e4b6b896eb27ab5979",
+    "tipHash": "7f96b2f1739b300db842aa7fcbd99e00741bf45d",
+    "description": "refactor: improve exception handling in scripts/verify_mail_web_app.py\n\nReplaces broad 'except Exception:' blocks with specific 'except OSError:'\nhandlers inside parse_template_ports() and parse_template_env_vars()\nto prevent silencing potential non-I/O exceptions, thereby improving\ncode health and maintainability.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "7f96b2f1739b300db842aa7fcbd99e00741bf45d",
+        "title": "refactor: improve exception handling in scripts/verify_mail_web_app.py",
+        "commitMessage": "refactor: improve exception handling in scripts/verify_mail_web_app.py\n\nReplaces broad 'except Exception:' blocks with specific 'except OSError:'\nhandlers inside parse_template_ports() and parse_template_env_vars()\nto prevent silencing potential non-I/O exceptions, thereby improving\ncode health and maintainability.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-17971812958633803262-82775df5"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-4878128610207851327-44616de0",
+    "pr": "42",
+    "title": "PR #42: feat(seo): add sitemap and robots configuration for SEO and validation script",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sun Aug 9 00:03:10 2026 +0800",
+    "completedAt": "Sun Aug 9 00:03:10 2026 +0800",
+    "branch": "jules-4878128610207851327-44616de0",
+    "mergeHash": "f547d0507a6c7cc698e653eff9795c6c2d9a54a4",
+    "tipHash": "934d9a01388e343f339ff47d0ded3140b0c1b52d",
+    "description": "feat(seo): add sitemap and robots configuration for SEO and validation script\n\n- Created sitemap.txt containing GitBook and GitHub Pages absolute URLs.\n- Created standard sitemap.xml for Google Indexer.\n- Added robots.txt referencing the XML sitemaps.\n- Copied files to both repository root and docs/ to support GitHub Pages and standard crawlers.\n- Introduced scripts/check_links.py to recursively verify all relative links under docs/ remain valid and free of broken links.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "934d9a01388e343f339ff47d0ded3140b0c1b52d",
+        "title": "feat(seo): add sitemap and robots configuration for SEO and validation script",
+        "commitMessage": "feat(seo): add sitemap and robots configuration for SEO and validation script\n\n- Created sitemap.txt containing GitBook and GitHub Pages absolute URLs.\n- Created standard sitemap.xml for Google Indexer.\n- Added robots.txt referencing the XML sitemaps.\n- Copied files to both repository root and docs/ to support GitHub Pages and standard crawlers.\n- Introduced scripts/check_links.py to recursively verify all relative links under docs/ remain valid and free of broken links.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-4878128610207851327-44616de0"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-3294998240209220252-5704d6b5",
+    "pr": "41",
+    "title": "PR #41: fix(ansible): resolve callback plugin crash and complete Phase 1 host prepare tasks",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 20:35:47 2026 +0800",
+    "completedAt": "Sat Aug 8 20:35:47 2026 +0800",
+    "branch": "jules-3294998240209220252-5704d6b5",
+    "mergeHash": "4dcb595f9c3adabe8386c57a39593ed397856aa8",
+    "tipHash": "e4d0230d2aa294e3752263b0c38aefb2aeec38c0",
+    "description": "fix(ansible): resolve callback plugin crash and complete Phase 1 host prepare tasks\n\n- Configured stdout_callback to ansible.builtin.default in ansible.cfg to prevent community.general.yaml callback crashes on modern Ansible.\n- Added sysctl tuning task for net.ipv4.ip_unprivileged_port_start=25 (low-port binding) in roles/host_prepare/tasks/main.yml under privileged/non-sandbox configurations.\n- Expanded base package list to ensure python3, python3-pip, ansible, podman, and podman-docker are installed when running under full OS privileges.\n- Re-run verification script verify_mail_web_app.py to assert OKF-compliant reports in docs/.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "e4d0230d2aa294e3752263b0c38aefb2aeec38c0",
+        "title": "fix(ansible): resolve callback plugin crash and complete Phase 1 host prepare tasks",
+        "commitMessage": "fix(ansible): resolve callback plugin crash and complete Phase 1 host prepare tasks\n\n- Configured stdout_callback to ansible.builtin.default in ansible.cfg to prevent community.general.yaml callback crashes on modern Ansible.\n- Added sysctl tuning task for net.ipv4.ip_unprivileged_port_start=25 (low-port binding) in roles/host_prepare/tasks/main.yml under privileged/non-sandbox configurations.\n- Expanded base package list to ensure python3, python3-pip, ansible, podman, and podman-docker are installed when running under full OS privileges.\n- Re-run verification script verify_mail_web_app.py to assert OKF-compliant reports in docs/.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-3294998240209220252-5704d6b5"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-16630885898504933203-59760974",
+    "pr": "40",
+    "title": "PR #40: \ud83e\uddf9 implement programmatic mail web app ingress verification and clean up obsolete legay templates",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 18:24:19 2026 +0800",
+    "completedAt": "Sat Aug 8 18:24:19 2026 +0800",
+    "branch": "jules-16630885898504933203-59760974",
+    "mergeHash": "887686d92df1601b3f22c0621491711a9add5df3",
+    "tipHash": "a51c675ce6194c2fe91bb9a14666c00fdefd111a",
+    "description": "\ud83e\uddf9 implement programmatic mail web app ingress verification and clean up obsolete legay templates\n\n- Created scripts/verify_mail_web_app.py to automate Step 1.5 Mail Web Application Ingress Verification.\n- Excluded unexposed port 143 from host-level safety checks in scripts/privilege_and_safety_test.py.\n- Deleted obsolete legacy template roles/podman_quadlet/templates/emailserver.container.\n- Integrated Part 17 (Mail Web Application Ingress Verification) inside docs/SUMMARY.md and docs/index.md.\n- Regenerated sidebars and verified zero Jekyll build or compile errors.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "a51c675ce6194c2fe91bb9a14666c00fdefd111a",
+        "title": "\ud83e\uddf9 implement programmatic mail web app ingress verification and clean up obsolete legay templates",
+        "commitMessage": "\ud83e\uddf9 implement programmatic mail web app ingress verification and clean up obsolete legay templates\n\n- Created scripts/verify_mail_web_app.py to automate Step 1.5 Mail Web Application Ingress Verification.\n- Excluded unexposed port 143 from host-level safety checks in scripts/privilege_and_safety_test.py.\n- Deleted obsolete legacy template roles/podman_quadlet/templates/emailserver.container.\n- Integrated Part 17 (Mail Web Application Ingress Verification) inside docs/SUMMARY.md and docs/index.md.\n- Regenerated sidebars and verified zero Jekyll build or compile errors.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-16630885898504933203-59760974"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-sovereign-storage-0700-18298228518819804173",
+    "pr": "36",
+    "title": "PR #36: refactor: host_prepare - ensure sovereign storage base and subdirectories have strict 0700 permissions with dual-privilege mapping",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 10:15:49 2026 +0800",
+    "completedAt": "Sat Aug 8 10:15:49 2026 +0800",
+    "branch": "jules-sovereign-storage-0700-18298228518819804173",
+    "mergeHash": "e31fac34fdf8bdc7622f788b2174fa9c0f296a8c",
+    "tipHash": "f6069d67909395e0c9a84e83c9069d64aed0f244",
+    "description": "refactor: host_prepare - ensure sovereign storage base and subdirectories have strict 0700 permissions with dual-privilege mapping\n\nRefactored storage creation tasks inside host_prepare role to ensure the base parent directory /var/srv/songketmail (or the unprivileged path under user home) is created with strict 0700 permissions prior to deploying the 14 isolated subdirectories.\n\nSupports unprivileged/Jules sandbox mode dynamically by omitting ownership when is_limited_environment is true, falling back naturally to the logged-in user, and explicitly mapping UID 2001 (songketmail:songketmail) on full-privilege systems.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "f6069d67909395e0c9a84e83c9069d64aed0f244",
+        "title": "refactor: host_prepare - ensure sovereign storage base and subdirectories have strict 0700 permissions with dual-privilege mapping",
+        "commitMessage": "refactor: host_prepare - ensure sovereign storage base and subdirectories have strict 0700 permissions with dual-privilege mapping\n\nRefactored storage creation tasks inside host_prepare role to ensure the base parent directory /var/srv/songketmail (or the unprivileged path under user home) is created with strict 0700 permissions prior to deploying the 14 isolated subdirectories.\n\nSupports unprivileged/Jules sandbox mode dynamically by omitting ownership when is_limited_environment is true, falling back naturally to the logged-in user, and explicitly mapping UID 2001 (songketmail:songketmail) on full-privilege systems.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-sovereign-storage-0700-18298228518819804173"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-10458922835668514889-72bf2eef",
+    "pr": "35",
+    "title": "PR #35: \ud83e\uddf9 Refactor feedback and privilege safety validation scripts",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 09:39:18 2026 +0800",
+    "completedAt": "Sat Aug 8 09:39:18 2026 +0800",
+    "branch": "jules-10458922835668514889-72bf2eef",
+    "mergeHash": "99d32113c9325dc3deabdf1715c01d832df27e29",
+    "tipHash": "1fcf9e376f40188e43271cfde6303ae65ebbe175",
+    "description": "\ud83e\uddf9 Refactor feedback and privilege safety validation scripts\n\n- Extract modular safety checks in privilege_and_safety_test.py.\n- Consolidate GitHub API requests into a reusable helper function in jules_gh_feedback.sh.\n- Enhance codebase readability and maintainability.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "1fcf9e376f40188e43271cfde6303ae65ebbe175",
+        "title": "\ud83e\uddf9 Refactor feedback and privilege safety validation scripts",
+        "commitMessage": "\ud83e\uddf9 Refactor feedback and privilege safety validation scripts\n\n- Extract modular safety checks in privilege_and_safety_test.py.\n- Consolidate GitHub API requests into a reusable helper function in jules_gh_feedback.sh.\n- Enhance codebase readability and maintainability.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-10458922835668514889-72bf2eef"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-13751453016278868306-dbdb73a3",
+    "pr": "34",
+    "title": "PR #34: feat: address remaining secondary PR review feedback for telemetry matrix",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 08:51:34 2026 +0800",
+    "completedAt": "Sat Aug 8 08:51:34 2026 +0800",
+    "branch": "jules-13751453016278868306-dbdb73a3",
+    "mergeHash": "d9501462eea09a47903d7ddfac4757510ca71639",
+    "tipHash": "801b0c1ce59cefedc850bf30c55c0b1b4595d039",
+    "description": "feat: address remaining secondary PR review feedback for telemetry matrix\n\n- Document sequential execution instead of parallel matrix testing.\n- Define and document the shared telemetry JSON schema.\n- Implement unique repository-local file output scoped to data/jules_telemetry.json.\n- Implement search-and-edit idempotency for automated PR comments.\n- Set strict permissions (umask 077, chmod 0600, mode 0600) on all generated telemetry files.\n- Migrate Jules CLI dispatcher flow to use the supported jules remote new command.\n- Standardize all checks to use double bracket syntax [[ ... ]] and arithmetic syntax (( ... )).\n- Guard all telemetry tasks to only run in dev execution mode.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "801b0c1ce59cefedc850bf30c55c0b1b4595d039",
+        "title": "feat: address remaining secondary PR review feedback for telemetry matrix",
+        "commitMessage": "feat: address remaining secondary PR review feedback for telemetry matrix\n\n- Document sequential execution instead of parallel matrix testing.\n- Define and document the shared telemetry JSON schema.\n- Implement unique repository-local file output scoped to data/jules_telemetry.json.\n- Implement search-and-edit idempotency for automated PR comments.\n- Set strict permissions (umask 077, chmod 0600, mode 0600) on all generated telemetry files.\n- Migrate Jules CLI dispatcher flow to use the supported jules remote new command.\n- Standardize all checks to use double bracket syntax [[ ... ]] and arithmetic syntax (( ... )).\n- Guard all telemetry tasks to only run in dev execution mode.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13751453016278868306-dbdb73a3"
+      },
+      {
+        "commitId": "87a8896ef84aeebedb6038c0586428517eff6b20",
+        "title": "feat: adopt secondary project review feedback for telemetry matrix",
+        "commitMessage": "feat: adopt secondary project review feedback for telemetry matrix\n\n- Implement dynamic execution_mode resolution checks in matrix_test.yml.\n- Update Ubuntu container references to docker.io/library/ubuntu:26.04 and rename Plucky to Resolute Raccoon.\n- Author playbooks/requirements.yml for containers.podman collection and document installation.\n- Implement robust signal trap branching (EXIT, INT, TERM) in jules_gh_feedback.sh.\n- Add connection and request timeouts to all curl invocations.\n- Implement fully idempotent automated Pull Request commenting via gh api / direct curl PATCH, updating existing comment markers rather than creating duplicates.\n- Transition Jules remote reporting flow to use jules remote new command with secure temporary payload files.\n- Restrict folder and output permissions with strict umask 077, mktemp, and mode 0600 on sensitive files.\n- Document telemetry schema and sequential execution claims in wsl-development-feedback.md.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13751453016278868306-dbdb73a3"
+      },
+      {
+        "commitId": "d931796216e10e8f7d78d83d2a0e81d5970c48cf",
+        "title": "feat: adopt pull request feedback for telemetry and bridge scripts",
+        "commitMessage": "feat: adopt pull request feedback for telemetry and bridge scripts\n\n- Configure execution_mode in playbooks/matrix_test.yml to check EXECUTION_MODE environment variable.\n- Replace all Ubuntu references with docker.io/library/ubuntu:26.04 and update documentation references to Resolute Raccoon.\n- Create playbooks/requirements.yml declaring containers.podman dependency.\n- Integrate automatic feedback dispatching task inside matrix_test.yml.\n- Update scripts/jules_gh_feedback.sh with connection and request timeouts.\n- Update signal traps in scripts/jules_gh_feedback.sh to isolate EXIT and non-zero exit handlers (INT/TERM).\n- Document new installation steps and environment switches in wsl-development-feedback.md.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13751453016278868306-dbdb73a3"
+      },
+      {
+        "commitId": "36ae6db8b8baa68b40fc22b41f87308387082f43",
+        "title": "chore: reply to PR design comments and finalize telemetry specifications",
+        "commitMessage": "chore: reply to PR design comments and finalize telemetry specifications\n\n- Acknowledged and verified the System Design Matrix Blueprint and technical constraints.\n- Confirmed strict adherence to Standard UK English, secure environment-driven credentials handling, robust Bash logging/traps, and absolute separation of execution modes.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13751453016278868306-dbdb73a3"
+      },
+      {
+        "commitId": "afcb312bd50a10c3ab7e5f99893e25dd4d4b24e3",
+        "title": "feat: implement WSL2 Podman multi-OS test matrix and Jules/GitHub feedback loop",
+        "commitMessage": "feat: implement WSL2 Podman multi-OS test matrix and Jules/GitHub feedback loop\n\n- Set up playbooks/matrix_test.yml and tasks to pull and test Ubuntu, AlmaLinux, and Debian containers via rootless Podman.\n- Implement playbooks/roles/feedback_collector/tasks/main.yml to aggregate run outputs and serialize telemetry to /tmp/jules_telemetry.json.\n- Implement scripts/jules_gh_feedback.sh to parse telemetry and stream structured Markdown diagnostic comments into active Google Jules and GitHub Pull Requests.\n- Securely configure mode separation gates via execution_mode=dev to prevent telemetry compiling or executing during production runs.\n- Document systems specifications and human-in-the-loop developer workflow in wsl-development-feedback.md and wsl-development-feedback.html.\n- Update Jekyll configurations to exclude newly added Ansible assets from site generation.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-13751453016278868306-dbdb73a3"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-11519222323861239415-d37311e9",
+    "pr": "33",
+    "title": "PR #33: feat: add WSL Ubuntu 26.04 development & Jules feedback loop",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 06:43:53 2026 +0800",
+    "completedAt": "Sat Aug 8 06:43:53 2026 +0800",
+    "branch": "jules-11519222323861239415-d37311e9",
+    "mergeHash": "ef1de2d6ad59c4350875e604dd7c96be0ecf895d",
+    "tipHash": "8758cdcf831300a475a699c7ee5250cdae69ec15",
+    "description": "feat: add WSL Ubuntu 26.04 development & Jules feedback loop\n\nIntroduced a dedicated WSL 2 Ubuntu 26.04 testing integration and feedback\nloop. Added detailed system documentation (Markdown + HTML), a dedicated\ncontrol bash script, and an Ansible playbook.\n\nAll components are strictly gated via development-only environment and\nplaybook variables (WSL_DEVELOPMENT_MODE) to bypass standard use-only mode\nusers, keeping the core codebase secure and conflict-free. Included complete\nsupport for reporting diagnostics back to Jules and active GitHub PRs.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "8758cdcf831300a475a699c7ee5250cdae69ec15",
+        "title": "feat: add WSL Ubuntu 26.04 development & Jules feedback loop",
+        "commitMessage": "feat: add WSL Ubuntu 26.04 development & Jules feedback loop\n\nIntroduced a dedicated WSL 2 Ubuntu 26.04 testing integration and feedback\nloop. Added detailed system documentation (Markdown + HTML), a dedicated\ncontrol bash script, and an Ansible playbook.\n\nAll components are strictly gated via development-only environment and\nplaybook variables (WSL_DEVELOPMENT_MODE) to bypass standard use-only mode\nusers, keeping the core codebase secure and conflict-free. Included complete\nsupport for reporting diagnostics back to Jules and active GitHub PRs.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-11519222323861239415-d37311e9"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-unprivileged-host-prepare-12625585258795269109",
+    "pr": "31",
+    "title": "PR #31: Configure host OS preparation and deployment for limited sandbox environments",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Sat Aug 8 04:37:01 2026 +0800",
+    "completedAt": "Sat Aug 8 04:37:01 2026 +0800",
+    "branch": "jules-unprivileged-host-prepare-12625585258795269109",
+    "mergeHash": "ca0b7b30577738df3ab147db04a5d2bb37d9a8c8",
+    "tipHash": "d3a74d38febda5d95008703ef534d50191302fae",
+    "description": "Configure host OS preparation and deployment for limited sandbox environments\n\nThis change sets `is_limited_environment: true` to bypass rootful\ntasks and optimize the deployment fabric for unprivileged sandboxes\nlike Google Jules. It adds `localhost` to `inventory/hosts.ini` and\npatches `run_asimp.sh` to correctly force `limited_sandbox` mode\nwhen the limited environment option is enabled.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "d3a74d38febda5d95008703ef534d50191302fae",
+        "title": "Configure host OS preparation and deployment for limited sandbox environments",
+        "commitMessage": "Configure host OS preparation and deployment for limited sandbox environments\n\nThis change sets `is_limited_environment: true` to bypass rootful\ntasks and optimize the deployment fabric for unprivileged sandboxes\nlike Google Jules. It adds `localhost` to `inventory/hosts.ini` and\npatches `run_asimp.sh` to correctly force `limited_sandbox` mode\nwhen the limited environment option is enabled.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-unprivileged-host-prepare-12625585258795269109"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-16722946154808976463-a92d6987",
+    "pr": "30",
+    "title": "PR #30: feat: implement dynamic privilege levels and safety checks in ASIMP",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Fri Aug 7 06:51:20 2026 +0800",
+    "completedAt": "Fri Aug 7 06:51:20 2026 +0800",
+    "branch": "jules-16722946154808976463-a92d6987",
+    "mergeHash": "8ed0ca980793bb44c84dd164cd35518aa5cb2ad4",
+    "tipHash": "792efb5d7bacbd6f974a45dc5d2722514ce527b4",
+    "description": "feat: implement dynamic privilege levels and safety checks in ASIMP\n\nIntroduced `asimp_privilege_level` in `scripts/privilege_and_safety_test.py`\nto distinguish between `limited_sandbox` and `full_privilege`.\nAdded a Pre-Remediation Safety Check play in the Ansible playbooks to\nenforce break-prevention verifications on full-privilege systems.\nDocumented sandbox constraints and ASIMP compatibility in AGENTS.md and\na new `jules-sandbox-mode` agent skill markdown file.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "792efb5d7bacbd6f974a45dc5d2722514ce527b4",
+        "title": "feat: implement dynamic privilege levels and safety checks in ASIMP",
+        "commitMessage": "feat: implement dynamic privilege levels and safety checks in ASIMP\n\nIntroduced `asimp_privilege_level` in `scripts/privilege_and_safety_test.py`\nto distinguish between `limited_sandbox` and `full_privilege`.\nAdded a Pre-Remediation Safety Check play in the Ansible playbooks to\nenforce break-prevention verifications on full-privilege systems.\nDocumented sandbox constraints and ASIMP compatibility in AGENTS.md and\na new `jules-sandbox-mode` agent skill markdown file.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-16722946154808976463-a92d6987"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-privilege-safety-gates-382262408292280756",
+    "pr": "29",
+    "title": "PR #29: feat: implement privilege detection and remediation safety validation gates",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Fri Aug 7 05:36:45 2026 +0800",
+    "completedAt": "Fri Aug 7 05:36:45 2026 +0800",
+    "branch": "jules-privilege-safety-gates-382262408292280756",
+    "mergeHash": "dc2102546d9424f779c7ef785ca72459d18caf0a",
+    "tipHash": "f0ef74e0c07a99737a0dbf34124dfd7ac489ad2c",
+    "description": "feat: implement privilege detection and remediation safety validation gates\n\n- Designed and implemented 'scripts/privilege_and_safety_test.py' to test host privilege levels and remediation safety risk factors.\n- Enhanced 'run_asimp.sh' to execute the privilege-detection script, support 'Test & Info' mode with real local Lynis and OpenSCAP scoring for unprivileged users, and abort/skip active remediation under high-risk environments.\n- Updated 'asimp_hardening_playbook.yml' and report templates to dynamically bind and display privilege modes, risks, and remediation status.\n- Verified and built the site successfully with Jekyll with 0 compile or Liquid errors.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "f0ef74e0c07a99737a0dbf34124dfd7ac489ad2c",
+        "title": "feat: implement privilege detection and remediation safety validation gates",
+        "commitMessage": "feat: implement privilege detection and remediation safety validation gates\n\n- Designed and implemented 'scripts/privilege_and_safety_test.py' to test host privilege levels and remediation safety risk factors.\n- Enhanced 'run_asimp.sh' to execute the privilege-detection script, support 'Test & Info' mode with real local Lynis and OpenSCAP scoring for unprivileged users, and abort/skip active remediation under high-risk environments.\n- Updated 'asimp_hardening_playbook.yml' and report templates to dynamically bind and display privilege modes, risks, and remediation status.\n- Verified and built the site successfully with Jekyll with 0 compile or Liquid errors.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-privilege-safety-gates-382262408292280756"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-sandbox-compatibility-5642043836401216772",
+    "pr": "28",
+    "title": "PR #28: Add Google Jules unprivileged sandbox dual-environment compatibility",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Fri Aug 7 04:38:27 2026 +0800",
+    "completedAt": "Fri Aug 7 04:38:27 2026 +0800",
+    "branch": "jules-sandbox-compatibility-5642043836401216772",
+    "mergeHash": "93acdf97247967fe81776a662840b940bcbb55db",
+    "tipHash": "346332ceec5321e1cd70ddf72ac0625bd762ccc3",
+    "description": "Add Google Jules unprivileged sandbox dual-environment compatibility\n\n- Define 'is_limited_environment' toggle in group_vars/all.yml\n- Configure dynamic privilege escalation (become) in site.yml\n- Introduce dynamic facts and bypasses in host_prepare role tasks\n- Gracefully skip systemd-user operations in podman_quadlet role tasks\n- Document Rule 31 sandbox limitations in AGENTS.md, .agents/AGENTS.md, and SKILL.md\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "346332ceec5321e1cd70ddf72ac0625bd762ccc3",
+        "title": "Add Google Jules unprivileged sandbox dual-environment compatibility",
+        "commitMessage": "Add Google Jules unprivileged sandbox dual-environment compatibility\n\n- Define 'is_limited_environment' toggle in group_vars/all.yml\n- Configure dynamic privilege escalation (become) in site.yml\n- Introduce dynamic facts and bypasses in host_prepare role tasks\n- Gracefully skip systemd-user operations in podman_quadlet role tasks\n- Document Rule 31 sandbox limitations in AGENTS.md, .agents/AGENTS.md, and SKILL.md\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-sandbox-compatibility-5642043836401216772"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-16957829524068928346-ac5fad25",
+    "pr": "26",
+    "title": "PR #26: docs(compliance): implement Local Knowledge-First Discovery Protocol and codify Rules 29 and 30",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Thu Aug 6 09:33:35 2026 +0800",
+    "completedAt": "Thu Aug 6 09:33:35 2026 +0800",
+    "branch": "jules-16957829524068928346-ac5fad25",
+    "mergeHash": "f51b69e8b21b4f5ede80f4fd9a2e49c3a8f6708e",
+    "tipHash": "a5ed9472b9be21e1b49c312f81ef7ccd5d995c42",
+    "description": "docs(compliance): implement Local Knowledge-First Discovery Protocol and codify Rules 29 and 30\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "a5ed9472b9be21e1b49c312f81ef7ccd5d995c42",
+        "title": "docs(compliance): implement Local Knowledge-First Discovery Protocol and codify Rules 29 and 30",
+        "commitMessage": "docs(compliance): implement Local Knowledge-First Discovery Protocol and codify Rules 29 and 30\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-16957829524068928346-ac5fad25"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-9649343764842966640-4c0f839d",
+    "pr": "25",
+    "title": "PR #25: docs: enforce OKF v0.1 YAML frontmatter compliance on all .md files",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Thu Aug 6 07:07:35 2026 +0800",
+    "completedAt": "Thu Aug 6 07:07:35 2026 +0800",
+    "branch": "jules-9649343764842966640-4c0f839d",
+    "mergeHash": "823be0af9e6b173d6de016c655a1ce724b2061ae",
+    "tipHash": "c034aaf789e78834e0291d97f2250bb72219a0ea",
+    "description": "docs: enforce OKF v0.1 YAML frontmatter compliance on all .md files\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "c034aaf789e78834e0291d97f2250bb72219a0ea",
+        "title": "docs: enforce OKF v0.1 YAML frontmatter compliance on all .md files",
+        "commitMessage": "docs: enforce OKF v0.1 YAML frontmatter compliance on all .md files\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-9649343764842966640-4c0f839d"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-asimp-hardening-update-13926512682636261017",
+    "pr": "24",
+    "title": "PR #24: feat: Run ASIMP hardening and integrate playbooks & scripts",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Thu Aug 6 05:25:12 2026 +0800",
+    "completedAt": "Thu Aug 6 05:25:12 2026 +0800",
+    "branch": "jules-asimp-hardening-update-13926512682636261017",
+    "mergeHash": "3d66f984080c3b3fc644c64c523fe3f50d19d02d",
+    "tipHash": "3a96565581b88f89ab4cdf8beb8f61bb42ea5108",
+    "description": "feat: Run ASIMP hardening and integrate playbooks & scripts\n\nIntegrated and automated the ASIMP security hardening and compliance auditing pipeline on the host OS.\nCreated a central run_asimp.sh automation script that clones and patches the ASIMP repository on-the-fly, and integrates playbooks with robust unprivileged sandbox compatibility.\nCaptured and logged extensive system metrics and technical problems (including block failed_when limits, template type constraints, deprecated module migrations, and OVAL scanning optimizations) in OKF v0.1-compliant reports (docs/asimp-hardening-report.md and .html).\nUpdated Jekyll build config to exclude the cloned asimp/ directory and automation scripts to maintain flawless static site generation.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "3a96565581b88f89ab4cdf8beb8f61bb42ea5108",
+        "title": "feat: Run ASIMP hardening and integrate playbooks & scripts",
+        "commitMessage": "feat: Run ASIMP hardening and integrate playbooks & scripts\n\nIntegrated and automated the ASIMP security hardening and compliance auditing pipeline on the host OS.\nCreated a central run_asimp.sh automation script that clones and patches the ASIMP repository on-the-fly, and integrates playbooks with robust unprivileged sandbox compatibility.\nCaptured and logged extensive system metrics and technical problems (including block failed_when limits, template type constraints, deprecated module migrations, and OVAL scanning optimizations) in OKF v0.1-compliant reports (docs/asimp-hardening-report.md and .html).\nUpdated Jekyll build config to exclude the cloned asimp/ directory and automation scripts to maintain flawless static site generation.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-asimp-hardening-update-13926512682636261017"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-10168405104657628969-c732c685",
+    "pr": "20",
+    "title": "PR #20: docs: implement ASIMP OS security hardening and compliance reporting",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Wed Aug 5 07:34:20 2026 +0800",
+    "completedAt": "Wed Aug 5 07:34:20 2026 +0800",
+    "branch": "jules-10168405104657628969-c732c685",
+    "mergeHash": "a9fd8385df1def94c968b34a44f9ef0474a76edb",
+    "tipHash": "d5fdb429c063c2198d7786c5d98cbaad2859b8c7",
+    "description": "docs: implement ASIMP OS security hardening and compliance reporting\n\nCo-authored-by: Harisfazillah Jamel <contact@linuxmalaysia.com>\nCo-authored-by: Google Jules <jules@google.com>\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "d5fdb429c063c2198d7786c5d98cbaad2859b8c7",
+        "title": "docs: implement ASIMP OS security hardening and compliance reporting",
+        "commitMessage": "docs: implement ASIMP OS security hardening and compliance reporting\n\nCo-authored-by: Harisfazillah Jamel <contact@linuxmalaysia.com>\nCo-authored-by: Google Jules <jules@google.com>\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-10168405104657628969-c732c685"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-12228733344554151599-d4ef1389",
+    "pr": "18",
+    "title": "PR #18: docs: update jules planning with option b coexistence strategy",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Tue Aug 4 14:41:47 2026 +0800",
+    "completedAt": "Tue Aug 4 14:41:47 2026 +0800",
+    "branch": "jules-12228733344554151599-d4ef1389",
+    "mergeHash": "047a8c614cc8639903bec33ef1be145f79dd2765",
+    "tipHash": "68fd091ab704bfeda86f765826eda8fa965bb062",
+    "description": "docs: update jules planning with option b coexistence strategy\n\nAdds Option B (Split-Horizon Ingress) description to Step 3.4 in docs/jules-planning.md and Session 3 in docs/jules-planning.html to align both documents with the discussed coexistence strategies.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "68fd091ab704bfeda86f765826eda8fa965bb062",
+        "title": "docs: update jules planning with option b coexistence strategy",
+        "commitMessage": "docs: update jules planning with option b coexistence strategy\n\nAdds Option B (Split-Horizon Ingress) description to Step 3.4 in docs/jules-planning.md and Session 3 in docs/jules-planning.html to align both documents with the discussed coexistence strategies.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-12228733344554151599-d4ef1389"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-10684087334765763628-ae9a19a2",
+    "pr": "17",
+    "title": "PR #17: docs: update BunkerWeb and DockPod integration architecture and coexistence strategies",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Tue Aug 4 12:26:50 2026 +0800",
+    "completedAt": "Tue Aug 4 12:26:50 2026 +0800",
+    "branch": "jules-10684087334765763628-ae9a19a2",
+    "mergeHash": "3910c06ee6e2aa7d6934c6fabd187e8374417f5d",
+    "tipHash": "4b0d155cc6ed797b431d2dcf07097046c618846c",
+    "description": "docs: update BunkerWeb and DockPod integration architecture and coexistence strategies\n\nThis commit updates the documentation files `bunkerweb-proxy`, `dockpod-integration`, and `jules-planning` in both Markdown and HTML formats to comprehensively address developer feedback regarding potential proxy conflicts with DockPod's Traefik. It provides three detailed architectural strategies: Option A (Pure Decoupled Mode), Option B (Split-Horizon Ingress), and Option C (Nested Proxying) along with specific Traefik trustedIPs configuration details and systemd Quadlet service management instructions. All documents comply with OKF v0.1 frontmatter rules and the DSOM/LinuxMalaysia footer protocol.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "4b0d155cc6ed797b431d2dcf07097046c618846c",
+        "title": "docs: update BunkerWeb and DockPod integration architecture and coexistence strategies",
+        "commitMessage": "docs: update BunkerWeb and DockPod integration architecture and coexistence strategies\n\nThis commit updates the documentation files `bunkerweb-proxy`, `dockpod-integration`, and `jules-planning` in both Markdown and HTML formats to comprehensively address developer feedback regarding potential proxy conflicts with DockPod's Traefik. It provides three detailed architectural strategies: Option A (Pure Decoupled Mode), Option B (Split-Horizon Ingress), and Option C (Nested Proxying) along with specific Traefik trustedIPs configuration details and systemd Quadlet service management instructions. All documents comply with OKF v0.1 frontmatter rules and the DSOM/LinuxMalaysia footer protocol.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-10684087334765763628-ae9a19a2"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-2187975266476740287-2609d896",
+    "pr": "14",
+    "title": "PR #14: \ud83d\udd12 [security] Avoid :latest tags for container images",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Mon Aug 3 12:53:58 2026 +0800",
+    "completedAt": "Mon Aug 3 12:53:58 2026 +0800",
+    "branch": "jules-2187975266476740287-2609d896",
+    "mergeHash": "6013c1fa1a01acb90fdf908199e8d138b4e10c23",
+    "tipHash": "fe8ea2a52ed74bb9923728b2057a2623e95d1ef6",
+    "description": "\ud83d\udd12 [security] Avoid :latest tags for container images\n\nPin all container images to explicit, stable, and secure version tags.\nDefine version tag variables in group_vars/all.yml and update templates\nand docs accordingly. This ensures consistent, reproducible, and secure\ndeployments of the SongketMail service fabric.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "fe8ea2a52ed74bb9923728b2057a2623e95d1ef6",
+        "title": "\ud83d\udd12 [security] Avoid :latest tags for container images",
+        "commitMessage": "\ud83d\udd12 [security] Avoid :latest tags for container images\n\nPin all container images to explicit, stable, and secure version tags.\nDefine version tag variables in group_vars/all.yml and update templates\nand docs accordingly. This ensures consistent, reproducible, and secure\ndeployments of the SongketMail service fabric.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-2187975266476740287-2609d896"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-14827156543887494571-a619453e",
+    "pr": "9",
+    "title": "PR #9: docs: append standard DSOM footer to all Markdown files",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Mon Aug 3 06:38:56 2026 +0800",
+    "completedAt": "Mon Aug 3 06:38:56 2026 +0800",
+    "branch": "jules-14827156543887494571-a619453e",
+    "mergeHash": "3a7b4f8df6d731f225f8f21fa3fa9b75fb1118e7",
+    "tipHash": "d7d7d6daa7187623094bba3e6acb6a5882980280",
+    "description": "docs: append standard DSOM footer to all Markdown files\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "d7d7d6daa7187623094bba3e6acb6a5882980280",
+        "title": "docs: append standard DSOM footer to all Markdown files",
+        "commitMessage": "docs: append standard DSOM footer to all Markdown files\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-14827156543887494571-a619453e"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-16384336864497033781-a89fa0e9",
+    "pr": "8",
+    "title": "PR #8: docs: adopt Google OKF v0.1 format for all Markdown files",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Mon Aug 3 06:16:39 2026 +0800",
+    "completedAt": "Mon Aug 3 06:16:39 2026 +0800",
+    "branch": "jules-16384336864497033781-a89fa0e9",
+    "mergeHash": "e89f689ac79f9c0a1688dac9c930cd884e01bf46",
+    "tipHash": "49ab1c9ab3e8d1c58f62af2c555f9903973437f9",
+    "description": "docs: adopt Google OKF v0.1 format for all Markdown files\n\n- Prepend structured YAML frontmatter (with okf_version, type, title, description, resource, timestamp) to all Markdown documents.\n- Add docs/OKF-ADOPTION-GUIDE.md as the reference guide.\n- Verify build completeness and compatibility under Jekyll.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "49ab1c9ab3e8d1c58f62af2c555f9903973437f9",
+        "title": "docs: adopt Google OKF v0.1 format for all Markdown files",
+        "commitMessage": "docs: adopt Google OKF v0.1 format for all Markdown files\n\n- Prepend structured YAML frontmatter (with okf_version, type, title, description, resource, timestamp) to all Markdown documents.\n- Add docs/OKF-ADOPTION-GUIDE.md as the reference guide.\n- Verify build completeness and compatibility under Jekyll.\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-16384336864497033781-a89fa0e9"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  },
+  {
+    "id": "jules-17786566768006336007-569f6b36",
+    "pr": "7",
+    "title": "PR #7: doc: convert system specifications to Markdown format and fix CodeQL advanced setup CI conflict",
+    "sourceId": "sources/github_com_SongketMail_songketmail",
+    "taskStatus": "COMPLETED",
+    "createdAt": "Mon Aug 3 05:55:37 2026 +0800",
+    "completedAt": "Mon Aug 3 05:55:37 2026 +0800",
+    "branch": "jules-17786566768006336007-569f6b36",
+    "mergeHash": "cd4c9be82170c1c33de2a0e2cc61e326aa494d3e",
+    "tipHash": "ac3314262e94b4eafba09c3ed7f44f96a248effa",
+    "description": "doc: convert system specifications to Markdown format and fix CodeQL advanced setup CI conflict\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+    "commits": [
+      {
+        "commitId": "ac3314262e94b4eafba09c3ed7f44f96a248effa",
+        "title": "doc: convert system specifications to Markdown format and fix CodeQL advanced setup CI conflict",
+        "commitMessage": "doc: convert system specifications to Markdown format and fix CodeQL advanced setup CI conflict\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-17786566768006336007-569f6b36"
+      },
+      {
+        "commitId": "2042f77d0b0643432aeb41ab403eddd0177c334f",
+        "title": "doc: add markdown format documentation and summary for gitbook publishing",
+        "commitMessage": "doc: add markdown format documentation and summary for gitbook publishing\n\nCo-authored-by: linuxmalaysia <72349+linuxmalaysia@users.noreply.github.com>",
+        "gitBranchName": "jules-17786566768006336007-569f6b36"
+      }
+    ],
+    "latestPlan": [
+      "Analyze repository architecture and task specifications",
+      "Implement core code, configuration, and documentation updates",
+      "Verify changes with automated pytest test suite",
+      "Submit changes for peer review and merge into main"
+    ]
+  }
+]
